@@ -5,24 +5,13 @@ interface EuiCenterProps {
 	children?: React.ReactNode
 	height?: string,
 	width?: string
-	growOptions?: boolean[]
-	defaultGrowValue?: boolean
+	growChildren?: boolean
 }
 
-function EuiCenter({children, height, width, growOptions, defaultGrowValue}: EuiCenterProps): JSX.Element {
+function EuiCenter({children, height, width, growChildren}: EuiCenterProps): JSX.Element {
 	const resolvedHeight = height || 'inherit';
 	const resolvedWidth = width || 'inherit';
-	const resolvedDefaultGrowValue = Boolean(defaultGrowValue)
-	const resolvedGrowOptArray: boolean[] = new Array<boolean>(
-		Children.count(children)
-	).fill(resolvedDefaultGrowValue)
-	if (growOptions){
-		if (growOptions.length < resolvedGrowOptArray.length){
-			growOptions.forEach((growOpt, optIndex) => {
-				resolvedGrowOptArray[optIndex] = growOpt;
-			})
-		}
-	}
+	
 	return (
 		<EuiFlexGroup
 			justifyContent={"center"}
@@ -35,7 +24,7 @@ function EuiCenter({children, height, width, growOptions, defaultGrowValue}: Eui
 			{Children.map(children, (passedChild, childIndex) => {
 				return (
 					<EuiFlexItem grow={
-						resolvedGrowOptArray[childIndex]
+						Boolean(growChildren)
 					}>
 						{passedChild}
 					</EuiFlexItem>

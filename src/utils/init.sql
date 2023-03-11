@@ -1,10 +1,9 @@
 CREATE TABLE "authUsers" (
     "walletId" TEXT UNIQUE NOT NULL,
-    "userName" TEXT UNIQUE NOT NULL,
     "userPass" TEXT NOT NULL,
 
     CONSTRAINT "pk_authUsers_walletId_userName"
-        PRIMARY KEY ("walletId", "userName")
+        PRIMARY KEY ("walletId")
 );
 
 CREATE TABLE "fundRaisers" (
@@ -16,14 +15,15 @@ CREATE TABLE "fundRaisers" (
 
     "fundraiserTarget" MONEY NOT NULL,
     "fundraiserToken" TEXT NOT NULL DEFAULT 'ETH',
+    "fundraiserMinDonationAmount" MONEY DEFAULT 1e-10,
 
     "fundraiserRaisedAmount" MONEY NOT NULL DEFAULT 0,
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_userName"
+    CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletId"
         FOREIGN KEY ("fundraiserCreator")
-            REFERENCES "authUsers"("userName")
+            REFERENCES "authUsers"("walletId")
 );
 
 CREATE TABLE "fundraiserUpdates" (
@@ -52,5 +52,18 @@ CREATE TABLE "fundraiserMilestones" (
 
     CONSTRAINT "fk_fundraiserMilestone_milestoneFundId_fundRaisers_fundraiserId"
         FOREIGN KEY ("milestoneFundraiserId") REFERENCES "fundRaisers"("fundraiserId")
+
+);
+
+CREATE TABLE "fundraiserDonations" (
+    "donatedFundraiser" INTEGER NOT NULL,
+    "donatorAddress" TEXT NOT NULL,
+    "donatedAmount" MONEY,
+
+    CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
+        FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers"("fundraiserId"),
+
+    CONSTRAINT "chk_fundraiserDonations_donatorAddress_isAuthenticated"
+        CHECK ("donatorAddress" IN (SELECT "walletId" FROM "authUsers"))
 
 );
