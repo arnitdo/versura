@@ -2,6 +2,7 @@
 
 type APIResponseRequestStatus =
 	// 2xx
+	"SUCCESS" |
 	// 3xx
 	// 4xx
 	"ERR_BODY_REQUIRED" |

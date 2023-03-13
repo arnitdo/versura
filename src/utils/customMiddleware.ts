@@ -8,10 +8,12 @@ export interface CustomApiResponse extends NextApiResponse {
 
 export type MiddlewareChain = {
 	middlewareCallStack: string[]
-	nextMiddleware?: () => void
+	nextMiddleware: NextMiddleware
 }
 
 export type MiddlewareFn = (req: NextApiRequest, res: CustomApiResponse, next: MiddlewareChain) => void
+
+export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
 
 export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
@@ -25,9 +27,8 @@ function requireMethod(requestMethod: ValidRequestMethods): MiddlewareFn {
 		}
 		// We don't need context of previous middleware evaluated here
 		const {middlewareCallStack, nextMiddleware} = next
-		if (nextMiddleware) {
-			nextMiddleware()
-		}
+		nextMiddleware(true)
+		
 	}
 }
 
@@ -48,13 +49,12 @@ function requireValidBody(): MiddlewareFn {
 			res.status(400).json({
 				requestStatus: "ERR_BODY_REQUIRED"
 			})
+			nextMiddleware(false)
 			return
 		}
 		// Body will only exist on "POST", "PUT", "PATCH" methods
 		
-		if (nextMiddleware) {
-			nextMiddleware()
-		}
+		nextMiddleware(true)
 	}
 }
 
@@ -80,16 +80,17 @@ function requireBodyParams(...bodyParams: string[]): MiddlewareFn {
 				requestStatus: "ERR_MISSING_BODY_PARAMS",
 				missingParams: missingBodyParams
 			})
+			nextMiddleware(false)
 			return
 		}
 		
-		if (nextMiddleware) {
-			nextMiddleware()
-		}
+		nextMiddleware(true)
 	}
 }
 
-function requireMiddlewareChecks(req: NextApiRequest, res: CustomApiResponse, middlewaresToCall: MiddlewareFn[]): boolean {
+type MiddlewareCallArgs = {[middlewareFnName: string]: MiddlewareFn}
+
+function requireMiddlewareChecks(req: NextApiRequest, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs): boolean {
 	const middlewareStack: string[] = []
 	let middlewaresExecutedSuccessfully: boolean = true
 	
@@ -97,19 +98,23 @@ function requireMiddlewareChecks(req: NextApiRequest, res: CustomApiResponse, mi
 	// true & failedMiddleware => false
 	// false & true | false & false => false
 	
-	for (let middlewareIdx = 0; middlewareIdx < middlewaresToCall.length; middlewareIdx){
-		const middlewareFnToCall = middlewaresToCall[middlewareIdx]
-		const nextFn = () => {
-			middlewareIdx += 1
+	for (let middlewareKVPairIdx = 0; middlewareKVPairIdx < Object.keys(middlewaresToCall).length; middlewaresExecutedSuccessfully){
+		const middlewareEntries = Object.entries(middlewaresToCall)
+		const currentEntry = middlewareEntries[middlewareKVPairIdx]
+		// @ts-ignore
+		const [middlewareFnName, middlewareFnToCall] = currentEntry
+		const nextFn: NextMiddleware = (middlewareStatus) => {
+			middlewaresExecutedSuccessfully &&= middlewareStatus
+			middlewareKVPairIdx += 1
 		}
 		
 		try {
-			console.debug(`Calling ${middlewareFnToCall.name} with middlewareStack: ${middlewareStack}`)
+			console.debug(`Calling ${middlewareFnName} with middlewareStack: ${middlewareStack}`)
 			middlewareFnToCall(req, res, {
 				middlewareCallStack: middlewareStack,
 				nextMiddleware: nextFn
 			})
-			middlewareStack.push(middlewareFnToCall.name)
+			middlewareStack.push(middlewareFnName)
 		} catch (err: unknown){
 			res.status(500).json({
 				requestStatus: "ERR_INTERNAL_ERROR"

@@ -7,13 +7,20 @@ import {
 } from "@/utils/customMiddleware"
 import type {NextApiRequest} from "next";
 export default function loginUser(req: NextApiRequest, res: CustomApiResponse){
-	requireMiddlewareChecks(
+	const middlewarePassed = requireMiddlewareChecks(
 		req,
 		res,
-		[
-			requireMethod("POST"),
-			requireValidBody(),
-			requireBodyParams("walletAddress", "userPass")
-		]
+		{
+			"requireMethod": requireMethod("POST"),
+			"requireValidBody": requireValidBody(),
+			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
+		}
 	)
+	if (!middlewarePassed){
+		return
+	}
+	
+	res.status(200).json({
+		requestStatus: "SUCCESS"
+	})
 }
