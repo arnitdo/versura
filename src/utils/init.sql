@@ -57,13 +57,13 @@ CREATE TABLE "fundraiserMilestones" (
 
 CREATE TABLE "fundraiserDonations" (
     "donatedFundraiser" INTEGER NOT NULL,
-    "donatorAddress" TEXT NOT NULL,
+    "donorAddress" TEXT NOT NULL,
     "donatedAmount" MONEY,
 
     CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
         FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers"("fundraiserId"),
 
-    CONSTRAINT "chk_fundraiserDonations_donatorAddress_isAuthenticated"
-        CHECK ("donatorAddress" IN (SELECT "walletId" FROM "authUsers"))
+    CONSTRAINT "fk_fundraiserDonations_donatorAddress_authUsers_walletId"
+        FOREIGN KEY ("donorAddress") REFERENCES "authUsers"("walletId")
 
 );

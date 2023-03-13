@@ -8,7 +8,7 @@ interface EuiCenterProps {
 	growChildren?: boolean
 }
 
-function EuiCenter({children, height, width, growChildren}: EuiCenterProps): JSX.Element {
+function 	EuiCenter({children, height, width, growChildren}: EuiCenterProps): JSX.Element {
 	const resolvedHeight = height || 'inherit';
 	const resolvedWidth = width || 'inherit';
 	
@@ -23,9 +23,12 @@ function EuiCenter({children, height, width, growChildren}: EuiCenterProps): JSX
 		>
 			{Children.map(children, (passedChild, childIndex) => {
 				return (
-					<EuiFlexItem grow={
-						Boolean(growChildren)
-					}>
+					<EuiFlexItem
+						grow={Boolean(growChildren)}
+						style={{
+							alignItems: "center"
+						}}
+					>
 						{passedChild}
 					</EuiFlexItem>
 				)
