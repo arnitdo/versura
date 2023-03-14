@@ -1,9 +1,13 @@
 CREATE TABLE "authUsers" (
     "walletId" TEXT UNIQUE NOT NULL,
     "userPass" TEXT NOT NULL,
+    "userRole" TEXT NOT NULL DEFAULT 'CLIENT',
 
     CONSTRAINT "pk_authUsers_walletId_userName"
-        PRIMARY KEY ("walletId")
+        PRIMARY KEY ("walletId"),
+
+    CONSTRAINT "chk_authUsers_userRole_isValidRole"
+        CHECK ( "userRole" IN ('CLIENT', 'ADMIN'))
 );
 
 CREATE TABLE "fundRaisers" (

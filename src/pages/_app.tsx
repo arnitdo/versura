@@ -4,10 +4,12 @@ import {createContext, useState} from "react";
 import type {AppProps} from 'next/app'
 
 import '@elastic/eui/dist/eui_theme_dark.css'
+import {UserRole} from "@/utils/queryTypedefs";
 
 type AuthData = {
 	isAuthenticated: boolean,
 	metamaskAddress?: string
+	userRole?: UserRole
 }
 
 export type AuthContextType = AuthData & {
@@ -19,7 +21,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export default function App({Component, pageProps}: AppProps) {
 	const [authData, setAuthData] = useState<AuthData>({
 		isAuthenticated: false,
-		metamaskAddress: undefined
+		metamaskAddress: undefined,
+		userRole: undefined
 	})
 	
 	const authContextValue: AuthContextType = {

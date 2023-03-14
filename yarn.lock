@@ -1207,6 +1207,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bcryptjs@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@types/bcryptjs@npm:2.4.2"
+  checksum: 220dade7b0312b41e23ccfb15f2ddde7804eb3c7ef41db41a6c49054be1e19a15eb3dd8c8ef196494f0866307cce22ad6f3f272941387124707d81dc66155bbc
+  languageName: node
+  linkType: hard
+
 "@types/bn.js@npm:^4.11.3":
   version: 4.11.6
   resolution: "@types/bn.js@npm:4.11.6"
@@ -1274,6 +1281,15 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
+  languageName: node
+  linkType: hard
+
+"@types/jsonwebtoken@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "@types/jsonwebtoken@npm:9.0.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: a7f0925e9a42ad3ae970364c63c5986d40da5c83d51d3f4e624eb0f064a380376f9e3fb3f2f837390a9ab80143f5d75fd51866da30e110f6b486a3379e1c768f
   languageName: node
   linkType: hard
 
@@ -1997,6 +2013,13 @@ __metadata:
   dependencies:
     tweetnacl: ^0.14.3
   checksum: 4edfc9fe7d07019609ccf797a2af28351736e9d012c8402a07120c4453a3b789a15f2ee1530dc49eee8f7eb9379331a8dd4b3766042b9e502f74a68e7f662291
+  languageName: node
+  linkType: hard
+
+"bcryptjs@npm:^2.4.3":
+  version: 2.4.3
+  resolution: "bcryptjs@npm:2.4.3"
+  checksum: 0e80ed852a41f5dfb1853f53ee14a7390b0ef263ce05dba6e2ef3cd919dfad025a7c21ebcfe5bc7fa04b100990edf90c7a877ff7fe623d3e479753253131b629
   languageName: node
   linkType: hard
 
@@ -9075,10 +9098,13 @@ __metadata:
     "@elastic/eui": ^76.1.0
     "@emotion/css": ^11.10.6
     "@emotion/react": ^11.10.6
+    "@types/bcryptjs": ^2.4.2
+    "@types/jsonwebtoken": ^9.0.1
     "@types/node": 18.14.6
     "@types/pg": ^8.6.6
     "@types/react": 18.0.28
     "@types/react-dom": 18.0.11
+    bcryptjs: ^2.4.3
     eslint: 8.35.0
     eslint-config-next: 13.2.3
     hardhat: ^2.13.0

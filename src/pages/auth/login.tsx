@@ -19,6 +19,8 @@ import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 
 import {useToastList} from "@/utils/toastUtils";
 import {AuthContext, AuthContextType} from "@/pages/_app"
+import {makeAPIRequest} from "@/utils/apiHandler";
+import {LoginResponse} from "@/utils/apiTypedefs";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -38,6 +40,9 @@ function LoginPage(): JSX.Element {
 		[metamaskConnected, metamaskAddress],
 		setMetamaskInfo
 	] = useState<[boolean, string]>([false, ""])
+	
+	const [userPassword, setUserPassword] = useState<string>("")
+	const [passwordInvalid, setPasswordInvalid] = useState<boolean>(false);
 	
 	const toastCountRef = useRef<number>(0)
 	
@@ -86,6 +91,83 @@ function LoginPage(): JSX.Element {
 			return
 		}
 	}, [])
+	
+	const attemptUserLogin = useCallback(async () => {
+		if (!metamaskConnected){
+			addToast(
+				"Metamask Authentication is required",
+				"Connect to Metamask by clicking the \"Connect\" button",
+				"danger"
+			)
+			toastCountRef.current += 1
+			return
+		}
+		if (userPassword.trim() === ""){
+			addToast(
+				"Input a valid password",
+				"Make sure the password matches the one used when signing up",
+				"danger"
+			)
+			toastCountRef.current += 1
+			return
+		}
+		
+		const loginAPIResponse = await makeAPIRequest<LoginResponse>({
+			endpointPath: `/api/auth/login`,
+			requestMethod: "POST",
+			bodyParams: {
+				walletAddress: metamaskAddress,
+				userPass: userPassword
+			}
+		})
+		
+		const {isSuccess, isError, code, data, error} = loginAPIResponse
+		if (isError && error){
+			addToast(
+				"An error occurred when processing your request",
+				(error as Error).message,
+				"danger"
+			)
+			toastCountRef.current += 1
+			return
+		}
+		
+		if (isSuccess && data){
+			const {requestStatus} = data
+			if (code === 400) {
+				if (requestStatus === "ERR_INVALID_PARAMS"){
+					const {invalidParams} = data
+					if (invalidParams && invalidParams.includes("userPass")){
+						setPasswordInvalid(true)
+						addToast(
+							"Invalid password provided",
+							"Make sure the password matches the one used when signing up",
+							"danger"
+						)
+						toastCountRef.current += 1
+					}
+					if (invalidParams && invalidParams.includes("walletId")){
+						addToast(
+							"That account doesn't exist",
+							"Make sure you are connecting with the right Metamask Account",
+							"danger"
+						)
+						toastCountRef.current += 1
+					}
+					return
+				}
+			} else if (code === 200){
+				if (requestStatus === "SUCCESS"){
+					const {userRole} = data
+					authCtx?.updateAuthData({
+						isAuthenticated: true,
+						metamaskAddress: metamaskAddress,
+						userRole: userRole
+					})
+				}
+			}
+		}
+	}, [metamaskConnected, metamaskAddress, userPassword])
 	
 	return (
 		<>
@@ -149,10 +231,18 @@ function LoginPage(): JSX.Element {
 									<EuiFieldPassword
 										type={"dual"}
 										fullWidth
+										isInvalid={passwordInvalid}
+										onChange={(e) => {
+											setPasswordInvalid(false)
+											setUserPassword(e.target.value)
+										}}
 									/>
 								</EuiFormRow>
 								<EuiFormRow>
-									<EuiButton fill fullWidth>
+									<EuiButton
+										fill fullWidth
+										onClick={attemptUserLogin}
+									>
 										Log In
 									</EuiButton>
 								</EuiFormRow>

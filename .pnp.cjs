@@ -32,10 +32,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@elastic/eui", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:76.1.0"],\
             ["@emotion/css", "npm:11.10.6"],\
             ["@emotion/react", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:11.10.6"],\
+            ["@types/bcryptjs", "npm:2.4.2"],\
+            ["@types/jsonwebtoken", "npm:9.0.1"],\
             ["@types/node", "npm:18.14.6"],\
             ["@types/pg", "npm:8.6.6"],\
             ["@types/react", "npm:18.0.28"],\
             ["@types/react-dom", "npm:18.0.11"],\
+            ["bcryptjs", "npm:2.4.3"],\
             ["eslint", "npm:8.35.0"],\
             ["eslint-config-next", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:13.2.3"],\
             ["hardhat", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:2.13.0"],\
@@ -1448,6 +1451,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/bcryptjs", [\
+        ["npm:2.4.2", {\
+          "packageLocation": "./.yarn/cache/@types-bcryptjs-npm-2.4.2-3a0c115732-220dade7b0.zip/node_modules/@types/bcryptjs/",\
+          "packageDependencies": [\
+            ["@types/bcryptjs", "npm:2.4.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/bn.js", [\
         ["npm:4.11.6", {\
           "packageLocation": "./.yarn/cache/@types-bn.js-npm-4.11.6-85f0d125f5-7f66f2c7b7.zip/node_modules/@types/bn.js/",\
@@ -1523,6 +1535,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-json5-npm-0.0.29-f63a7916bd-e60b153664.zip/node_modules/@types/json5/",\
           "packageDependencies": [\
             ["@types/json5", "npm:0.0.29"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/jsonwebtoken", [\
+        ["npm:9.0.1", {\
+          "packageLocation": "./.yarn/cache/@types-jsonwebtoken-npm-9.0.1-5f660fdf38-a7f0925e9a.zip/node_modules/@types/jsonwebtoken/",\
+          "packageDependencies": [\
+            ["@types/jsonwebtoken", "npm:9.0.1"],\
+            ["@types/node", "npm:18.15.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -2389,6 +2411,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["bcrypt-pbkdf", "npm:1.0.2"],\
             ["tweetnacl", "npm:0.14.5"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["bcryptjs", [\
+        ["npm:2.4.3", {\
+          "packageLocation": "./.yarn/cache/bcryptjs-npm-2.4.3-32de4957eb-0e80ed852a.zip/node_modules/bcryptjs/",\
+          "packageDependencies": [\
+            ["bcryptjs", "npm:2.4.3"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -10629,10 +10660,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@elastic/eui", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:76.1.0"],\
             ["@emotion/css", "npm:11.10.6"],\
             ["@emotion/react", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:11.10.6"],\
+            ["@types/bcryptjs", "npm:2.4.2"],\
+            ["@types/jsonwebtoken", "npm:9.0.1"],\
             ["@types/node", "npm:18.14.6"],\
             ["@types/pg", "npm:8.6.6"],\
             ["@types/react", "npm:18.0.28"],\
             ["@types/react-dom", "npm:18.0.11"],\
+            ["bcryptjs", "npm:2.4.3"],\
             ["eslint", "npm:8.35.0"],\
             ["eslint-config-next", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:13.2.3"],\
             ["hardhat", "virtual:41136136a8321104f4c6d2701c4ce6aeb054154a6cb5f88501322b08f4fe40639571ad662914da5f3428a405606da970039c1037da9eea9861d65c262a52b8c0#npm:2.13.0"],\
