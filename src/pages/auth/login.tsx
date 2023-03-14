@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useRef, useState} from "react";
 import EuiCenter from '@/components/customCenter'
+import Link from "next/link"
 import Image from 'next/image'
 import {
 	EuiFlexItem,
@@ -15,7 +16,6 @@ import {
 
 import VersuraIcon from "@/assets/versura-icon.png";
 import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
-import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 
 import {useToastList} from "@/utils/toastUtils";
 import {AuthContext, AuthContextType} from "@/pages/_app"
@@ -247,9 +247,15 @@ function LoginPage(): JSX.Element {
 									</EuiButton>
 								</EuiFormRow>
 								<EuiFormRow>
-									<EuiButton fullWidth>
-										Sign Up Instead
-									</EuiButton>
+									<Link
+										href={"/auth/signup"}
+									>
+										<EuiButton
+											fullWidth
+										>
+											Sign Up Instead
+										</EuiButton>
+									</Link>
 								</EuiFormRow>
 							</EuiForm>
 						</EuiFlexItem>

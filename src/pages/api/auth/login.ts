@@ -71,6 +71,7 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 			return
 		}
 	} catch (err: unknown){
+		console.error(err)
 		await dbClient.query("ROLLBACK")
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"

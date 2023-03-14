@@ -8,6 +8,7 @@ import {
 } from "@/utils/customMiddleware"
 import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
+import {SignupResponse} from "@/utils/apiTypedefs";
 export default async function signupUser(req: NextApiRequest, res: CustomApiResponse){
 	const middlewarePassed = requireMiddlewareChecks(
 		req,
@@ -25,6 +26,20 @@ export default async function signupUser(req: NextApiRequest, res: CustomApiResp
 	const {walletAddress, userPass} = req.body
 	const dbClient = await db.connect();
 	try {
+		const {rows} = await dbClient.query(
+			`SELECT 1 FROM "authUsers" WHERE "walletId" = $1`,
+			[walletAddress]
+		)
+		
+		if (rows.length > 0){
+			res.status(400).json<SignupResponse>({
+				requestStatus: "ERR_INVALID_PARAMS",
+				invalidParams: ["walletId"]
+			})
+			await dbClient.release()
+			return
+		}
+		
 		const hashedPassword = await hash(userPass, 10)
 		await dbClient.query("BEGIN")
 		await dbClient.query(
@@ -36,6 +51,7 @@ export default async function signupUser(req: NextApiRequest, res: CustomApiResp
 			requestStatus: "SUCCESS"
 		})
 	} catch (err: unknown){
+		console.error(err)
 		await dbClient.query("ROLLBACK")
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"

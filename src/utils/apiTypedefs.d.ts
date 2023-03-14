@@ -15,14 +15,19 @@ type APIResponseRequestStatus =
 
 interface APIResponse {
 	requestStatus: APIResponseRequestStatus
+	invalidParams?: string[]
 }
 
 interface LoginResponse extends APIResponse {
 	userRole?: UserRole,
-	invalidParams?: string[]
+}
+
+interface SignupResponse extends APIResponse{
+
 }
 
 export {
 	APIResponse,
-	LoginResponse
+	LoginResponse,
+	SignupResponse
 }
