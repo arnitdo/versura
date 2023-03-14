@@ -27,14 +27,14 @@ export default async function signupUser(req: NextApiRequest, res: CustomApiResp
 	const dbClient = await db.connect();
 	try {
 		const {rows} = await dbClient.query(
-			`SELECT 1 FROM "authUsers" WHERE "walletId" = $1`,
+			`SELECT 1 FROM "authUsers" WHERE "walletAddress" = $1`,
 			[walletAddress]
 		)
 		
 		if (rows.length > 0){
 			res.status(400).json<SignupResponse>({
 				requestStatus: "ERR_INVALID_PARAMS",
-				invalidParams: ["walletId"]
+				invalidParams: ["walletAddress"]
 			})
 			await dbClient.release()
 			return

@@ -1,5 +1,9 @@
 import type {NextApiRequest, NextApiResponse} from "next";
-import type {APIResponse} from "@/utils/apiTypedefs";
+import type {APIResponse, DecodedJWTCookie} from "@/utils/apiTypedefs";
+
+export interface CustomApiRequest extends NextApiRequest {
+	user?: DecodedJWTCookie
+}
 
 export interface CustomApiResponse extends NextApiResponse {
 	status: (statusCode: number) => CustomApiResponse
@@ -11,14 +15,14 @@ export type MiddlewareChain = {
 	nextMiddleware: NextMiddleware
 }
 
-export type MiddlewareFn = (req: NextApiRequest, res: CustomApiResponse, next: MiddlewareChain) => void
+export type MiddlewareFn = (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain) => void
 
 export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
 
 export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 function requireMethod(requestMethod: ValidRequestMethods): MiddlewareFn {
-	return function (req: NextApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
+	return function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
 		if (req.method !== requestMethod) {
 			res.status(400).json({
 				requestStatus: "ERR_INVALID_METHOD"
@@ -33,7 +37,7 @@ function requireMethod(requestMethod: ValidRequestMethods): MiddlewareFn {
 }
 
 function requireValidBody(): MiddlewareFn {
-	return function (req: NextApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
+	return function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
 		const {middlewareCallStack, nextMiddleware} = next
 		
 		const acceptedRequestMethods: ValidRequestMethods[] = ["POST", "PUT", "PATCH"]
@@ -60,7 +64,7 @@ function requireValidBody(): MiddlewareFn {
 
 
 function requireBodyParams(...bodyParams: string[]): MiddlewareFn {
-	return function (req: NextApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
+	return function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): void {
 		const {middlewareCallStack, nextMiddleware} = next
 		if (!middlewareCallStack.includes(requireValidBody.name)) {
 			throw new Error(
@@ -90,7 +94,7 @@ function requireBodyParams(...bodyParams: string[]): MiddlewareFn {
 
 type MiddlewareCallArgs = {[middlewareFnName: string]: MiddlewareFn}
 
-function requireMiddlewareChecks(req: NextApiRequest, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs): boolean {
+function requireMiddlewareChecks(req: CustomApiRequest, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs): boolean {
 	const middlewareStack: string[] = []
 	let middlewaresExecutedSuccessfully: boolean = true
 	
@@ -109,7 +113,6 @@ function requireMiddlewareChecks(req: NextApiRequest, res: CustomApiResponse, mi
 		}
 		
 		try {
-			console.debug(`Calling ${middlewareFnName} with middlewareStack: ${middlewareStack}`)
 			middlewareFnToCall(req, res, {
 				middlewareCallStack: middlewareStack,
 				nextMiddleware: nextFn

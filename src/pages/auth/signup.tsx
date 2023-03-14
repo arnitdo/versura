@@ -105,6 +105,7 @@ function SignupPage(): JSX.Element {
 		}
 		
 		if (userPassword !== confirmPassword){
+			console.log({userPassword, confirmPassword})
 			setPasswordMismatch(true)
 			addToast(
 				"Passwords do not match",
@@ -112,6 +113,7 @@ function SignupPage(): JSX.Element {
 				"danger"
 			)
 			toastCountRef.current += 1
+			return
 		}
 		
 		const signupAPIResponse = await makeAPIRequest<LoginResponse>({
@@ -139,7 +141,7 @@ function SignupPage(): JSX.Element {
 			if (code === 400){
 				if (requestStatus === "ERR_INVALID_PARAMS"){
 					const {invalidParams} = data
-					if (invalidParams && invalidParams.includes("walletId")){
+					if (invalidParams && invalidParams.includes("walletAddress")){
 						addToast(
 							"An account already exists with that wallet",
 							"Try logging in with that wallet and password",
@@ -161,7 +163,7 @@ function SignupPage(): JSX.Element {
 				}
 			}
 		}
-	}, [metamaskConnected, metamaskAddress, userPassword])
+	}, [metamaskConnected, metamaskAddress, userPassword, confirmPassword])
 	
 	return (
 		<>
@@ -199,6 +201,10 @@ function SignupPage(): JSX.Element {
 								style={{
 									minWidth: "20vw"
 								}}
+								onSubmit={(e) => {
+									e.preventDefault()
+									attemptUserSignup()
+								}}
 							>
 								<EuiFormRow
 									label={"Metamask Authentication"}
@@ -225,6 +231,7 @@ function SignupPage(): JSX.Element {
 									<EuiFieldPassword
 										type={"dual"}
 										onChange={(e) => {
+											setPasswordMismatch(false)
 											setUserPassword(e.target.value)
 										}}
 										fullWidth
@@ -236,8 +243,8 @@ function SignupPage(): JSX.Element {
 									<EuiFieldPassword
 										isInvalid={passwordMismatch}
 										onChange={(e) => {
-											setPasswordMismatch(false)
 											setConfirmPassword(e.target.value)
+											setPasswordMismatch(false)
 										}}
 										fullWidth
 									/>

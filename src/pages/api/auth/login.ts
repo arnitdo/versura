@@ -10,7 +10,7 @@ import {
 import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
 import type {AuthUsers} from "@/utils/queryTypedefs";
-import {LoginResponse} from "@/utils/apiTypedefs";
+import {DecodedJWTCookie, LoginResponse} from "@/utils/apiTypedefs";
 
 export default async function loginUser(req: NextApiRequest, res: CustomApiResponse){
 	const middlewarePassed = requireMiddlewareChecks(
@@ -30,15 +30,15 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 	const dbClient = await db.connect();
 	try {
 		const {rows} = await dbClient.query<AuthUsers>(
-			`SELECT "userPass", "userRole" FROM "authUsers" WHERE "walletId" = $1`,
+			`SELECT "userPass", "userRole" FROM "authUsers" WHERE "walletAddress" = $1`,
 			[walletAddress]
 		)
-		console.log(rows, walletAddress)
 		if (rows.length === 0){
 			res.status(400).json<LoginResponse>({
 				requestStatus: "ERR_INVALID_PARAMS",
 				invalidParams: ["walletAddress"]
 			})
+			await dbClient.release()
 			return
 		}
 		
@@ -51,7 +51,7 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 				{
 					walletAddress: walletAddress,
 					userRole: userRole
-				},
+				} as DecodedJWTCookie,
 				process.env.JWT_SECRET!,
 				{
 					algorithm: "HS256"
@@ -62,12 +62,14 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 				requestStatus: "SUCCESS",
 				userRole: userRole
 			})
+			await dbClient.release()
 			return
 		} else {
 			res.status(400).json<LoginResponse>({
 				requestStatus: "ERR_INVALID_PARAMS",
 				invalidParams: ["userPass"]
 			})
+			await dbClient.release()
 			return
 		}
 	} catch (err: unknown){

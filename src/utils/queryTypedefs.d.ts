@@ -1,7 +1,7 @@
 export type UserRole = "CLIENT" | "ADMIN"
 
 export type AuthUsers = {
-	walletId: string,
+	walletAddress: string,
 	userPass: string,
 	userRole: UserRole
 }

@@ -146,7 +146,7 @@ function LoginPage(): JSX.Element {
 						)
 						toastCountRef.current += 1
 					}
-					if (invalidParams && invalidParams.includes("walletId")){
+					if (invalidParams && invalidParams.includes("walletAddress")){
 						addToast(
 							"That account doesn't exist",
 							"Make sure you are connecting with the right Metamask Account",
@@ -204,6 +204,10 @@ function LoginPage(): JSX.Element {
 								component={"form"}
 								style={{
 									minWidth: "20vw"
+								}}
+								onSubmit={(e) => {
+									e.preventDefault()
+									attemptUserLogin()
 								}}
 							>
 								<EuiFormRow

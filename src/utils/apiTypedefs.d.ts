@@ -26,8 +26,14 @@ interface SignupResponse extends APIResponse{
 
 }
 
+interface DecodedJWTCookie {
+	walletAddress: string,
+	userRole: UserRole
+}
+
 export {
 	APIResponse,
 	LoginResponse,
-	SignupResponse
+	SignupResponse,
+	DecodedJWTCookie
 }

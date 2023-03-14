@@ -1,10 +1,10 @@
 CREATE TABLE "authUsers" (
-    "walletId" TEXT UNIQUE NOT NULL,
+    "walletAddress" TEXT UNIQUE NOT NULL,
     "userPass" TEXT NOT NULL,
     "userRole" TEXT NOT NULL DEFAULT 'CLIENT',
 
-    CONSTRAINT "pk_authUsers_walletId_userName"
-        PRIMARY KEY ("walletId"),
+    CONSTRAINT "pk_authUsers_walletAddress_userName"
+        PRIMARY KEY ("walletAddress"),
 
     CONSTRAINT "chk_authUsers_userRole_isValidRole"
         CHECK ( "userRole" IN ('CLIENT', 'ADMIN'))
@@ -25,9 +25,9 @@ CREATE TABLE "fundRaisers" (
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletId"
+    CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletAddress"
         FOREIGN KEY ("fundraiserCreator")
-            REFERENCES "authUsers"("walletId")
+            REFERENCES "authUsers"("walletAddress")
 );
 
 CREATE TABLE "fundraiserUpdates" (
@@ -67,7 +67,7 @@ CREATE TABLE "fundraiserDonations" (
     CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
         FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers"("fundraiserId"),
 
-    CONSTRAINT "fk_fundraiserDonations_donatorAddress_authUsers_walletId"
-        FOREIGN KEY ("donorAddress") REFERENCES "authUsers"("walletId")
+    CONSTRAINT "fk_fundraiserDonations_donatorAddress_authUsers_walletAddress"
+        FOREIGN KEY ("donorAddress") REFERENCES "authUsers"("walletAddress")
 
 );
