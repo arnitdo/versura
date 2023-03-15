@@ -27,6 +27,8 @@ function LogoutPage(): JSX.Element {
 	
 	const navRouter = useRouter()
 	
+	const LOGOUT_REDIRECT_TIMER_S = 5;
+	
 	const returnToPreviousPage = useCallback(() => {
 		navRouter.back()
 	}, [navRouter])
@@ -67,12 +69,17 @@ function LogoutPage(): JSX.Element {
 			if (code === 200 && requestStatus === "SUCCESS"){
 				addToast(
 					"You have been logged out successfully",
-					"You will be redirected to the home page in 2 seconds",
+					`You will be redirected to the home page in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
 					"success"
 				)
+				authCtx.updateAuthData({
+					isAuthenticated: false,
+					metamaskAddress: undefined,
+					userRole: undefined
+				})
 				setTimeout(() => {
 					navRouter.push('/')
-				}, 2000)
+				}, LOGOUT_REDIRECT_TIMER_S * 1000)
 				return
 			}
 		}

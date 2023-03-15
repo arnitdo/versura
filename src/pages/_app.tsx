@@ -19,7 +19,7 @@ export type AuthContextType = AuthData & {
 const AuthContext = createContext<AuthContextType>({
 	isAuthenticated: false,
 	metamaskAddress: undefined,
-	userRole: "CLIENT",
+	userRole: undefined,
 	updateAuthData: (newAuth) => {
 		throw new Error(
 			"Attempted to update authentication context before initialization of main application!"
@@ -31,7 +31,7 @@ export default function App({Component, pageProps}: AppProps) {
 	const [authData, setAuthData] = useState<AuthData>({
 		isAuthenticated: false,
 		metamaskAddress: undefined,
-		userRole: "CLIENT"
+		userRole: undefined
 	})
 	
 	const authContextValue: AuthContextType = {
