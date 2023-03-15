@@ -10,7 +10,7 @@ import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
 import {SignupResponse} from "@/utils/apiTypedefs";
 export default async function signupUser(req: NextApiRequest, res: CustomApiResponse){
-	const middlewarePassed = requireMiddlewareChecks(
+	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{

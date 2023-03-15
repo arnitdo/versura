@@ -1,8 +1,6 @@
 import type {APIResponse} from "@/utils/apiTypedefs";
 import {ValidRequestMethods} from "@/utils/customMiddleware";
-
-export type APIResponseCode =
-	0 | 200 | 400 | 403 | 404 | 500
+import {APIResponseCode} from "@/utils/apiTypedefs";
 
 export type APIRequestParams = {
 	endpointPath: string,

@@ -13,7 +13,7 @@ import type {AuthUsers} from "@/utils/queryTypedefs";
 import {DecodedJWTCookie, LoginResponse} from "@/utils/apiTypedefs";
 
 export default async function loginUser(req: NextApiRequest, res: CustomApiResponse){
-	const middlewarePassed = requireMiddlewareChecks(
+	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
@@ -75,10 +75,9 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 	} catch (err: unknown){
 		console.error(err)
 		await dbClient.query("ROLLBACK")
+		await dbClient.release()
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"
 		})
-	} finally {
-		await dbClient.release()
 	}
 }

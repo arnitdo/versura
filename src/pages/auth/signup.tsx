@@ -33,7 +33,7 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 }
 
 function SignupPage(): JSX.Element {
-	const authCtx = useContext<AuthContextType | undefined>(AuthContext)
+	const authCtx = useContext<AuthContextType>(AuthContext)
 	
 	const [
 		[metamaskConnected, metamaskAddress],
@@ -45,11 +45,9 @@ function SignupPage(): JSX.Element {
 	
 	const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
 	
-	const toastCountRef = useRef<number>(0)
-	
 	const {toasts, addToast, dismissToast} = useToastList({
-		toastIdFactoryFn: (toastType) => {
-			return `signup-page-${toastCountRef.current}`
+		toastIdFactoryFn: (toastCount, toastType) => {
+			return `signup-page-${toastCount}`
 		}
 	})
 	
@@ -61,7 +59,6 @@ function SignupPage(): JSX.Element {
 				"Check if you have the MetaMask extension installed!",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		// @ts-ignore
@@ -71,7 +68,6 @@ function SignupPage(): JSX.Element {
 				"We only support Metamask wallets as of now",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -88,7 +84,6 @@ function SignupPage(): JSX.Element {
 				"Connect your MetaMask account with Versura to continue",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 	}, [])
@@ -100,7 +95,6 @@ function SignupPage(): JSX.Element {
 				"Connect to Metamask by clicking the \"Connect\" button",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -112,7 +106,6 @@ function SignupPage(): JSX.Element {
 				"Passwords are case and whitespace sensitive",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -129,10 +122,9 @@ function SignupPage(): JSX.Element {
 		if (isError && error){
 			addToast(
 				"An error occurred when processing your request",
-				(error as Error).message,
+				(error as Error).message || "",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -147,7 +139,6 @@ function SignupPage(): JSX.Element {
 							"Try logging in with that wallet and password",
 							"danger"
 						)
-						toastCountRef.current += 1
 						return
 					}
 				}

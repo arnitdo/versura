@@ -34,7 +34,7 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 }
 
 function LoginPage(): JSX.Element {
-	const authCtx = useContext<AuthContextType | undefined>(AuthContext)
+	const authCtx = useContext<AuthContextType>(AuthContext)
 	
 	const [
 		[metamaskConnected, metamaskAddress],
@@ -44,11 +44,9 @@ function LoginPage(): JSX.Element {
 	const [userPassword, setUserPassword] = useState<string>("")
 	const [passwordInvalid, setPasswordInvalid] = useState<boolean>(false);
 	
-	const toastCountRef = useRef<number>(0)
-	
 	const {toasts, addToast, dismissToast} = useToastList({
-		toastIdFactoryFn: (toastType) => {
-			return `login-page-${toastCountRef.current}`
+		toastIdFactoryFn: (toastCount, toastType) => {
+			return `login-page-${toastCount}`
 		}
 	})
 	
@@ -60,7 +58,6 @@ function LoginPage(): JSX.Element {
 				"Check if you have the MetaMask extension installed!",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		// @ts-ignore
@@ -70,7 +67,6 @@ function LoginPage(): JSX.Element {
 				"We only support Metamask wallets as of now",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -87,7 +83,6 @@ function LoginPage(): JSX.Element {
 				"Connect your MetaMask account with Versura to continue",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 	}, [])
@@ -99,7 +94,6 @@ function LoginPage(): JSX.Element {
 				"Connect to Metamask by clicking the \"Connect\" button",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		if (userPassword.trim() === ""){
@@ -108,7 +102,6 @@ function LoginPage(): JSX.Element {
 				"Make sure the password matches the one used when signing up",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -125,10 +118,9 @@ function LoginPage(): JSX.Element {
 		if (isError && error){
 			addToast(
 				"An error occurred when processing your request",
-				(error as Error).message,
+				(error as Error).message || "",
 				"danger"
 			)
-			toastCountRef.current += 1
 			return
 		}
 		
@@ -144,7 +136,6 @@ function LoginPage(): JSX.Element {
 							"Make sure the password matches the one used when signing up",
 							"danger"
 						)
-						toastCountRef.current += 1
 					}
 					if (invalidParams && invalidParams.includes("walletAddress")){
 						addToast(
@@ -152,7 +143,6 @@ function LoginPage(): JSX.Element {
 							"Make sure you are connecting with the right Metamask Account",
 							"danger"
 						)
-						toastCountRef.current += 1
 					}
 					return
 				}

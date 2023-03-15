@@ -10,14 +10,16 @@ type ToastUtils = {
 }
 
 type ToastListHookArgs = {
-	toastIdFactoryFn: (toastType?: ToastType) => string
+	toastIdFactoryFn: (toastCount: number, toastType?: ToastType) => string
 }
 
 function useToastList(toastListArgs: ToastListHookArgs): ToastUtils{
 	const [toasts, setToasts] = useState<Toast[]>([])
+	const internalToastCountRef = useRef<number>(0)
 	
 	const addToast = useCallback((toastTitle: string, toastText: string, toastType?: ToastType) => {
-		const generatedToastId = toastListArgs.toastIdFactoryFn(toastType)
+		const generatedToastId = toastListArgs.toastIdFactoryFn(internalToastCountRef.current, toastType)
+		internalToastCountRef.current += 1
 		setToasts((oldToasts) => {
 			return [
 				...oldToasts,
