@@ -1,5 +1,5 @@
 import type {NextApiRequest, NextApiResponse} from "next";
-import type {APIResponse, APIResponseCode, DecodedJWTCookie} from "@/utils/apiTypedefs";
+import type {APIResponse, APIResponseCode, DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {verify} from "jsonwebtoken";
 import {db} from "@/utils/db";
 

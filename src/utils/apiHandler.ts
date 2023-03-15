@@ -1,6 +1,6 @@
-import type {APIResponse} from "@/utils/apiTypedefs";
+import type {APIResponse} from "@/utils/types/apiTypedefs";
 import {ValidRequestMethods} from "@/utils/customMiddleware";
-import {APIResponseCode} from "@/utils/apiTypedefs";
+import {APIResponseCode} from "@/utils/types/apiTypedefs";
 
 export type APIRequestParams = {
 	endpointPath: string,

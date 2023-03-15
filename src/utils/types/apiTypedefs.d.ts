@@ -1,6 +1,6 @@
 // Refer to file `@/utils/init.sql` for PostgreSQL type definitions
 
-import {UserRole} from "@/utils/queryTypedefs";
+import {UserRole} from "@/utils/types/queryTypedefs";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 500

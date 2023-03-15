@@ -19,7 +19,7 @@ import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 import {useToastList} from "@/utils/toastUtils";
 import {AuthContext, AuthContextType} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {LoginResponse} from "@/utils/apiTypedefs";
+import {LoginResponse} from "@/utils/types/apiTypedefs";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (

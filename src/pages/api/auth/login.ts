@@ -9,8 +9,8 @@ import {
 } from "@/utils/customMiddleware"
 import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
-import type {AuthUsers} from "@/utils/queryTypedefs";
-import {DecodedJWTCookie, LoginResponse} from "@/utils/apiTypedefs";
+import type {AuthUsers} from "@/utils/types/queryTypedefs";
+import {DecodedJWTCookie, LoginResponse} from "@/utils/types/apiTypedefs";
 
 export default async function loginUser(req: NextApiRequest, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(

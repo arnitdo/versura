@@ -4,7 +4,7 @@ import {createContext, useState} from "react";
 import type {AppProps} from 'next/app'
 
 import '@elastic/eui/dist/eui_theme_dark.css'
-import {UserRole} from "@/utils/queryTypedefs";
+import {UserRole} from "@/utils/types/queryTypedefs";
 
 type AuthData = {
 	isAuthenticated: boolean,
