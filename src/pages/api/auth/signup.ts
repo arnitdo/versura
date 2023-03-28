@@ -47,16 +47,16 @@ export default async function signupUser(req: NextApiRequest, res: CustomApiResp
 			[walletAddress, hashedPassword]
 		)
 		await dbClient.query("COMMIT")
+		await dbClient.release()
 		res.status(200).json({
 			requestStatus: "SUCCESS"
 		})
 	} catch (err: unknown){
 		console.error(err)
 		await dbClient.query("ROLLBACK")
+		await dbClient.release()
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"
 		})
-	} finally {
-		await dbClient.release()
 	}
 }

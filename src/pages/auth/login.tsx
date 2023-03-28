@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useRef, useState} from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import Link from "next/link"
 import Image from 'next/image'
@@ -18,9 +18,11 @@ import VersuraIcon from "@/assets/versura-icon.png";
 import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 
 import {useToastList} from "@/utils/toastUtils";
-import {AuthContext, AuthContextType} from "@/pages/_app"
+import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {LoginResponse} from "@/utils/types/apiTypedefs";
+import {useRouter} from "next/router";
+import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -33,8 +35,18 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 	)
 }
 
-function LoginPage(): JSX.Element {
+function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const authCtx = useContext<AuthContextType>(AuthContext)
+	
+	useEffect(() => {
+		props.setShowPageHeader(false)
+		
+		return () => {
+			props.setShowPageHeader(true)
+		}
+	}, [])
+	
+	const LOGIN_SUCCESS_REDIR_TIMEOUT_S = 5
 	
 	const [
 		[metamaskConnected, metamaskAddress],
@@ -49,6 +61,8 @@ function LoginPage(): JSX.Element {
 			return `login-page-${toastCount}`
 		}
 	})
+	
+	const navRouter = useRouter()
 	
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
@@ -149,11 +163,19 @@ function LoginPage(): JSX.Element {
 			} else if (code === 200){
 				if (requestStatus === "SUCCESS"){
 					const {userRole} = data
-					authCtx?.updateAuthData({
+					authCtx.updateAuthData({
 						isAuthenticated: true,
 						metamaskAddress: metamaskAddress,
 						userRole: userRole
 					})
+					addToast(
+						"You have logged in successfully",
+						`You will be redirected to the home page in ${LOGIN_SUCCESS_REDIR_TIMEOUT_S} seconds`,
+						"success"
+					)
+					setTimeout(() => {
+						navRouter.push("/")
+					}, LOGIN_SUCCESS_REDIR_TIMEOUT_S * 1000)
 				}
 			}
 		}
@@ -181,13 +203,15 @@ function LoginPage(): JSX.Element {
 						gutterSize={"xl"}
 					>
 						<EuiFlexItem>
-							<Image
-								src={VersuraIcon}
-								alt={"Versura Icon"}
-								placeholder={"blur"}
-								height={40}
-								width={291}
-							/>
+							<Link href={"/"}>
+								<Image
+									src={VersuraIcon}
+									alt={"Versura Icon"}
+									placeholder={"blur"}
+									height={40}
+									width={291}
+								/>
+							</Link>
 						</EuiFlexItem>
 						<EuiFlexItem>
 							<EuiForm
@@ -225,6 +249,7 @@ function LoginPage(): JSX.Element {
 									<EuiFieldPassword
 										type={"dual"}
 										fullWidth
+										disabled={!metamaskConnected}
 										isInvalid={passwordInvalid}
 										onChange={(e) => {
 											setPasswordInvalid(false)

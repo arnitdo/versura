@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useRef, useState} from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import {useRouter} from "next/router"
 import Image from 'next/image'
@@ -13,11 +13,21 @@ import {
 
 import VersuraIcon from "@/assets/versura-icon.png";
 import {useToastList} from "@/utils/toastUtils";
-import {AuthContext, AuthContextType} from "@/pages/_app"
+import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
+import Link from "next/link";
+import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 
-function LogoutPage(): JSX.Element {
+function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const authCtx = useContext<AuthContextType>(AuthContext)
+	
+	useEffect(() => {
+		props.setShowPageHeader(false)
+		
+		return () => {
+			props.setShowPageHeader(true)
+		}
+	}, [])
 	
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
@@ -109,13 +119,15 @@ function LogoutPage(): JSX.Element {
 						gutterSize={"xl"}
 					>
 						<EuiFlexItem>
-							<Image
-								src={VersuraIcon}
-								alt={"Versura Icon"}
-								placeholder={"blur"}
-								height={40}
-								width={291}
-							/>
+							<Link href={"/"}>
+								<Image
+									src={VersuraIcon}
+									alt={"Versura Icon"}
+									placeholder={"blur"}
+									height={40}
+									width={291}
+								/>
+							</Link>
 						</EuiFlexItem>
 						<EuiFlexItem>
 							<h2

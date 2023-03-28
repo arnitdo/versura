@@ -5,16 +5,9 @@ import type {AppProps} from 'next/app'
 
 import '@elastic/eui/dist/eui_theme_dark.css'
 import {UserRole} from "@/utils/types/queryTypedefs";
+import {PageHeader} from "@/components/pageHeader";
+import {AuthContextType, AuthData} from "@/utils/types/componentTypedefs";
 
-type AuthData = {
-	isAuthenticated: boolean,
-	metamaskAddress?: string
-	userRole?: UserRole
-}
-
-export type AuthContextType = AuthData & {
-	updateAuthData: (newAuthData: AuthData) => void
-}
 
 const AuthContext = createContext<AuthContextType>({
 	isAuthenticated: false,
@@ -36,14 +29,25 @@ export default function App({Component, pageProps}: AppProps) {
 	
 	const authContextValue: AuthContextType = {
 		...authData,
-		updateAuthData: setAuthData
+		updateAuthData: (autD) => {
+			console.table(autD)
+			setAuthData(autD)
+		}
 	}
+	
+	const [showPageHeader, setShowPageHeader] = useState<boolean>(true);
 	
 	return (
 		<>
 			<EuiProvider colorMode={"dark"}>
 				<AuthContext.Provider value={authContextValue}>
-					<Component {...pageProps} />
+					{showPageHeader ? (
+						<PageHeader />
+					) : null}
+					<Component
+						{...pageProps}
+						setShowPageHeader={setShowPageHeader}
+					/>
 				</AuthContext.Provider>
 			</EuiProvider>
 		</>

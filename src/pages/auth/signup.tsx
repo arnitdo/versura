@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useRef, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import Image from 'next/image'
 import {
@@ -17,9 +17,11 @@ import VersuraIcon from "@/assets/versura-icon.png";
 import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 
 import {useToastList} from "@/utils/toastUtils";
-import {AuthContext, AuthContextType} from "@/pages/_app"
+import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {LoginResponse} from "@/utils/types/apiTypedefs";
+import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
+import { useRouter } from "next/router";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -32,8 +34,18 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 	)
 }
 
-function SignupPage(): JSX.Element {
-	const authCtx = useContext<AuthContextType>(AuthContext)
+function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
+	useEffect(() => {
+		props.setShowPageHeader(false)
+		
+		return () => {
+			props.setShowPageHeader(true)
+		}
+	}, [])
+	
+	const navRouter = useRouter()
+	
+	const SIGNUP_SUCCESS_REDIR_TIMEOUT_S = 5
 	
 	const [
 		[metamaskConnected, metamaskAddress],
@@ -145,12 +157,14 @@ function SignupPage(): JSX.Element {
 			}
 			if (code === 200){
 				if (requestStatus === "SUCCESS"){
-					const {userRole} = data
-					authCtx?.updateAuthData({
-						isAuthenticated: true,
-						metamaskAddress: metamaskAddress,
-						userRole: userRole
-					})
+					addToast(
+						"You have signed up successfully",
+						`You will be redirected to the home page in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
+						"success"
+					)
+					setTimeout(() => {
+						navRouter.push("/")
+					}, SIGNUP_SUCCESS_REDIR_TIMEOUT_S * 1000)
 				}
 			}
 		}
@@ -178,13 +192,15 @@ function SignupPage(): JSX.Element {
 						gutterSize={"xl"}
 					>
 						<EuiFlexItem>
-							<Image
-								src={VersuraIcon}
-								alt={"Versura Icon"}
-								placeholder={"blur"}
-								height={40}
-								width={291}
-							/>
+							<Link href={"/"}>
+								<Image
+									src={VersuraIcon}
+									alt={"Versura Icon"}
+									placeholder={"blur"}
+									height={40}
+									width={291}
+								/>
+							</Link>
 						</EuiFlexItem>
 						<EuiFlexItem>
 							<EuiForm
@@ -221,6 +237,7 @@ function SignupPage(): JSX.Element {
 								>
 									<EuiFieldPassword
 										type={"dual"}
+										disabled={!metamaskConnected}
 										onChange={(e) => {
 											setPasswordMismatch(false)
 											setUserPassword(e.target.value)
@@ -233,6 +250,7 @@ function SignupPage(): JSX.Element {
 								>
 									<EuiFieldPassword
 										isInvalid={passwordMismatch}
+										disabled={!metamaskConnected}
 										onChange={(e) => {
 											setConfirmPassword(e.target.value)
 											setPasswordMismatch(false)

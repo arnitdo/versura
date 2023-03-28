@@ -5,8 +5,8 @@ export default function Document(){
 		<Html lang="en">
 			<Head/>
 			<body style={{
-				width: "100vw",
-				height: "100vh"
+				minWidth: "100vw",
+				minHeight: "100vh"
 			}}>
 			<Main/>
 			<NextScript/>
