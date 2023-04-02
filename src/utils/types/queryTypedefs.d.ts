@@ -5,3 +5,14 @@ export type AuthUsers = {
 	userPass: string,
 	userRole: UserRole
 }
+
+export type FundRaisers = {
+	fundraiserId: number,
+	fundraiserCreator: string,
+	fundraiserTitle: string,
+	fundraiserDescription: string,
+	fundraiserTarget: number,
+	fundraiserMinDonationAmount: number,
+	fundraiserRaisedAmount: number,
+	fundraiserContributorCount: number
+}

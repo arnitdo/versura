@@ -1,10 +1,13 @@
 import type {NextApiRequest, NextApiResponse} from "next";
-import type {APIResponse, APIResponseCode, DecodedJWTCookie} from "@/utils/types/apiTypedefs";
+import type {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {verify} from "jsonwebtoken";
 import {db} from "@/utils/db";
+import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
+import {CreateFundraiserRequest} from "@/utils/types/apiRequests";
 
-export interface CustomApiRequest extends NextApiRequest {
-	user?: DecodedJWTCookie
+export interface CustomApiRequest<T = any> extends NextApiRequest {
+	user?: DecodedJWTCookie,
+	body: Required<T>
 }
 
 export interface CustomApiResponse extends NextApiResponse {
@@ -12,41 +15,49 @@ export interface CustomApiResponse extends NextApiResponse {
 	json: <T extends APIResponse>(body: T) => void
 }
 
-export type MiddlewareChain = {
+export type MiddlewareOptions = {
 	middlewareCallStack: string[]
-	nextMiddleware: NextMiddleware
+	nextMiddleware: NextMiddleware,
+	// setRequestProperty: (propertyName: string, value: any) => void
 }
 
-export type MiddlewareFn = (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain) => Promise<void>
+export type MiddlewareFn<T = any> = (req: CustomApiRequest<T>, res: CustomApiResponse, opts: MiddlewareOptions) => Promise<void>
 
 export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
 
 export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
-type MiddlewareCallArgs = {[middlewareFnName: string]: MiddlewareFn}
+type MiddlewareCallArgs<T> = {[middlewareFnName: string]: MiddlewareFn<T>}
 
-function requireMethod(requestMethod: ValidRequestMethods): MiddlewareFn {
-	return async function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): Promise<void> {
-		if (req.method !== requestMethod) {
+export type ValidatorMapType<T> = {
+	[validateProperty in keyof T]: (propValue: T[validateProperty]) => boolean;
+};
+
+function requireMethods(...acceptedMethods: ValidRequestMethods[]): MiddlewareFn {
+	return async function (req: CustomApiRequest, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
+		const reqMethod = req.method as ValidRequestMethods || "GET"
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
+		if (!acceptedMethods.includes(reqMethod)) {
 			res.status(400).json({
 				requestStatus: "ERR_INVALID_METHOD"
 			})
+			nextMiddleware(false)
 			return
 		}
 		// We don't need context of previous middleware evaluated here
-		const {middlewareCallStack, nextMiddleware} = next
+		
 		nextMiddleware(true)
 		
 	}
 }
 
 function requireValidBody(): MiddlewareFn {
-	return async function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): Promise<void> {
-		const {middlewareCallStack, nextMiddleware} = next
+	return async function (req: CustomApiRequest, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		
 		const acceptedRequestMethods: ValidRequestMethods[] = ["POST", "PUT", "PATCH"]
 		if (!acceptedRequestMethods.includes(req.method as ValidRequestMethods || "GET")){
-			if (!middlewareCallStack.includes(requireMethod.name)) {
+			if (!middlewareCallStack.includes(requireMethods.name)) {
 				throw new Error(`Incorrect body check called for method ${req.method}. Are you calling requireMethod?`)
 			} else {
 				throw new Error(`requireMethod was called with mismatching methods and body`)
@@ -67,9 +78,9 @@ function requireValidBody(): MiddlewareFn {
 }
 
 
-function requireBodyParams(...bodyParams: string[]): MiddlewareFn {
-	return async function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): Promise<void> {
-		const {middlewareCallStack, nextMiddleware} = next
+function requireBodyParams<T>(...bodyParams: string[]): MiddlewareFn<T> {
+	return async function (req: CustomApiRequest<T>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		if (!middlewareCallStack.includes(requireValidBody.name)) {
 			throw new Error(
 				"requireBodyParams was called without verifying a valid body"
@@ -96,10 +107,10 @@ function requireBodyParams(...bodyParams: string[]): MiddlewareFn {
 	}
 }
 
-function requireAuthenticatedUser(setReqProperty: boolean = true): MiddlewareFn {
-	return async function (req: CustomApiRequest, res: CustomApiResponse, next: MiddlewareChain): Promise<void> {
+function requireAuthenticatedUser(): MiddlewareFn {
+	return async function (req: CustomApiRequest, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
 		const authCookie = req.cookies["versura-auth-token"];
-		const {nextMiddleware} = next
+		const {nextMiddleware} = middlewareOptions
 		if (authCookie == null || authCookie == '') {
 			res.status(403).json({
 				requestStatus: "ERR_AUTH_REQUIRED"
@@ -140,9 +151,7 @@ function requireAuthenticatedUser(setReqProperty: boolean = true): MiddlewareFn 
 			// Having 1 row means that the current user exists in our database
 			// We can go ahead and assume that the user is authenticated
 			
-			if (setReqProperty){
-				req.user = decodedCookie
-			}
+			req.user = decodedCookie
 			
 			nextMiddleware(true)
 			dbClient.release()
@@ -159,47 +168,90 @@ function requireAuthenticatedUser(setReqProperty: boolean = true): MiddlewareFn 
 	}
 }
 
-async function requireMiddlewareChecks(req: CustomApiRequest, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs): Promise<boolean> {
+function requireValidators<T>(validatorsToRun: ValidatorMapType<T>): MiddlewareFn<T> {
+	return async function (req: CustomApiRequest<T>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
+		if (!middlewareCallStack.includes("requireBodyParams")){
+			throw new Error(
+				"requireValidators was called without verifying all properties in body (requireBodyParams)"
+			)
+		}
+		const validParams: string[] = []
+		const invalidParams: string[] = []
+		// Only run validators on passed values
+		for (const paramKey in validatorsToRun) {
+			const paramValue = req.body[paramKey]
+			const validatorToRun = validatorsToRun[paramKey]
+			const validatorResult = validatorToRun(paramValue)
+			if (validatorResult == true){
+				validParams.push(paramKey)
+			} else {
+				invalidParams.push(paramKey)
+			}
+		}
+		if (invalidParams.length > 0){
+			res.status(400).json({
+				requestStatus: "ERR_INVALID_PARAMS",
+				invalidParams: invalidParams
+			})
+			nextMiddleware(false)
+			return
+		}
+		nextMiddleware(true)
+		return
+	}
+}
+
+async function requireMiddlewareChecks<T>(req: CustomApiRequest<T>, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs<T>): Promise<boolean> {
 	const middlewareStack: string[] = []
-	let middlewaresExecutedSuccessfully: boolean = true
-	let lastMiddlewareIdx = -1
+	let middlewareExecutionStatus: boolean = true
 	// true & successfulMiddleware => true
 	// true & failedMiddleware => false
 	// false & true | false & false => false
 	
-	for (let middlewareKVPairIdx = 0; middlewareKVPairIdx < Object.keys(middlewaresToCall).length; middlewaresExecutedSuccessfully && middlewareKVPairIdx > lastMiddlewareIdx){
-		const middlewareEntries = Object.entries(middlewaresToCall)
-		const currentEntry = middlewareEntries[middlewareKVPairIdx]
-		// @ts-ignore
-		const [middlewareFnName, middlewareFnToCall] = currentEntry
-		const nextFn: NextMiddleware = (middlewareStatus) => {
-			middlewaresExecutedSuccessfully &&= middlewareStatus
-			middlewareKVPairIdx += 1
-			lastMiddlewareIdx += 1
+	for (const middlewareName in middlewaresToCall) {
+		if (!middlewareExecutionStatus){
+			break
+		}
+		const middlewareFnToExecute = middlewaresToCall[middlewareName]
+		const nextFn: NextMiddleware = (middlewareStatus: boolean) => {
+			middlewareExecutionStatus &&= middlewareStatus
+		}
+		
+		// const setRequestProperty = (propertyName: string, value: any) => {
+		// 	Object.defineProperty(req, propertyName, {value: value})
+		// }
+		
+		const middlewareOptions: MiddlewareOptions = {
+			middlewareCallStack: middlewareStack,
+			nextMiddleware: nextFn,
+			// setRequestProperty: setRequestProperty
 		}
 		
 		try {
-			await middlewareFnToCall(req, res, {
-				middlewareCallStack: middlewareStack,
-				nextMiddleware: nextFn
-			})
-			middlewareStack.push(middlewareFnName)
+			await middlewareFnToExecute(
+				req,
+				res,
+				middlewareOptions
+			)
+			middlewareStack.push(middlewareName)
 		} catch (err: unknown){
+			console.error(err)
 			res.status(500).json({
-				requestStatus: "ERR_INTERNAL_ERROR"
+				"requestStatus": "ERR_INTERNAL_ERROR"
 			})
-			middlewaresExecutedSuccessfully &&= false
-			break
 		}
 	}
-	return middlewaresExecutedSuccessfully
+	
+	return middlewareExecutionStatus
 }
 
 export {
-	requireMethod,
+	requireMethods,
 	requireValidBody,
 	requireBodyParams,
 	requireAuthenticatedUser,
+	requireValidators,
 	
 	requireMiddlewareChecks
 }

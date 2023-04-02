@@ -19,9 +19,9 @@ import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 import {useToastList} from "@/utils/toastUtils";
 import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {LoginResponse} from "@/utils/types/apiTypedefs";
 import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import { useRouter } from "next/router";
+import {LoginResponse} from "@/utils/types/apiResponses";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -111,7 +111,6 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 		}
 		
 		if (userPassword !== confirmPassword){
-			console.log({userPassword, confirmPassword})
 			setPasswordMismatch(true)
 			addToast(
 				"Passwords do not match",

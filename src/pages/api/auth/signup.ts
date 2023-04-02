@@ -4,17 +4,18 @@ import {
 	requireBodyParams,
 	requireMiddlewareChecks,
 	CustomApiResponse,
-	requireMethod
+	requireMethods, CustomApiRequest
 } from "@/utils/customMiddleware"
 import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
-import {SignupResponse} from "@/utils/types/apiTypedefs";
-export default async function signupUser(req: NextApiRequest, res: CustomApiResponse){
+import {SignupResponse} from "@/utils/types/apiResponses";
+import {SignupUserRequest} from "@/utils/types/apiRequests";
+export default async function signupUser(req: CustomApiRequest<SignupUserRequest>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
-			"requireMethod": requireMethod("POST"),
+			"requireMethod": requireMethods("POST"),
 			"requireValidBody": requireValidBody(),
 			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
 		}

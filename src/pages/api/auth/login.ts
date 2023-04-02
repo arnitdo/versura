@@ -5,19 +5,20 @@ import {
 	requireBodyParams,
 	requireMiddlewareChecks,
 	CustomApiResponse,
-	requireMethod
+	requireMethods, CustomApiRequest
 } from "@/utils/customMiddleware"
-import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
 import type {AuthUsers} from "@/utils/types/queryTypedefs";
-import {DecodedJWTCookie, LoginResponse} from "@/utils/types/apiTypedefs";
+import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
+import {LoginResponse} from "@/utils/types/apiResponses";
+import {LoginUserRequest, CreateFundraiserRequest} from "@/utils/types/apiRequests";
 
-export default async function loginUser(req: NextApiRequest, res: CustomApiResponse){
+export default async function loginUser(req: CustomApiRequest<LoginUserRequest>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
-			"requireMethod": requireMethod("POST"),
+			"requireMethod": requireMethods("POST"),
 			"requireValidBody": requireValidBody(),
 			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
 		}
@@ -57,7 +58,7 @@ export default async function loginUser(req: NextApiRequest, res: CustomApiRespo
 					algorithm: "HS256"
 				}
 			)
-			res.setHeader("Set-Cookie", `versura-auth-token=${authToken}; HttpOnly`)
+			res.setHeader("Set-Cookie", `versura-auth-token=${authToken}; Path=/; HttpOnly`)
 			res.status(200).json<LoginResponse>({
 				requestStatus: "SUCCESS",
 				userRole: userRole

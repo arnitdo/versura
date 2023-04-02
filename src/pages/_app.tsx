@@ -30,7 +30,6 @@ export default function App({Component, pageProps}: AppProps) {
 	const authContextValue: AuthContextType = {
 		...authData,
 		updateAuthData: (autD) => {
-			console.table(autD)
 			setAuthData(autD)
 		}
 	}
