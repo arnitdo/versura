@@ -141,7 +141,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 		if (isSuccess && data){
 			const {requestStatus} = data
 			if (code === 400) {
-				if (requestStatus === "ERR_INVALID_PARAMS"){
+				if (requestStatus === "ERR_INVALID_BODY_PARAMS"){
 					const {invalidParams} = data
 					if (invalidParams && invalidParams.includes("userPass")){
 						setPasswordInvalid(true)
