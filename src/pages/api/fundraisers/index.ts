@@ -4,7 +4,7 @@ import {
 	requireMiddlewareChecks,
 	requireBodyParams,
 	requireValidBody,
-	CustomApiRequest, CustomApiResponse, requireQueryParamValidators, requireBodyValidators, requireQueryParams
+	CustomApiRequest, CustomApiResponse, requireBodyValidators, requireQueryParams
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
 import {CreateFundraiserRequestBody} from "@/utils/types/apiRequests";

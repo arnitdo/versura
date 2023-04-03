@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import {
 	EuiPageTemplate,
-	EuiSideNav,
 	EuiSideNavItemType,
 	EuiText,
 	EuiFlexGroup,

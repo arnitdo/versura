@@ -11,7 +11,7 @@ import {db} from "@/utils/db";
 import type {AuthUsers} from "@/utils/types/queryTypedefs";
 import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {LoginResponse} from "@/utils/types/apiResponses";
-import {LoginUserRequestBody, CreateFundraiserRequestBody} from "@/utils/types/apiRequests";
+import {LoginUserRequestBody} from "@/utils/types/apiRequests";
 
 export default async function loginUser(req: CustomApiRequest<LoginUserRequestBody>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(

@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
+import React, {useCallback, useContext, useEffect} from "react";
 import EuiCenter from '@/components/customCenter'
 import {useRouter} from "next/router"
 import Image from 'next/image'
@@ -7,7 +7,6 @@ import {
 	EuiButton,
 	EuiPanel,
 	EuiFlexGroup,
-	EuiText,
 	EuiGlobalToastList
 } from "@elastic/eui";
 

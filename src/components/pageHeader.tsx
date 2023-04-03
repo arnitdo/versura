@@ -5,15 +5,9 @@ import {
 	EuiHeaderSection,
 	EuiAvatar,
 	EuiHeaderLinks,
-	EuiHeaderLink,
-	EuiHeaderSectionItemButton,
-	EuiPopover,
-	EuiFlexGroup,
-	EuiFlexItem,
-	EuiText,
-	useGeneratedHtmlId
+	EuiHeaderLink
 } from "@elastic/eui"
-import {useCallback, useContext, useState} from "react";
+import {useContext} from "react";
 import Link from "next/link";
 import Image from "next/image";
 

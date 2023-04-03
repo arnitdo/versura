@@ -4,7 +4,6 @@ import {createContext, useState} from "react";
 import type {AppProps} from 'next/app'
 
 import '@elastic/eui/dist/eui_theme_dark.css'
-import {UserRole} from "@/utils/types/queryTypedefs";
 import {PageHeader} from "@/components/pageHeader";
 import {AuthContextType, AuthData} from "@/utils/types/componentTypedefs";
 

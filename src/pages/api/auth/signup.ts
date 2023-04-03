@@ -6,7 +6,6 @@ import {
 	CustomApiResponse,
 	requireMethods, CustomApiRequest
 } from "@/utils/customMiddleware"
-import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
 import {SignupResponse} from "@/utils/types/apiResponses";
 import {SignupUserRequestBody} from "@/utils/types/apiRequests";

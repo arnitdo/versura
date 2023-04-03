@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import Link from "next/link"
 import Image from 'next/image'
