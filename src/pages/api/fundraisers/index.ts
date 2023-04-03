@@ -4,28 +4,31 @@ import {
 	requireMiddlewareChecks,
 	requireBodyParams,
 	requireValidBody,
-	CustomApiRequest, CustomApiResponse, requireValidators
+	CustomApiRequest, CustomApiResponse, requireQueryParamValidators, requireBodyValidators, requireQueryParams
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
-import {CreateFundraiserRequest} from "@/utils/types/apiRequests";
+import {CreateFundraiserRequestBody} from "@/utils/types/apiRequests";
 import {FundRaisers} from "@/utils/types/queryTypedefs";
 import {NON_ZERO_NON_NEGATIVE, ALLOW_UNDEFINED_WITH_FN, STRLEN_GT} from "@/utils/validatorUtils";
 import {CreateFundraiserResponse} from "@/utils/types/apiResponses";
 
-export default async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequest>, res: CustomApiResponse){
+export default async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBody>, res: CustomApiResponse){
 	const dbClient = await db.connect();
 	try {
 		const middlewareCheckPassed = await requireMiddlewareChecks(
 			req,
 			res,
 			{
-				"requireMethod": requireMethods("POST"),
-				"requireValidBody": requireValidBody(),
-				"requireAuthenticatedUser": requireAuthenticatedUser(),
-				"requireBodyParams": requireBodyParams<CreateFundraiserRequest>(
+				[requireMethods.name]: requireMethods("POST"),
+				[requireValidBody.name]: requireValidBody(),
+				[requireAuthenticatedUser.name]: requireAuthenticatedUser(),
+				[requireBodyParams.name]: requireBodyParams(
 					"fundraiserTitle", "fundraiserDescription", "fundraiserTarget"
 				),
-				"requireValidators": requireValidators({
+				[requireQueryParams.name]: requireQueryParams(
+					"fundraiserId"
+				),
+				[requireBodyValidators.name]: requireBodyValidators({
 					fundraiserTarget: NON_ZERO_NON_NEGATIVE,
 					fundraiserTitle: STRLEN_GT(16),
 					fundraiserDescription: STRLEN_GT(200),
@@ -33,7 +36,7 @@ export default async function createFundraiser(req: CustomApiRequest<CreateFundr
 					fundraiserToken: ALLOW_UNDEFINED_WITH_FN((fundraiserToken: string) => {
 						return fundraiserToken === "ETH"
 					})
-				})
+				}),
 			}
 		)
 		

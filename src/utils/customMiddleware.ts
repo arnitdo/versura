@@ -3,11 +3,12 @@ import type {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {verify} from "jsonwebtoken";
 import {db} from "@/utils/db";
 import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
-import {CreateFundraiserRequest} from "@/utils/types/apiRequests";
 
-export interface CustomApiRequest<T = any> extends NextApiRequest {
+// @ts-ignore
+export interface CustomApiRequest<BodyType = any, QueryType = any> extends NextApiRequest {
 	user?: DecodedJWTCookie,
-	body: Required<T>
+	body: Required<BodyType>,
+	query: Required<QueryType>
 }
 
 export interface CustomApiResponse extends NextApiResponse {
@@ -21,13 +22,13 @@ export type MiddlewareOptions = {
 	// setRequestProperty: (propertyName: string, value: any) => void
 }
 
-export type MiddlewareFn<T = any> = (req: CustomApiRequest<T>, res: CustomApiResponse, opts: MiddlewareOptions) => Promise<void>
+export type MiddlewareFn<T = any, P = any> = (req: CustomApiRequest<T, P>, res: CustomApiResponse, opts: MiddlewareOptions) => Promise<void>
 
 export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
 
 export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
-type MiddlewareCallArgs<T> = {[middlewareFnName: string]: MiddlewareFn<T>}
+type MiddlewareCallArgs<T, P> = {[middlewareFnName: string]: MiddlewareFn<T, P>}
 
 export type ValidatorMapType<T> = {
 	[validateProperty in keyof T]: (propValue: T[validateProperty]) => boolean;
@@ -78,7 +79,7 @@ function requireValidBody(): MiddlewareFn {
 }
 
 
-function requireBodyParams<T>(...bodyParams: string[]): MiddlewareFn<T> {
+function requireBodyParams<T>(...bodyParams: (keyof T)[]): MiddlewareFn<T> {
 	return async function (req: CustomApiRequest<T>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		if (!middlewareCallStack.includes(requireValidBody.name)) {
@@ -86,9 +87,9 @@ function requireBodyParams<T>(...bodyParams: string[]): MiddlewareFn<T> {
 				"requireBodyParams was called without verifying a valid body"
 			)
 		}
-		const requestBodyKeys = Object.keys(req.body)
-		const missingBodyParams: string[] = bodyParams.filter((bodyParam) => {
-			if (requestBodyKeys.includes(bodyParam)){
+		const requestBodyKeys = Object.keys(req.body) as (keyof T)[]
+		const missingBodyParams: (keyof T)[] = bodyParams.filter((bodyParam) => {
+			if (requestBodyKeys.includes(bodyParam as keyof T) && req.body[bodyParam] !== undefined){
 				return false
 			}
 			return true
@@ -98,6 +99,30 @@ function requireBodyParams<T>(...bodyParams: string[]): MiddlewareFn<T> {
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_BODY_PARAMS",
 				missingParams: missingBodyParams
+			})
+			nextMiddleware(false)
+			return
+		}
+		
+		nextMiddleware(true)
+	}
+}
+
+function requireQueryParams<T, P>(...queryParams: (keyof P)[]): MiddlewareFn<T, P> {
+	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
+		const requestQueryKeys = Object.keys(req.query) as (keyof P)[]
+		const missingQueryParams: (keyof P)[] = queryParams.filter((queryParam) => {
+			if (requestQueryKeys.includes(queryParam as keyof P) && req.query[queryParam] !== undefined){
+				return false
+			}
+			return true
+		})
+		
+		if (missingQueryParams.length > 0){
+			res.status(400).json({
+				requestStatus: "ERR_MISSING_QUERY_PARAMS",
+				missingParams: missingQueryParams
 			})
 			nextMiddleware(false)
 			return
@@ -168,12 +193,12 @@ function requireAuthenticatedUser(): MiddlewareFn {
 	}
 }
 
-function requireValidators<T>(validatorsToRun: ValidatorMapType<T>): MiddlewareFn<T> {
-	return async function (req: CustomApiRequest<T>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
+function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>): MiddlewareFn<T, P> {
+	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!middlewareCallStack.includes("requireBodyParams")){
+		if (!middlewareCallStack.includes(requireBodyParams.name)){
 			throw new Error(
-				"requireValidators was called without verifying all properties in body (requireBodyParams)"
+				"requireBodyValidators was called without verifying all properties in body (requireBodyParams)"
 			)
 		}
 		const validParams: string[] = []
@@ -191,7 +216,7 @@ function requireValidators<T>(validatorsToRun: ValidatorMapType<T>): MiddlewareF
 		}
 		if (invalidParams.length > 0){
 			res.status(400).json({
-				requestStatus: "ERR_INVALID_PARAMS",
+				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: invalidParams
 			})
 			nextMiddleware(false)
@@ -202,7 +227,41 @@ function requireValidators<T>(validatorsToRun: ValidatorMapType<T>): MiddlewareF
 	}
 }
 
-async function requireMiddlewareChecks<T>(req: CustomApiRequest<T>, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs<T>): Promise<boolean> {
+function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>): MiddlewareFn<T, P> {
+	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
+		const {middlewareCallStack, nextMiddleware} = middlewareOptions
+		if (!middlewareCallStack.includes(requireQueryParams.name)){
+			throw new Error(
+				"requireQueryParamValidators was called without verifying all properties in body (requireQueryParams)"
+			)
+		}
+		const validParams: string[] = []
+		const invalidParams: string[] = []
+		// Only run validators on passed values
+		for (const paramKey in validatorsToRun) {
+			const paramValue = req.query[paramKey]
+			const validatorToRun = validatorsToRun[paramKey]
+			const validatorResult = validatorToRun(paramValue)
+			if (validatorResult == true){
+				validParams.push(paramKey)
+			} else {
+				invalidParams.push(paramKey)
+			}
+		}
+		if (invalidParams.length > 0){
+			res.status(400).json({
+				requestStatus: "ERR_INVALID_QUERY_PARAMS",
+				invalidParams: invalidParams
+			})
+			nextMiddleware(false)
+			return
+		}
+		nextMiddleware(true)
+		return
+	}
+}
+
+async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs<T, P>): Promise<boolean> {
 	const middlewareStack: string[] = []
 	let middlewareExecutionStatus: boolean = true
 	// true & successfulMiddleware => true
@@ -218,14 +277,9 @@ async function requireMiddlewareChecks<T>(req: CustomApiRequest<T>, res: CustomA
 			middlewareExecutionStatus &&= middlewareStatus
 		}
 		
-		// const setRequestProperty = (propertyName: string, value: any) => {
-		// 	Object.defineProperty(req, propertyName, {value: value})
-		// }
-		
 		const middlewareOptions: MiddlewareOptions = {
 			middlewareCallStack: middlewareStack,
 			nextMiddleware: nextFn,
-			// setRequestProperty: setRequestProperty
 		}
 		
 		try {
@@ -250,8 +304,10 @@ export {
 	requireMethods,
 	requireValidBody,
 	requireBodyParams,
+	requireQueryParams,
 	requireAuthenticatedUser,
-	requireValidators,
+	requireBodyValidators,
+	requireQueryParamValidators,
 	
 	requireMiddlewareChecks
 }

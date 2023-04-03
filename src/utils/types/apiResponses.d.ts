@@ -10,9 +10,12 @@ type APIResponseRequestStatus =
 	"ERR_BODY_REQUIRED" |
 	"ERR_INTERNAL_ERROR" |
 	"ERR_INVALID_METHOD" |
-	"ERR_INVALID_PARAMS" |
+	"ERR_INVALID_BODY_PARAMS" |
 	"ERR_MISSING_BODY_PARAMS" |
-	"ERR_AUTH_REQUIRED"
+	"ERR_INVALID_QUERY_PARAMS" |
+	"ERR_MISSING_QUERY_PARAMS" |
+	"ERR_AUTH_REQUIRED"	|
+	"ERR_NOT_FOUND"
 
 interface APIResponse {
 	requestStatus: APIResponseRequestStatus
@@ -31,9 +34,23 @@ interface CreateFundraiserResponse extends APIResponse {
 	fundraiserId: number,
 }
 
+interface GetFundraiserResponse extends APIResponse {
+	fundraiserData: {
+		fundraiserId: number,
+		fundraiserCreator: string,
+		fundraiserTitle: string,
+		fundraiserDescription: string,
+		fundraiserTarget: number,
+		fundraiserMinDonationAmount: number,
+		fundraiserRaisedAmount: number,
+		fundraiserContributorCount: number
+	}
+}
+
 export {
 	SignupResponse,
 	LoginResponse,
 	APIResponse,
-	CreateFundraiserResponse
+	CreateFundraiserResponse,
+	GetFundraiserResponse
 };

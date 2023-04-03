@@ -11,14 +11,14 @@ import {db} from "@/utils/db";
 import type {AuthUsers} from "@/utils/types/queryTypedefs";
 import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {LoginResponse} from "@/utils/types/apiResponses";
-import {LoginUserRequest, CreateFundraiserRequest} from "@/utils/types/apiRequests";
+import {LoginUserRequestBody, CreateFundraiserRequestBody} from "@/utils/types/apiRequests";
 
-export default async function loginUser(req: CustomApiRequest<LoginUserRequest>, res: CustomApiResponse){
+export default async function loginUser(req: CustomApiRequest<LoginUserRequestBody>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
-			"requireMethod": requireMethods("POST"),
+			"requireMethods": requireMethods("POST"),
 			"requireValidBody": requireValidBody(),
 			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
 		}
@@ -36,7 +36,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequest>,
 		)
 		if (rows.length === 0){
 			res.status(400).json<LoginResponse>({
-				requestStatus: "ERR_INVALID_PARAMS",
+				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
 			})
 			await dbClient.release()
@@ -67,7 +67,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequest>,
 			return
 		} else {
 			res.status(400).json<LoginResponse>({
-				requestStatus: "ERR_INVALID_PARAMS",
+				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["userPass"]
 			})
 			await dbClient.release()

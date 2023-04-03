@@ -23,12 +23,6 @@ import VersuraIcon from "@/assets/versura-icon.png"
 function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
 
-	const profilePopoverId = useGeneratedHtmlId({
-		prefix: "headerProfilePopover"
-	})
-
-	const [profilePopoverOpen, setProfilePopoverOpen] = useState<boolean>(false);
-
 	return (
 		<EuiHeader
 			style={{
@@ -63,7 +57,9 @@ function PageHeader(): JSX.Element {
 			>
 				{isAuthenticated ? (
 					<>
-						<EuiHeaderLinks>
+						<EuiHeaderLinks
+							popoverBreakpoints={"none"}
+						>
 							<EuiHeaderLink>
 								<Link
 									href={"/auth/logout"}
@@ -85,7 +81,9 @@ function PageHeader(): JSX.Element {
 						/>
 					</>
 				) : (
-						<EuiHeaderLinks>
+						<EuiHeaderLinks
+							popoverBreakpoints={"none"}
+						>
 							<EuiHeaderLink>
 								<Link
 									href={"/auth/login"}

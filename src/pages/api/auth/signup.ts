@@ -9,15 +9,15 @@ import {
 import type {NextApiRequest} from "next";
 import {db} from "@/utils/db";
 import {SignupResponse} from "@/utils/types/apiResponses";
-import {SignupUserRequest} from "@/utils/types/apiRequests";
-export default async function signupUser(req: CustomApiRequest<SignupUserRequest>, res: CustomApiResponse){
+import {SignupUserRequestBody} from "@/utils/types/apiRequests";
+export default async function signupUser(req: CustomApiRequest<SignupUserRequestBody>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
-			"requireMethod": requireMethods("POST"),
-			"requireValidBody": requireValidBody(),
-			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
+			[requireMethods.name]: requireMethods("POST"),
+			[requireValidBody.name]: requireValidBody(),
+			[requireBodyParams.name]: requireBodyParams("walletAddress", "userPass")
 		}
 	)
 	if (!middlewarePassed){
@@ -34,7 +34,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 		
 		if (rows.length > 0){
 			res.status(400).json<SignupResponse>({
-				requestStatus: "ERR_INVALID_PARAMS",
+				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
 			})
 			await dbClient.release()

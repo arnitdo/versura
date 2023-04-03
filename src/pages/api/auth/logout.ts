@@ -4,15 +4,15 @@ import {
 	requireAuthenticatedUser, requireMethods,
 	requireMiddlewareChecks
 } from "@/utils/customMiddleware";
-import {LogoutUserRequest} from "@/utils/types/apiRequests";
+import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
 
-export default async function logoutUser(req: CustomApiRequest<LogoutUserRequest>, res: CustomApiResponse){
+export default async function logoutUser(req: CustomApiRequest<LogoutUserRequestBody>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
 		{
-			"requireMethod": requireMethods("POST"),
-			"requireAuthenticatedUser": requireAuthenticatedUser(false)
+			[requireMethods.name]: requireMethods("POST"),
+			[requireAuthenticatedUser.name]: requireAuthenticatedUser()
 			// No need to set req.user since we aren't using it
 		}
 	)

@@ -1,18 +1,18 @@
-interface SignupUserRequest {
+interface SignupUserRequestBody {
 	walletAddress: string,
 	userPass: string
 }
 
-interface LoginUserRequest {
+interface LoginUserRequestBody {
 	walletAddress: string,
 	userPass: string
 }
 
-interface LogoutUserRequest {
+interface LogoutUserRequestBody {
 
 }
 
-interface CreateFundraiserRequest {
+interface CreateFundraiserRequestBody {
 	fundraiserTitle: string,
 	fundraiserDescription: string,
 	fundraiserTarget: number,
@@ -20,9 +20,14 @@ interface CreateFundraiserRequest {
 	fundraiserMinDonationAmount?: number
 }
 
+interface GetFundraiserRequestParams {
+	fundraiserId: string
+}
+
 export {
-	SignupUserRequest,
-	LoginUserRequest,
-	LogoutUserRequest,
-	CreateFundraiserRequest
+	SignupUserRequestBody,
+	LoginUserRequestBody,
+	LogoutUserRequestBody,
+	CreateFundraiserRequestBody,
+	GetFundraiserRequestParams
 }
