@@ -56,16 +56,15 @@ async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams
 				}
 			} = ssrContext
 			resolvedUrl = `${hostName}${resolvedUrl}`
-		}
-		
-		if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined){
-			resolvedUrl = `http://${resolvedUrl}`
-		} else if (process.env.NODE_ENV === "production"){
-			resolvedUrl = `https://${resolvedUrl}`
-		} else {
-			throw new Error(
-				"Could not distinguish process environment" + process.env.NODE_ENV
-			)
+			if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined){
+				resolvedUrl = `http://${resolvedUrl}`
+			} else if (process.env.NODE_ENV === "production"){
+				resolvedUrl = `https://${resolvedUrl}`
+			} else {
+				throw new Error(
+					"Could not distinguish process environment" + process.env.NODE_ENV
+				)
+			}
 		}
 		
 		const reqResponse = await fetch(
