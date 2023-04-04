@@ -54,9 +54,8 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		)
 		const {rows: dbRows} = dbResponse
 		if (dbRows.length === 0){
-			res.status(400).json({
-				requestStatus: "ERR_INVALID_QUERY_PARAMS",
-				invalidParams: ["fundraiserId"]
+			res.status(404).json({
+				requestStatus: "ERR_NOT_FOUND",
 			})
 			return
 		}

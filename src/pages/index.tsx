@@ -1,50 +1,18 @@
 import Head from 'next/head'
 import {
 	EuiPageTemplate,
-	EuiSideNavItemType,
 	EuiText,
 	EuiFlexGroup,
 	EuiFlexItem
 } from "@elastic/eui"
 
-import Link from 'next/link'
 import Image from 'next/image'
-import {ReactNode} from "react";
 
 import EthereumIcon from "@/assets/eth-icon.png"
 import MetamaskFox from "@/assets/metamask-fox.svg"
 import BlockchainNetwork from "@/assets/blockchain-network.png"
 
-type SideNavLinkProps = {
-	href: string,
-	children: ReactNode
-} & any
-
-function SideNavLink({href, children}: SideNavLinkProps): JSX.Element {
-	return (
-		<Link href={href} style={{
-			color: "#DFE5EF"
-		}}>{children}</Link>
-	)
-}
-
 export default function IndexPage() {
-	// @ts-ignore
-	const navItems: EuiSideNavItemType<any>[] = [
-		{
-			name: "Sample Side Nav Header",
-			id: "index-sidenav-header",
-			items: [
-				{
-					renderItem: SideNavLink,
-					id: "index-sidenav-login",
-					name: "Log In",
-					href: "/auth/login"
-				},
-			]
-		}
-	]
-	
 	return (
 		<>
 			<Head>
@@ -57,14 +25,6 @@ export default function IndexPage() {
 				panelled={true}
 				bottomBorder={"extended"}
 			>
-				{/*<EuiPageTemplate.Sidebar>*/}
-				{/*	<EuiSideNav items={navItems}></EuiSideNav>*/}
-				{/*</EuiPageTemplate.Sidebar>*/}
-				{/*<EuiPageTemplate.Header>*/}
-				{/*	<EuiText>*/}
-				{/*		<h2>Sample Header Content</h2>*/}
-				{/*	</EuiText>*/}
-				{/*</EuiPageTemplate.Header>*/}
 				<EuiPageTemplate.Section
 					color={"subdued"}
 					restrictWidth={false}

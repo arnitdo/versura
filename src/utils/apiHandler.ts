@@ -1,11 +1,13 @@
 import {ValidRequestMethods} from "@/utils/customMiddleware";
 import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
+import {GetServerSidePropsContext} from "next";
 
 export type APIRequestParams = {
 	endpointPath: string,
 	requestMethod: ValidRequestMethods,
 	queryParams?: any,
-	bodyParams?: any
+	bodyParams?: any,
+	ssrContext?: GetServerSidePropsContext
 }
 
 export type APIRequestResponse<T> = {
@@ -18,7 +20,7 @@ export type APIRequestResponse<T> = {
 }
 
 async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams): Promise<APIRequestResponse<T>> {
-	const {requestMethod, endpointPath, queryParams, bodyParams} = reqParams
+	const {requestMethod, endpointPath, queryParams, bodyParams, ssrContext} = reqParams
 	let requestOptions: RequestInit = {
 		method: requestMethod,
 		headers: {
@@ -41,7 +43,30 @@ async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams
 			}
 			resolvedQueryString = `?${queryParamsObj.toString()}`
 		}
-		const resolvedUrl = `${endpointPath}${resolvedQueryString}`
+		
+		
+		let resolvedUrl: string = `${endpointPath}${resolvedQueryString}`
+		
+		if (ssrContext){
+			const {
+				req: {
+					headers: {
+						host: hostName
+					}
+				}
+			} = ssrContext
+			resolvedUrl = `${hostName}${resolvedUrl}`
+		}
+		
+		if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined){
+			resolvedUrl = `http://${resolvedUrl}`
+		} else if (resolvedUrl === "production"){
+			resolvedUrl = `https://${resolvedUrl}`
+		} else {
+			throw new Error(
+				"Could not distinguish process environment"
+			)
+		}
 		
 		const reqResponse = await fetch(
 			resolvedUrl,

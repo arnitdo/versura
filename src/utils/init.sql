@@ -17,11 +17,11 @@ CREATE TABLE "fundRaisers" (
     "fundraiserTitle" TEXT NOT NULL,
     "fundraiserDescription" TEXT NOT NULL,
 
-    "fundraiserTarget" MONEY NOT NULL,
+    "fundraiserTarget" NUMERIC NOT NULL,
     "fundraiserToken" TEXT NOT NULL DEFAULT 'ETH',
-    "fundraiserMinDonationAmount" MONEY DEFAULT 1e-10,
+    "fundraiserMinDonationAmount" NUMERIC DEFAULT 1e-10,
 
-    "fundraiserRaisedAmount" MONEY NOT NULL DEFAULT 0,
+    "fundraiserRaisedAmount" NUMERIC NOT NULL DEFAULT 0,
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
 
@@ -48,7 +48,7 @@ CREATE TABLE "fundraiserMilestones" (
     "milestoneId" SERIAL,
     "milestoneFundraiserId" INTEGER NOT NULL,
 
-    "milestoneAmount" MONEY,
+    "milestoneAmount" NUMERIC,
 
 
     CONSTRAINT "pk_fundraiserMilestones_milestoneId_milestoneFundraiserId"
@@ -62,7 +62,7 @@ CREATE TABLE "fundraiserMilestones" (
 CREATE TABLE "fundraiserDonations" (
     "donatedFundraiser" INTEGER NOT NULL,
     "donorAddress" TEXT NOT NULL,
-    "donatedAmount" MONEY,
+    "donatedAmount" NUMERIC,
 
     CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
         FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers"("fundraiserId"),
