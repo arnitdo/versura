@@ -60,11 +60,11 @@ async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams
 		
 		if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined){
 			resolvedUrl = `http://${resolvedUrl}`
-		} else if (resolvedUrl === "production"){
+		} else if (process.env.NODE_ENV === "production"){
 			resolvedUrl = `https://${resolvedUrl}`
 		} else {
 			throw new Error(
-				"Could not distinguish process environment"
+				"Could not distinguish process environment" + process.env.NODE_ENV
 			)
 		}
 		
