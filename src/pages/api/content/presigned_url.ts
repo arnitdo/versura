@@ -9,7 +9,6 @@ import {db} from "@/utils/db";
 import {getPresignedURL} from "@/utils/s3";
 import {ContentManagementEndpointBody} from "@/utils/types/apiRequests";
 import {PASSTHROUGH} from "@/utils/validatorUtils";
-import * as fs from "fs";
 import {ContentManagementPresignedUrlResponse} from "@/utils/types/apiResponses";
 
 export default async function contentManagementEndpoint(req: CustomApiRequest<ContentManagementEndpointBody>, res: CustomApiResponse){
@@ -22,7 +21,7 @@ export default async function contentManagementEndpoint(req: CustomApiRequest<Co
 			[requireBodyParams.name]: requireBodyParams("requestMethod", "objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({
 				requestMethod: (reqMethod) => {
-					return reqMethod === "PUT" || reqMethod === "GET"
+					return ["GET", "PUT", "DELETE"].includes(reqMethod)
 				},
 				objectKey: PASSTHROUGH
 			})

@@ -1,3 +1,5 @@
+import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
+
 interface SignupUserRequestBody {
 	walletAddress: string,
 	userPass: string
@@ -29,7 +31,7 @@ interface GetFundraiserFeedRequestParams {
 }
 
 interface ContentManagementEndpointBody {
-	requestMethod: "PUT" | "GET",
+	requestMethod: S3ObjectMethods,
 	objectKey: string
 }
 

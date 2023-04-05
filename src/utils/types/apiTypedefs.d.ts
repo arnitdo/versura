@@ -7,6 +7,9 @@ interface DecodedJWTCookie {
 	userRole: UserRole
 }
 
+type S3ObjectMethods = "PUT" | "GET" | "DELETE"
+
 export {
-	DecodedJWTCookie
+	DecodedJWTCookie,
+	S3ObjectMethods
 }
