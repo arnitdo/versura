@@ -28,11 +28,17 @@ interface GetFundraiserFeedRequestParams {
 	feedPage?: number
 }
 
+interface ContentManagementEndpointBody {
+	requestMethod: "PUT" | "GET",
+	objectKey: string
+}
+
 export {
 	SignupUserRequestBody,
 	LoginUserRequestBody,
 	LogoutUserRequestBody,
 	CreateFundraiserRequestBody,
 	GetFundraiserRequestParams,
-	GetFundraiserFeedRequestParams
+	GetFundraiserFeedRequestParams,
+	ContentManagementEndpointBody
 }

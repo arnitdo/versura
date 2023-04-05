@@ -78,3 +78,18 @@ CREATE TABLE "fundraiserDonations" (
         FOREIGN KEY ("donorAddress") REFERENCES "authUsers"("walletAddress")
 
 );
+
+CREATE TABLE "internalS3Buckets" (
+    "bucketName" TEXT PRIMARY KEY ,
+    "bucketLocation" TEXT NOT NULL,
+    "bucketObjectCount" INTEGER DEFAULT 0
+);
+
+CREATE TABLE "internalS3BucketObjects" (
+    "bucketName" TEXT NOT NULL,
+    "objectKey" TEXT NOT NULL,
+    "objectSizeBytes" INTEGER DEFAULT 0,
+
+    CONSTRAINT "fk_S3BucketObjects_bucketName_S3Buckets_bucketName"
+        FOREIGN KEY ("bucketName") REFERENCES "internalS3Buckets"("bucketName")
+);

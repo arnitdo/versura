@@ -42,6 +42,9 @@ interface GetFundraiserFeedResponse extends APIResponse {
 	feedData: GetFundraiserResponse["fundraiserData"][]
 }
 
+interface ContentManagementPresignedUrlResponse extends APIResponse {
+	presignedUrl: string
+}
 
 export {
 	SignupResponse,
@@ -49,5 +52,6 @@ export {
 	APIResponse,
 	CreateFundraiserResponse,
 	GetFundraiserResponse,
-	GetFundraiserFeedResponse
+	GetFundraiserFeedResponse,
+	ContentManagementPresignedUrlResponse
 };

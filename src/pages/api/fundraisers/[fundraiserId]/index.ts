@@ -62,6 +62,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		
 		const selectedFundraiser = dbRows[0]
 		
+		dbClient.release()
 		res.status(200).json<GetFundraiserResponse>({
 			requestStatus: "SUCCESS",
 			fundraiserData: selectedFundraiser

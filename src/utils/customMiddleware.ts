@@ -294,6 +294,8 @@ async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: 
 			res.status(500).json({
 				"requestStatus": "ERR_INTERNAL_ERROR"
 			})
+			// Halt execution right here
+			return false
 		}
 	}
 	
