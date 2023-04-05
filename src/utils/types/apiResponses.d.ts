@@ -1,4 +1,4 @@
-import {UserRole} from "@/utils/types/queryTypedefs";
+import {FundRaisers, UserRole} from "@/utils/types/queryTypedefs";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 500
@@ -35,22 +35,19 @@ interface CreateFundraiserResponse extends APIResponse {
 }
 
 interface GetFundraiserResponse extends APIResponse {
-	fundraiserData: {
-		fundraiserId: number,
-		fundraiserCreator: string,
-		fundraiserTitle: string,
-		fundraiserDescription: string,
-		fundraiserTarget: number,
-		fundraiserMinDonationAmount: number,
-		fundraiserRaisedAmount: number,
-		fundraiserContributorCount: number
-	}
+	fundraiserData: FundRaisers
 }
+
+interface GetFundraiserFeedResponse extends APIResponse {
+	feedData: GetFundraiserResponse["fundraiserData"][]
+}
+
 
 export {
 	SignupResponse,
 	LoginResponse,
 	APIResponse,
 	CreateFundraiserResponse,
-	GetFundraiserResponse
+	GetFundraiserResponse,
+	GetFundraiserFeedResponse
 };

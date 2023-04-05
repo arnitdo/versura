@@ -14,5 +14,6 @@ export type FundRaisers = {
 	fundraiserTarget: number,
 	fundraiserMinDonationAmount: number,
 	fundraiserRaisedAmount: number,
-	fundraiserContributorCount: number
+	fundraiserContributorCount: number,
+	fundraiserCreatedOn: string
 }

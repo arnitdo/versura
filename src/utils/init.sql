@@ -25,6 +25,8 @@ CREATE TABLE "fundRaisers" (
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
 
+    "fundraiserCreatedOn" TIMESTAMP WITH TIME ZONE,
+
     CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletAddress"
         FOREIGN KEY ("fundraiserCreator")
             REFERENCES "authUsers"("walletAddress")
@@ -36,6 +38,8 @@ CREATE TABLE "fundraiserUpdates" (
 
     "updateTitle" TEXT NOT NULL,
     "updateDescription" TEXT NOT NULL,
+
+    "updatePostedOn" TIMESTAMP WITH TIME ZONE NOT NULL,
 
     CONSTRAINT "pk_fundraiserUpdates_updateId_updateFundraiserId"
         PRIMARY KEY ("updateId", "updateFundraiserId"),
@@ -49,7 +53,8 @@ CREATE TABLE "fundraiserMilestones" (
     "milestoneFundraiserId" INTEGER NOT NULL,
 
     "milestoneAmount" NUMERIC,
-
+    "milestoneStatus" BOOLEAN DEFAULT FALSE,
+    "milestoneReachedOn" TIMESTAMP WITH TIME ZONE DEFAULT NULL,
 
     CONSTRAINT "pk_fundraiserMilestones_milestoneId_milestoneFundraiserId"
         PRIMARY KEY ("milestoneId", "milestoneFundraiserId"),
@@ -63,6 +68,8 @@ CREATE TABLE "fundraiserDonations" (
     "donatedFundraiser" INTEGER NOT NULL,
     "donorAddress" TEXT NOT NULL,
     "donatedAmount" NUMERIC,
+
+    "donationTimestamp" TIMESTAMP WITH TIME ZONE NOT NULL,
 
     CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
         FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers"("fundraiserId"),

@@ -193,10 +193,10 @@ function requireAuthenticatedUser(): MiddlewareFn {
 	}
 }
 
-function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>): MiddlewareFn<T, P> {
+function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipRequired: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!middlewareCallStack.includes(requireBodyParams.name)){
+		if (!skipRequired && !middlewareCallStack.includes(requireBodyParams.name)){
 			throw new Error(
 				"requireBodyValidators was called without verifying all properties in body (requireBodyParams)"
 			)
@@ -227,10 +227,10 @@ function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>): Midd
 	}
 }
 
-function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>): MiddlewareFn<T, P> {
+function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>, skipRequired: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!middlewareCallStack.includes(requireQueryParams.name)){
+		if (!skipRequired && !middlewareCallStack.includes(requireQueryParams.name)){
 			throw new Error(
 				"requireQueryParamValidators was called without verifying all properties in body (requireQueryParams)"
 			)

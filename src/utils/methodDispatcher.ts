@@ -18,7 +18,7 @@ async function unsupportedMethod(req: CustomApiRequest, res: CustomApiResponse){
 	})
 }
 
-function withMethodDispatcher<T, P>(dispatchMap: MethodDispatchMap<T, P>): APIHandler {
+function withMethodDispatcher<BodyT, ParamT>(dispatchMap: MethodDispatchMap<BodyT, ParamT>): APIHandler {
 	return async function (req, res){
 		for (const dispatchMapKey in dispatchMap){
 			const reqMethod = req.method as ValidRequestMethods

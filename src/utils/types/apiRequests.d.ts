@@ -24,10 +24,15 @@ interface GetFundraiserRequestParams {
 	fundraiserId: string
 }
 
+interface GetFundraiserFeedRequestParams {
+	feedPage?: number
+}
+
 export {
 	SignupUserRequestBody,
 	LoginUserRequestBody,
 	LogoutUserRequestBody,
 	CreateFundraiserRequestBody,
-	GetFundraiserRequestParams
+	GetFundraiserRequestParams,
+	GetFundraiserFeedRequestParams
 }
