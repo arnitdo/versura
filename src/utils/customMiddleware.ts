@@ -22,6 +22,13 @@ export type MiddlewareOptions = {
 	// setRequestProperty: (propertyName: string, value: any) => void
 }
 
+export type MiddlewareAdapterArgs<BodyT, ParamT> = {
+	req: CustomApiRequest<BodyT, ParamT>,
+	res: CustomApiResponse,
+	emulatedMiddlewareStack?: string[],
+	middlewareToEmulate: MiddlewareFn<BodyT, ParamT>
+}
+
 export type MiddlewareFn<T = any, P = any> = (req: CustomApiRequest<T, P>, res: CustomApiResponse, opts: MiddlewareOptions) => Promise<void>
 
 export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
@@ -31,7 +38,7 @@ export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 type MiddlewareCallArgs<T, P> = {[middlewareFnName: string]: MiddlewareFn<T, P>}
 
 export type ValidatorMapType<T> = {
-	[validateProperty in keyof T]: (propValue: T[validateProperty]) => boolean;
+	[validateProperty in keyof T]: (propValue: T[validateProperty]) => (Promise<boolean> | boolean);
 };
 
 function requireMethods(...acceptedMethods: ValidRequestMethods[]): MiddlewareFn {
@@ -98,7 +105,7 @@ function requireBodyParams<T>(...bodyParams: (keyof T)[]): MiddlewareFn<T> {
 		if (missingBodyParams.length > 0){
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_BODY_PARAMS",
-				missingParams: missingBodyParams
+				missingParams: missingBodyParams as string[]
 			})
 			nextMiddleware(false)
 			return
@@ -122,7 +129,7 @@ function requireQueryParams<T, P>(...queryParams: (keyof P)[]): MiddlewareFn<T, 
 		if (missingQueryParams.length > 0){
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_QUERY_PARAMS",
-				missingParams: missingQueryParams
+				missingParams: missingQueryParams as string[]
 			})
 			nextMiddleware(false)
 			return
@@ -193,10 +200,10 @@ function requireAuthenticatedUser(): MiddlewareFn {
 	}
 }
 
-function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipRequired: boolean = false): MiddlewareFn<T, P> {
+function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipBodyParamRequirement: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!skipRequired && !middlewareCallStack.includes(requireBodyParams.name)){
+		if (!skipBodyParamRequirement && !middlewareCallStack.includes(requireBodyParams.name)){
 			throw new Error(
 				"requireBodyValidators was called without verifying all properties in body (requireBodyParams)"
 			)
@@ -207,7 +214,7 @@ function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipR
 		for (const paramKey in validatorsToRun) {
 			const paramValue = req.body[paramKey]
 			const validatorToRun = validatorsToRun[paramKey]
-			const validatorResult = validatorToRun(paramValue)
+			const validatorResult = await validatorToRun(paramValue)
 			if (validatorResult == true){
 				validParams.push(paramKey)
 			} else {
@@ -227,10 +234,10 @@ function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipR
 	}
 }
 
-function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>, skipRequired: boolean = false): MiddlewareFn<T, P> {
+function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>, skipQueryParamRequirement: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!skipRequired && !middlewareCallStack.includes(requireQueryParams.name)){
+		if (!skipQueryParamRequirement && !middlewareCallStack.includes(requireQueryParams.name)){
 			throw new Error(
 				"requireQueryParamValidators was called without verifying all properties in body (requireQueryParams)"
 			)
@@ -241,7 +248,7 @@ function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>,
 		for (const paramKey in validatorsToRun) {
 			const paramValue = req.query[paramKey]
 			const validatorToRun = validatorsToRun[paramKey]
-			const validatorResult = validatorToRun(paramValue)
+			const validatorResult = await validatorToRun(paramValue)
 			if (validatorResult == true){
 				validParams.push(paramKey)
 			} else {
@@ -302,6 +309,30 @@ async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: 
 	return middlewareExecutionStatus
 }
 
+async function adaptedMiddleware<BodyT, ParamT>(adapterArgs: MiddlewareAdapterArgs<BodyT, ParamT>): Promise<boolean> {
+	const {req, res, emulatedMiddlewareStack, middlewareToEmulate} = adapterArgs
+	
+	const emulatedMiddlewareStatus = {
+		middlewareStatus: false
+	}
+	const emulatedNextFn: NextMiddleware = (middlewareStatus) => {
+		emulatedMiddlewareStatus.middlewareStatus = middlewareStatus
+	}
+	
+	const emulatedMiddlewareCallArgs: MiddlewareOptions = {
+		middlewareCallStack: emulatedMiddlewareStack || [],
+		nextMiddleware: emulatedNextFn
+	}
+	
+	await middlewareToEmulate(
+		req,
+		res,
+		emulatedMiddlewareCallArgs
+	)
+	
+	return emulatedMiddlewareStatus.middlewareStatus
+}
+
 export {
 	requireMethods,
 	requireValidBody,
@@ -311,5 +342,7 @@ export {
 	requireBodyValidators,
 	requireQueryParamValidators,
 	
-	requireMiddlewareChecks
+	requireMiddlewareChecks,
+	
+	adaptedMiddleware
 }

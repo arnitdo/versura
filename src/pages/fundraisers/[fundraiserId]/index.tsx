@@ -9,6 +9,7 @@ type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
 
 // @ts-ignore
 export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFundraiserRequestParams> = async (ctx) => {
+	console.log(ctx.params)
 	if (ctx.params === undefined){
 		return {
 			notFound: true
@@ -39,9 +40,12 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 	
 	const {fundraiserId} = ctx.params
 	
-	const {isSuccess, isError, code, data, error} = await makeAPIRequest<GetFundraiserResponse>({
-		endpointPath: `/api/fundraisers/${fundraiserId}`,
+	const {isSuccess, isError, code, data, error} = await makeAPIRequest<GetFundraiserResponse, {}, GetFundraiserRequestParams>({
+		endpointPath: `/api/fundraisers/:fundraiserId`,
 		requestMethod: "GET",
+		queryParams: {
+			fundraiserId: fundraiserId
+		},
 		// @ts-ignore
 		ssrContext: ctx
 	})

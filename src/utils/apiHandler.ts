@@ -2,11 +2,11 @@ import {ValidRequestMethods} from "@/utils/customMiddleware";
 import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
 import {GetServerSidePropsContext} from "next";
 
-export type APIRequestParams = {
+export type APIRequestParams<Body, Params> = {
 	endpointPath: string,
 	requestMethod: ValidRequestMethods,
-	queryParams?: any,
-	bodyParams?: any,
+	queryParams?: Params,
+	bodyParams?: Body,
 	ssrContext?: GetServerSidePropsContext
 }
 
@@ -19,8 +19,8 @@ export type APIRequestResponse<T> = {
 	error?: unknown
 }
 
-async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams): Promise<APIRequestResponse<T>> {
-	const {requestMethod, endpointPath, queryParams, bodyParams, ssrContext} = reqParams
+async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, RequestParamsT = {}>(reqParams: APIRequestParams<RequestBodyT, RequestParamsT>): Promise<APIRequestResponse<ResponseT>> {
+	let {requestMethod, endpointPath, queryParams, bodyParams, ssrContext} = reqParams
 	let requestOptions: RequestInit = {
 		method: requestMethod,
 		headers: {
@@ -36,16 +36,29 @@ async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams
 			requestOptions.body = JSON.stringify(bodyParams)
 		}
 		if (queryParams) {
+			for (const queryParam in queryParams) {
+				if (endpointPath.includes(`:${queryParam}`)){
+					endpointPath = endpointPath.replace(
+						`:${queryParam}`,
+						// @ts-ignore
+						queryParams[queryParam].toString()
+					)
+					delete queryParams[queryParam]
+				}
+			}
 			const queryParamsObj = new URLSearchParams()
-			for (const queryParamKey of queryParams) {
+			for (const queryParamKey in queryParams) {
 				const queryParamValue = queryParams[queryParamKey]
-				queryParamsObj.set(queryParamKey, queryParamValue)
+				// @ts-ignore
+				queryParamsObj.set(queryParamKey, queryParamValue.toString())
 			}
 			resolvedQueryString = `?${queryParamsObj.toString()}`
 		}
 		
 		
 		let resolvedUrl: string = `${endpointPath}${resolvedQueryString}`
+		
+		console.log(resolvedUrl)
 		
 		if (ssrContext){
 			const {
@@ -72,7 +85,7 @@ async function makeAPIRequest<T extends APIResponse>(reqParams: APIRequestParams
 			requestOptions
 		)
 		const responseCode = reqResponse.status
-		const responseJSON = await reqResponse.json() as T
+		const responseJSON = await reqResponse.json() as ResponseT
 		
 		return {
 			isSuccess: true,

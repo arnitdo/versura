@@ -2,6 +2,10 @@ function NON_ZERO(value: number){
 	return value != 0
 }
 
+function NON_NEGATIVE(value: number){
+	return value >= 0
+}
+
 function NON_ZERO_NON_NEGATIVE(value: number){
 	return value > 0
 }
@@ -60,6 +64,7 @@ function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean){
 
 export {
 	NON_ZERO,
+	NON_NEGATIVE,
 	NON_ZERO_NON_NEGATIVE,
 	NON_ZERO_NON_POSITIVE,
 	

@@ -19,7 +19,8 @@ type APIResponseRequestStatus =
 
 interface APIResponse {
 	requestStatus: APIResponseRequestStatus
-	invalidParams?: string[]
+	invalidParams?: string[],
+	missingParams?: string[]
 }
 
 interface LoginResponse extends APIResponse {
@@ -30,28 +31,49 @@ interface SignupResponse extends APIResponse {
 
 }
 
+interface LogoutResponse extends APIResponse {
+
+}
+
 interface CreateFundraiserResponse extends APIResponse {
 	fundraiserId: number,
 }
 
+interface FundraiserMedia {
+	mediaURL: string,
+	mediaContentType: string
+}
+
 interface GetFundraiserResponse extends APIResponse {
-	fundraiserData: FundRaisers
+	fundraiserData: Omit<
+		FundRaisers,
+		"fundraiserMediaObjectKeys"
+	> & {
+		"fundraiserMedia": FundraiserMedia[]
+	}
 }
 
 interface GetFundraiserFeedResponse extends APIResponse {
 	feedData: GetFundraiserResponse["fundraiserData"][]
 }
 
-interface ContentManagementPresignedUrlResponse extends APIResponse {
+interface PresignedURLResponse extends APIResponse {
 	presignedUrl: string
+}
+
+interface MediaCallbackResponse extends APIResponse {
+
 }
 
 export {
 	SignupResponse,
 	LoginResponse,
+	LogoutResponse,
 	APIResponse,
 	CreateFundraiserResponse,
 	GetFundraiserResponse,
 	GetFundraiserFeedResponse,
-	ContentManagementPresignedUrlResponse
+	PresignedURLResponse,
+	FundraiserMedia,
+	MediaCallbackResponse
 };

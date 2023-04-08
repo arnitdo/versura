@@ -1,18 +1,22 @@
 import {
+	adaptedMiddleware,
 	CustomApiRequest,
-	CustomApiResponse, requireBodyParams, requireBodyValidators,
+	CustomApiResponse, requireAuthenticatedUser, requireBodyParams, requireBodyValidators,
 	requireMethods,
 	requireMiddlewareChecks,
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
 import {getPresignedURL} from "@/utils/s3";
-import {ContentManagementEndpointBody} from "@/utils/types/apiRequests";
-import {PASSTHROUGH} from "@/utils/validatorUtils";
-import {ContentManagementPresignedUrlResponse} from "@/utils/types/apiResponses";
+import {PresignedURLBody} from "@/utils/types/apiRequests";
+import {PASSTHROUGH, STRLEN_NZ} from "@/utils/validatorUtils";
+import {PresignedURLResponse} from "@/utils/types/apiResponses";
+import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
 
-export default async function contentManagementEndpoint(req: CustomApiRequest<ContentManagementEndpointBody>, res: CustomApiResponse){
-	const middlewareExecStatus = await requireMiddlewareChecks(
+export default async function presignedUrlEndpoint(req: CustomApiRequest<PresignedURLBody>, res: CustomApiResponse){
+	const dbClient = await db.connect()
+	
+	let middlewareExecStatus = await requireMiddlewareChecks(
 		req,
 		res,
 		{
@@ -20,21 +24,50 @@ export default async function contentManagementEndpoint(req: CustomApiRequest<Co
 			[requireValidBody.name]: requireValidBody(),
 			[requireBodyParams.name]: requireBodyParams("requestMethod", "objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({
-				requestMethod: (reqMethod) => {
+				requestMethod: (reqMethod: S3ObjectMethods) => {
 					return ["GET", "PUT", "DELETE"].includes(reqMethod)
 				},
-				objectKey: PASSTHROUGH
+				objectKey: async (objectKey: string) => {
+					// Check if object key exists if GET or DELETE content
+					if (req.body.requestMethod === "PUT"){
+						return true
+					}
+					const {rows} = await dbClient.query(
+						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+						[objectKey]
+					)
+					
+					if (rows.length > 0){
+						return true
+					}
+					
+					return false
+				}
 			})
 		}
 	)
 	
 	if (!middlewareExecStatus){
+		dbClient.release()
 		return
 	}
 	
-	const dbClient = await db.connect()
+	const {requestMethod, objectKey} = req.body
+	
+	if (requestMethod !== "GET"){
+		// Require authentication for PUT or DELETE S3 Calls
+		const authCheck = await adaptedMiddleware({
+			req,
+			res,
+			middlewareToEmulate: requireAuthenticatedUser()
+		})
+		if (!authCheck){
+			dbClient.release()
+			return
+		}
+	}
+	
 	try {
-		const {requestMethod, objectKey} = req.body
 		
 		const presignedUrl = await getPresignedURL({
 			requestMethod,
@@ -42,7 +75,7 @@ export default async function contentManagementEndpoint(req: CustomApiRequest<Co
 		})
 		
 		dbClient.release()
-		res.status(200).json<ContentManagementPresignedUrlResponse>({
+		res.status(200).json<PresignedURLResponse>({
 			requestStatus: "SUCCESS",
 			presignedUrl: presignedUrl
 		})

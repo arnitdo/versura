@@ -16,6 +16,8 @@ import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
 import Link from "next/link";
 import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
+import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
+import { LogoutResponse } from "@/utils/types/apiResponses";
 
 function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const authCtx = useContext<AuthContextType>(AuthContext)
@@ -43,7 +45,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [navRouter])
 	
 	const attemptUserLogout = useCallback(async () => {
-		const {isSuccess, isError, code, data, error} = await makeAPIRequest({
+		const {isSuccess, isError, code, data, error} = await makeAPIRequest<LogoutResponse, LogoutUserRequestBody>({
 			endpointPath: `/api/auth/logout`,
 			requestMethod: "POST"
 		})

@@ -1,3 +1,5 @@
+import {MediaCallbackBody} from "@/utils/types/apiRequests";
+
 export type UserRole = "CLIENT" | "ADMIN"
 
 export type AuthUsers = {
@@ -15,5 +17,14 @@ export type FundRaisers = {
 	fundraiserMinDonationAmount: number,
 	fundraiserRaisedAmount: number,
 	fundraiserContributorCount: number,
-	fundraiserCreatedOn: string
+	fundraiserMilestoneCount: number,
+	fundraiserMediaObjectKeys: string[]
+	fundraiserCreatedOn: Date
+}
+
+export type S3BucketObjects = {
+	bucketName: string,
+	objectKey: string,
+	objectSizeBytes: number,
+	objectContentType: string
 }

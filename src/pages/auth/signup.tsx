@@ -20,7 +20,8 @@ import {useToastList} from "@/utils/toastUtils";
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import { useRouter } from "next/router";
-import {LoginResponse} from "@/utils/types/apiResponses";
+import {LoginResponse, SignupResponse} from "@/utils/types/apiResponses";
+import {SignupUserRequestBody} from "@/utils/types/apiRequests";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -119,7 +120,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		const signupAPIResponse = await makeAPIRequest<LoginResponse>({
+		const signupAPIResponse = await makeAPIRequest<SignupResponse, SignupUserRequestBody>({
 			endpointPath: `/api/auth/signup`,
 			requestMethod: "POST",
 			bodyParams: {

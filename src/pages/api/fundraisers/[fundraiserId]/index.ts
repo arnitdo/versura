@@ -9,8 +9,9 @@ import {
 import {db} from "@/utils/db";
 import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
 import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
-import {FundRaisers} from "@/utils/types/queryTypedefs";
-import {GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
+import {FundraiserMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {getPresignedURL} from "@/utils/s3";
 
 type FundraiserBodyDispatch = {
 	GET: any
@@ -61,11 +62,46 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		}
 		
 		const selectedFundraiser = dbRows[0]
+		const {fundraiserMediaObjectKeys} = selectedFundraiser
+		
+		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
+			`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
+			WHERE "objectKey" = ANY($1)`,
+			[fundraiserMediaObjectKeys]
+		)
+		
+		const objectKeyContentMap: {[objKey: string]: string} = {}
+		for (const objectContentTypeRow of objectContentTypeRows) {
+			const {objectKey, objectContentType} = objectContentTypeRow
+			objectKeyContentMap[objectKey] = objectContentType
+		}
+		
+		const fundraiserMedia: FundraiserMedia[] = []
+		
+		for (const objectKey of fundraiserMediaObjectKeys) {
+			const presignedURL = await getPresignedURL({
+				requestMethod: "GET",
+				objectKey: objectKey
+			})
+			const mappedContentType = objectKeyContentMap[objectKey]
+			fundraiserMedia.push({
+				mediaURL: presignedURL,
+				mediaContentType: mappedContentType
+			})
+		}
+		
+		const fundraiserData = {
+			...selectedFundraiser,
+			fundraiserMedia: fundraiserMedia
+		}
+		
+		// @ts-ignore
+		delete fundraiserData["fundraiserMediaObjectKeys"]
 		
 		dbClient.release()
 		res.status(200).json<GetFundraiserResponse>({
 			requestStatus: "SUCCESS",
-			fundraiserData: selectedFundraiser
+			fundraiserData: fundraiserData
 		})
 	} catch (err: unknown){
 		console.error(err)

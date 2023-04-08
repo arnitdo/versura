@@ -30,17 +30,46 @@ interface GetFundraiserFeedRequestParams {
 	feedPage?: number
 }
 
-interface ContentManagementEndpointBody {
+interface PresignedURLBody {
 	requestMethod: S3ObjectMethods,
 	objectKey: string
 }
 
+interface MediaCallbackBody {
+	requestMethod: S3ObjectMethods,
+	objectKey: string,
+	objectSizeBytes: number,
+	objectContentType: string
+}
+
+interface AddFundraiserContentBody {
+	objectKey: string
+}
+
+interface AddFundraiserContentParams {
+	fundraiserId: string
+}
+
+interface DeleteFundraiserContentBody {
+	objectKey: string
+}
+
+interface DeleteFundraiserContentParams {
+	fundraiserId: string
+}
+
 export {
+	S3ObjectMethods,
 	SignupUserRequestBody,
 	LoginUserRequestBody,
 	LogoutUserRequestBody,
 	CreateFundraiserRequestBody,
 	GetFundraiserRequestParams,
 	GetFundraiserFeedRequestParams,
-	ContentManagementEndpointBody
+	PresignedURLBody,
+	MediaCallbackBody,
+	AddFundraiserContentBody,
+	AddFundraiserContentParams,
+	DeleteFundraiserContentBody,
+	DeleteFundraiserContentParams
 }

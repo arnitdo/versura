@@ -24,8 +24,11 @@ CREATE TABLE "fundRaisers" (
     "fundraiserRaisedAmount" NUMERIC NOT NULL DEFAULT 0,
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
+    "fundraiserMilestoneCount" INTEGER NOT NULL DEFAULT 0,
 
     "fundraiserCreatedOn" TIMESTAMP WITH TIME ZONE,
+
+    "fundraiserMediaObjectKeys" TEXT[] DEFAULT '{}'::text[],
 
     CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletAddress"
         FOREIGN KEY ("fundraiserCreator")
@@ -40,6 +43,7 @@ CREATE TABLE "fundraiserUpdates" (
     "updateDescription" TEXT NOT NULL,
 
     "updatePostedOn" TIMESTAMP WITH TIME ZONE NOT NULL,
+    "updateMediaObjectKeys" TEXT[] DEFAULT '{}'::text[],
 
     CONSTRAINT "pk_fundraiserUpdates_updateId_updateFundraiserId"
         PRIMARY KEY ("updateId", "updateFundraiserId"),
@@ -54,6 +58,9 @@ CREATE TABLE "fundraiserMilestones" (
 
     "milestoneAmount" NUMERIC,
     "milestoneStatus" BOOLEAN DEFAULT FALSE,
+
+    "milestoneMediaObjectKeys" TEXT[] DEFAULT '{}'::TEXT[] NOT NULL,
+
     "milestoneReachedOn" TIMESTAMP WITH TIME ZONE DEFAULT NULL,
 
     CONSTRAINT "pk_fundraiserMilestones_milestoneId_milestoneFundraiserId"
@@ -87,8 +94,9 @@ CREATE TABLE "internalS3Buckets" (
 
 CREATE TABLE "internalS3BucketObjects" (
     "bucketName" TEXT NOT NULL,
-    "objectKey" TEXT NOT NULL,
+    "objectKey" TEXT UNIQUE NOT NULL,
     "objectSizeBytes" INTEGER DEFAULT 0,
+    "objectContentType" TEXT NOT NULL,
 
     CONSTRAINT "fk_S3BucketObjects_bucketName_S3Buckets_bucketName"
         FOREIGN KEY ("bucketName") REFERENCES "internalS3Buckets"("bucketName")

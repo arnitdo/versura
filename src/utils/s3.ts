@@ -47,7 +47,9 @@ async function getPresignedURL({requestMethod, objectKey}: PresignedURLOpts): Pr
 		s3Client,
 		objCommand,
 		{
-			expiresIn: 600 // 10min
+			expiresIn: requestMethod === "GET" ?
+				24 * 60 * 60	// 1day for GET (Long term access)
+				: 600			// 10min for PUT / DELETE
 		}
 	)
 	

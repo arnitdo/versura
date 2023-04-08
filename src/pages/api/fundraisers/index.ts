@@ -8,10 +8,11 @@ import {
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
 import {CreateFundraiserRequestBody, GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
-import {FundRaisers} from "@/utils/types/queryTypedefs";
+import {FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
 import {NON_ZERO_NON_NEGATIVE, ALLOW_UNDEFINED_WITH_FN, STRLEN_GT} from "@/utils/validatorUtils";
-import {CreateFundraiserResponse, GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
+import {CreateFundraiserResponse, FundraiserMedia, GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
 import {withMethodDispatcher} from "@/utils/methodDispatcher"
+import {getPresignedURL} from "@/utils/s3";
 
 type FundraiserRequestBodyMap = {
 	GET: any,
@@ -35,9 +36,6 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 				[requireAuthenticatedUser.name]: requireAuthenticatedUser(),
 				[requireBodyParams.name]: requireBodyParams(
 					"fundraiserTitle", "fundraiserDescription", "fundraiserTarget"
-				),
-				[requireQueryParams.name]: requireQueryParams(
-					"fundraiserId"
 				),
 				[requireBodyValidators.name]: requireBodyValidators({
 					fundraiserTarget: NON_ZERO_NON_NEGATIVE,
@@ -70,7 +68,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 		
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
 			`INSERT INTO "fundRaisers" VALUES
-                (DEFAULT, $1, $2, $3, $4, $5, $6, 0, 0, NOW()) RETURNING "fundraiserId"`,
+                (DEFAULT, $1, $2, $3, $4, $5, $6, 0, 0, NOW(), 0, DEFAULT) RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)
 		
@@ -107,6 +105,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 		)
 		
 		if (!middlewareExecStatus){
+			dbClient.release()
 			return
 		}
 		
@@ -123,10 +122,51 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 			[feedPageOffset, FEED_PAGE_SIZE]
 		)
 		
+		const feedRowsWithMedia = await Promise.all(
+			feedRows.map(async (feedRow) => {
+				const {fundraiserMediaObjectKeys} = feedRow
+				const fundraiserMedia: FundraiserMedia[] = []
+				
+				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
+					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
+					WHERE "objectKey" IN $1`,
+					[fundraiserMediaObjectKeys]
+				)
+				
+				const objectKeyContentMap: {[objKey: string]: string} = {}
+				for (const objectContentTypeRow of objectContentTypeRows) {
+					const {objectKey, objectContentType} = objectContentTypeRow
+					objectKeyContentMap[objectKey] = objectContentType
+				}
+				
+				for (const objectKey of fundraiserMediaObjectKeys) {
+					const presignedURL = await getPresignedURL({
+						requestMethod: "GET",
+						objectKey: objectKey
+					})
+					const mappedContentType = objectKeyContentMap[objectKey]
+					fundraiserMedia.push({
+						mediaURL: presignedURL,
+						mediaContentType: mappedContentType
+					})
+				}
+				
+				const feedRowWithMedia = {
+					...feedRow,
+					fundraiserMedia: fundraiserMedia
+				}
+				
+				// @ts-ignore
+				delete feedRowWithMedia["fundraiserMediaObjectKeys"]
+				
+				return feedRowWithMedia
+			})
+		)
+		
 		dbClient.release()
 		res.status(200).json<GetFundraiserFeedResponse>({
 			requestStatus: "SUCCESS",
-			feedData: feedRows
+			feedData: feedRowsWithMedia
 		})
 		
 	} catch (err: unknown){

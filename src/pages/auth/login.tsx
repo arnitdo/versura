@@ -23,6 +23,7 @@ import {makeAPIRequest} from "@/utils/apiHandler";
 import {useRouter} from "next/router";
 import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import {LoginResponse} from "@/utils/types/apiResponses";
+import {LoginUserRequestBody} from "@/utils/types/apiRequests";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -119,7 +120,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		const loginAPIResponse = await makeAPIRequest<LoginResponse>({
+		const loginAPIResponse = await makeAPIRequest<LoginResponse, LoginUserRequestBody>({
 			endpointPath: `/api/auth/login`,
 			requestMethod: "POST",
 			bodyParams: {
