@@ -309,7 +309,7 @@ export default function CreateFundraiser(): JSX.Element {
 	
 	return (
 		<EuiCenter
-			height={"150vh"}
+			height={"180vh"}
 			width={"100vw"}
 		>
 			<EuiPanel

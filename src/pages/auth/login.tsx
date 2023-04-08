@@ -64,6 +64,8 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	})
 	
 	const navRouter = useRouter()
+	const {query} = navRouter
+	const {returnTo} = query
 	
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
@@ -171,11 +173,11 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 					})
 					addToast(
 						"You have logged in successfully",
-						`You will be redirected to the home page in ${LOGIN_SUCCESS_REDIR_TIMEOUT_S} seconds`,
+						`You will be redirected in ${LOGIN_SUCCESS_REDIR_TIMEOUT_S} seconds`,
 						"success"
 					)
 					setTimeout(() => {
-						navRouter.push("/")
+						navRouter.push(returnTo as string || "/")
 					}, LOGIN_SUCCESS_REDIR_TIMEOUT_S * 1000)
 				}
 			}

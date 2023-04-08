@@ -12,11 +12,12 @@ import Link from "next/link";
 import Image from "next/image";
 
 import VersuraIcon from "@/assets/versura-icon.png"
-
+import {useRouter} from "next/router"
 
 function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
-
+	const {pathname} = useRouter()
+	
 	return (
 		<EuiHeader
 			style={{
@@ -56,7 +57,7 @@ function PageHeader(): JSX.Element {
 						>
 							<EuiHeaderLink>
 								<Link
-									href={"/auth/logout"}
+									href={`/auth/logout?returnTo=${pathname}`}
 									style={{
 										color: "#DFE5EF"
 									}}
@@ -80,7 +81,7 @@ function PageHeader(): JSX.Element {
 						>
 							<EuiHeaderLink>
 								<Link
-									href={"/auth/login"}
+									href={`/auth/login?returnTo=${pathname}`}
 									style={{
 										color: "#DFE5EF"
 									}}
@@ -90,7 +91,7 @@ function PageHeader(): JSX.Element {
 							</EuiHeaderLink>
 							<EuiHeaderLink>
 								<Link
-									href={"/auth/signup"}
+									href={`/auth/signup?returnTo=${pathname}`}
 									style={{
 										color: "#DFE5EF"
 									}}

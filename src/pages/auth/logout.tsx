@@ -37,7 +37,8 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	})
 	
 	const navRouter = useRouter()
-	
+	const {query} = navRouter
+	const {returnTo} = query
 	const LOGOUT_REDIRECT_TIMER_S = 5;
 	
 	const returnToPreviousPage = useCallback(() => {
@@ -80,7 +81,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 			if (code === 200 && requestStatus === "SUCCESS"){
 				addToast(
 					"You have been logged out successfully",
-					`You will be redirected to the home page in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
+					`You will be redirected in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
 					"success"
 				)
 				authCtx.updateAuthData({
@@ -89,7 +90,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 					userRole: undefined
 				})
 				setTimeout(() => {
-					navRouter.push('/')
+					navRouter.push(returnTo as string || '/')
 				}, LOGOUT_REDIRECT_TIMER_S * 1000)
 				return
 			}

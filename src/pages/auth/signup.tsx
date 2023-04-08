@@ -44,6 +44,8 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [])
 	
 	const navRouter = useRouter()
+	const {query} = navRouter
+	const {returnTo} = query
 	
 	const SIGNUP_SUCCESS_REDIR_TIMEOUT_S = 5
 	
@@ -158,11 +160,11 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 				if (requestStatus === "SUCCESS"){
 					addToast(
 						"You have signed up successfully",
-						`You will be redirected to the home page in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
+						`You will be redirected in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
 						"success"
 					)
 					setTimeout(() => {
-						navRouter.push("/")
+						navRouter.push(returnTo as string || '/')
 					}, SIGNUP_SUCCESS_REDIR_TIMEOUT_S * 1000)
 				}
 			}
