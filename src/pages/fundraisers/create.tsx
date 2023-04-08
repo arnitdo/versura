@@ -36,12 +36,15 @@ import {
 	APIResponse
 } from "@/utils/types/apiResponses";
 import {useToastList} from "@/utils/toastUtils";
+import {useRouter} from "next/router";
 
 type InvalidMap<T> = {
 	[propName in keyof Required<T>]: boolean
 }
 
 export default function CreateFundraiser(): JSX.Element {
+	const FUNDRAISER_REDIR_TIMEOUT_S = 5 as const;
+	
 	const [fundraiserFormData, setFundraiserFormData] = useState<CreateFundraiserRequestBody>({
 		fundraiserTitle: "",
 		fundraiserDescription: "",
@@ -58,6 +61,8 @@ export default function CreateFundraiser(): JSX.Element {
 		fundraiserDescription: false,
 		fundraiserTitle: false
 	})
+	
+	const navRouter = useRouter()
 	
 	const {fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount} = fundraiserFormData
 	const {
@@ -287,6 +292,21 @@ export default function CreateFundraiser(): JSX.Element {
 				fundraiserCreationStatus.fundraiserContentUpdate = true
 			}
 		}
+		{
+			if (fundraiserCreationStatus.fundraiserContentUpdate == true){
+				addToast(
+					"Fundraiser created successfully",
+					`You will be redirected in ${FUNDRAISER_REDIR_TIMEOUT_S} seconds`,
+					"success"
+				)
+				setTimeout(
+					() => {
+						navRouter.push(`/fundraisers/${successFundraiserId}`)
+					},
+					FUNDRAISER_REDIR_TIMEOUT_S * 1000
+				)
+			}
+		}
 	}, [fundraiserFormData, fundraiserMedia, addToast])
 	
 	const resetForm = () => {
@@ -490,6 +510,7 @@ export default function CreateFundraiser(): JSX.Element {
 						<EuiHorizontalRule />
 						<EuiFormRow
 							label={""}
+							fullWidth
 						>
 							<EuiFlexGroup
 								direction={"row"}
@@ -497,12 +518,14 @@ export default function CreateFundraiser(): JSX.Element {
 								<EuiButton
 									color={"primary"}
 									onClick={createFundraiserWithMedia}
+									fullWidth
 								>
 									Create Fundraiser
 								</EuiButton>
 								<EuiButton
 									color={"ghost"}
 									onClick={resetForm}
+									fullWidth
 								>
 									Clear Data
 								</EuiButton>

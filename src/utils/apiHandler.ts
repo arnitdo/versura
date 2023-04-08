@@ -58,8 +58,6 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 		
 		let resolvedUrl: string = `${endpointPath}${resolvedQueryString}`
 		
-		console.log(resolvedUrl)
-		
 		if (ssrContext){
 			const {
 				req: {

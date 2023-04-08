@@ -13,8 +13,8 @@ export type MethodDispatchMap<T, P> = {
 };
 
 async function unsupportedMethod(req: CustomApiRequest, res: CustomApiResponse){
-	res.status(404).json({
-		requestStatus: "ERR_NOT_FOUND"
+	res.status(400).json({
+		requestStatus: "ERR_INVALID_METHOD"
 	})
 }
 

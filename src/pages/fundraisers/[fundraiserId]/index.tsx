@@ -9,7 +9,6 @@ type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
 
 // @ts-ignore
 export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFundraiserRequestParams> = async (ctx) => {
-	console.log(ctx.params)
 	if (ctx.params === undefined){
 		return {
 			notFound: true

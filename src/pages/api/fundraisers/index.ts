@@ -68,7 +68,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 		
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
 			`INSERT INTO "fundRaisers" VALUES
-                (DEFAULT, $1, $2, $3, $4, $5, $6, 0, 0, NOW(), 0, DEFAULT) RETURNING "fundraiserId"`,
+                (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT) RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)
 		
@@ -129,7 +129,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 				
 				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
-					WHERE "objectKey" IN $1`,
+					WHERE "objectKey" = ANY($1)`,
 					[fundraiserMediaObjectKeys]
 				)
 				
