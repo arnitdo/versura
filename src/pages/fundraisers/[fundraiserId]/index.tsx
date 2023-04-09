@@ -11,7 +11,9 @@ type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
 export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFundraiserRequestParams> = async (ctx) => {
 	if (ctx.params === undefined){
 		return {
-			notFound: true
+			redirect: {
+				destination: "/404"
+			}
 		}
 	}
 	

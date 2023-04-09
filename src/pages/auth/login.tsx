@@ -91,9 +91,18 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			// @ts-ignore
 			const ethAccounts: string[] = await window.ethereum.request({method: "eth_requestAccounts"})
 			
+			// @ts-ignore
+			await window.ethereum.request({
+				method: "wallet_switchEthereumChain",
+				params: [{
+					chainId: "0x5" // Goerli Testnet
+				}]
+			})
+			
 			const selectedAccount = ethAccounts[0]
 			
 			setMetamaskInfo([true, selectedAccount])
+			
 		} catch (err: unknown){
 			addToast(
 				"Please authenticate with MetaMask",

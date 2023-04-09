@@ -1,5 +1,7 @@
 import {ValidatorMapType} from "@/utils/customMiddleware";
 
+const LINK_TEXT_COLOR_OVERRIDE = "#DFE5EF" as const
+
 export type ValidationResultMap<T> = {
 	[propName in keyof T]: boolean
 }
@@ -28,5 +30,6 @@ async function requireBasicObjectValidation<T>(objToValidate: T, validationMap: 
 }
 
 export {
+	LINK_TEXT_COLOR_OVERRIDE,
 	requireBasicObjectValidation
 }

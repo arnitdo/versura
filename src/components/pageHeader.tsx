@@ -13,8 +13,9 @@ import Image from "next/image";
 
 import VersuraIcon from "@/assets/versura-icon.png"
 import {useRouter} from "next/router"
+import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
 
-function PageHeader(): JSX.Element {
+export default function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
 	const {pathname} = useRouter()
 	
@@ -59,7 +60,7 @@ function PageHeader(): JSX.Element {
 								<Link
 									href={`/auth/logout?returnTo=${pathname}`}
 									style={{
-										color: "#DFE5EF"
+										color: LINK_TEXT_COLOR_OVERRIDE
 									}}
 								>
 									Log Out
@@ -69,7 +70,7 @@ function PageHeader(): JSX.Element {
 						<EuiAvatar
 							name={metamaskAddress || ""}
 							imageUrl={
-								`//gravatar.com/avatar/${metamaskAddress || ""}?d=retro&f=y`
+								`//gravatar.com/avatar/${metamaskAddress?.slice(2) || ""}?d=retro&f=y`
 							}
 							color={"plain"}
 							type={"space"}
@@ -83,7 +84,7 @@ function PageHeader(): JSX.Element {
 								<Link
 									href={`/auth/login?returnTo=${pathname}`}
 									style={{
-										color: "#DFE5EF"
+										color: LINK_TEXT_COLOR_OVERRIDE
 									}}
 								>
 									Log In
@@ -93,7 +94,7 @@ function PageHeader(): JSX.Element {
 								<Link
 									href={`/auth/signup?returnTo=${pathname}`}
 									style={{
-										color: "#DFE5EF"
+										color: LINK_TEXT_COLOR_OVERRIDE
 									}}
 								>
 									Sign Up
@@ -105,8 +106,3 @@ function PageHeader(): JSX.Element {
 		</EuiHeader>
 	)
 }
-
-export {
-	PageHeader
-}
-

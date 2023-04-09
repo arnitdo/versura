@@ -14,12 +14,13 @@ export type FundRaisers = {
 	fundraiserTitle: string,
 	fundraiserDescription: string,
 	fundraiserTarget: number,
+	fundraiserToken: string,
 	fundraiserMinDonationAmount: number,
 	fundraiserRaisedAmount: number,
 	fundraiserContributorCount: number,
 	fundraiserMilestoneCount: number,
 	fundraiserMediaObjectKeys: string[]
-	fundraiserCreatedOn: Date
+	fundraiserCreatedOn: string
 }
 
 export type S3BucketObjects = {

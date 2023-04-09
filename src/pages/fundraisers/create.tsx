@@ -120,7 +120,7 @@ export default function CreateFundraiser(): JSX.Element {
 			if (isSuccess && data){
 				const {requestStatus} = data
 				if (requestStatus === "ERR_MISSING_BODY_PARAMS" || requestStatus === "ERR_INVALID_BODY_PARAMS"){
-					const missingParams = data.missingParams!
+					const missingParams = data.missingParams || data.invalidParams || []
 					const clonedInvalidMap = {...invalidInputMap}
 					for (const missingParam of missingParams) {
 						// @ts-ignore
@@ -519,13 +519,15 @@ export default function CreateFundraiser(): JSX.Element {
 									color={"primary"}
 									onClick={createFundraiserWithMedia}
 									fullWidth
+									fill
 								>
 									Create Fundraiser
 								</EuiButton>
 								<EuiButton
-									color={"ghost"}
+									color={"danger"}
 									onClick={resetForm}
 									fullWidth
+									fill
 								>
 									Clear Data
 								</EuiButton>
