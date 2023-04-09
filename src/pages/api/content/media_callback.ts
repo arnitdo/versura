@@ -62,11 +62,21 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 					`DELETE FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
 					[objectKey]
 				)
+				await dbClient.query(
+					`UPDATE "internalS3Buckets" SET "bucketObjectCount" = "bucketObjectCount" - 1
+					WHERE "bucketName" = $1`,
+					[process.env.AWS_S3_BUCKET!]
+				)
 				break;
 			case "PUT":
 				await dbClient.query(
 					`INSERT INTO "internalS3BucketObjects" VALUES ($1, $2, $3, $4)`,
 					[process.env.AWS_S3_BUCKET!, objectKey, objectSizeBytes, objectContentType]
+				)
+				await dbClient.query(
+					`UPDATE "internalS3Buckets" SET "bucketObjectCount" = "bucketObjectCount" + 1
+					WHERE "bucketName" = $1`,
+					[process.env.AWS_S3_BUCKET!]
 				)
 				break;
 		}

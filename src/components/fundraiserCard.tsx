@@ -3,7 +3,7 @@ import {EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText} from "
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
 import Image from "next/image";
-import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
+import {LINK_TEXT_COLOR_OVERRIDE, useValueScale} from "@/utils/common";
 import Link from "next/link";
 
 type FundraiserCardProps = GetFundraiserResponse["fundraiserData"]
@@ -20,10 +20,16 @@ function FundraiserCard(props: FundraiserCardProps){
 	
 	const progressStatusColors = ["danger", "orange", "yellow", "green", "success"]
 	
-	const fundraiserCompletionPercentage = fundraiserRaisedAmount * 100 / fundraiserTarget
-	let fundraiserPercentageMod = (fundraiserCompletionPercentage - (fundraiserCompletionPercentage % 25)) / 25
-	fundraiserPercentageMod = fundraiserPercentageMod > 4 ? 4 : fundraiserPercentageMod
-	const selectedColor = progressStatusColors[fundraiserPercentageMod]
+	const fundraiserCompletionPercentage = (fundraiserRaisedAmount * 100) / fundraiserTarget
+	
+	const selectedColor = useValueScale({
+		minScale: 0,
+		maxScale: 4,
+		minValue: 0,
+		maxValue: 100,
+		currValue: fundraiserCompletionPercentage,
+		scaledValues: progressStatusColors
+	})
 	
 	const fundraiserPercentageInt = Number.parseInt(
 		fundraiserCompletionPercentage.toString()
@@ -43,6 +49,7 @@ function FundraiserCard(props: FundraiserCardProps){
 			direction={"row"}
 			alignItems={"center"}
 			justifyContent={"spaceAround"}
+			gutterSize={"xl"}
 		>
 			<EuiFlexItem
 				grow={0}
@@ -53,11 +60,9 @@ function FundraiserCard(props: FundraiserCardProps){
 					}
 					alt={`${fundraiserTitle} Banner Image`}
 					width={240}
-					height={120}
+					height={-1}
 					style={{
-						borderRadius: "10px",
-						border: `1px solid ${LINK_TEXT_COLOR_OVERRIDE}`,
-						padding: `10px`
+						borderRadius: 12
 					}}
 				/>
 			</EuiFlexItem>

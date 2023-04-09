@@ -58,6 +58,16 @@ interface DeleteFundraiserContentParams {
 	fundraiserId: string
 }
 
+interface AddFundraiserMilestoneBody {
+	milestoneTitle: string,
+	milestoneDescription: string,
+	milestoneAmount: number,
+}
+
+interface AddMilestoneMediaContent {
+	objectKey: string
+}
+
 export {
 	S3ObjectMethods,
 	SignupUserRequestBody,

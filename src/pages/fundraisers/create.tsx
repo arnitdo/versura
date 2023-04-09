@@ -37,6 +37,7 @@ import {
 } from "@/utils/types/apiResponses";
 import {useToastList} from "@/utils/toastUtils";
 import {useRouter} from "next/router";
+import {manageMedia, useValueScale} from "@/utils/common";
 
 type InvalidMap<T> = {
 	[propName in keyof Required<T>]: boolean
@@ -89,11 +90,18 @@ export default function CreateFundraiser(): JSX.Element {
 	]
 	
 	const [fundraiserCreationProgressValue, setFundraiserCreationProgressValue] = useState<number>(0)
-	const [fundraiserCreationProgressColor, setFundraiserCreationProgressColor] = useState<string>("red")
+	
+	const fundraiserProgressColor = useValueScale({
+		minValue: 0,
+		maxValue: fundraiserMedia.length * 5,
+		minScale: 0,
+		maxScale: 4,
+		scaledValues: ["danger", "orange", "yellow", "green", "success"],
+		currValue: fundraiserCreationProgressValue
+	})
 	
 	const createFundraiserWithMedia = useCallback(async () => {
 		let successFundraiserId: number = -1;
-		let presignedUrls: string[] = []
 		
 		let fundraiserCreationStatus = {
 			createFundraiser: false,
@@ -102,6 +110,13 @@ export default function CreateFundraiser(): JSX.Element {
 			contentMediaCallback: false,
 			fundraiserContentUpdate: false
 		}
+		
+		const commonProgressCallback = (fileIdx: number) => {
+			setFundraiserCreationProgressValue((progressValue) => {
+				return progressValue + 1
+			})
+		}
+		
 		// Create fundraiser in API
 		{
 			const {isSuccess, isError, code, data, error} = await makeAPIRequest<CreateFundraiserResponse>({
@@ -150,113 +165,34 @@ export default function CreateFundraiser(): JSX.Element {
 				}
 			}
 		}
-		
-		// Get presigned URLs for each media
 		{
 			if (!fundraiserCreationStatus.createFundraiser){
-				return false
+				return
 			}
-			presignedUrls = await Promise.all(
-				fundraiserMedia.map(async (mediaFile, mediaIdx) => {
-					const objectKey = `fundraisers/${successFundraiserId}/media/${mediaIdx + 1}`
-					const {isSuccess, isError, code, data, error, } = await makeAPIRequest<PresignedURLResponse, PresignedURLBody>({
-						endpointPath: `/api/content/presigned_url`,
-						requestMethod: "POST",
-						bodyParams: {
-							objectKey: objectKey,
-							requestMethod: "PUT"
-						}
-					})
-					if (isSuccess && data){
-						const {requestStatus} = data
-						if (requestStatus === "SUCCESS"){
-							const {presignedUrl} = data
-							setFundraiserCreationProgressValue((oldProgress) => {
-								return oldProgress + 1
-							})
-							return presignedUrl
-						} else {
-							return ""
-						}
-					}
-					return ""
-				})
-			)
-			presignedUrls = presignedUrls.filter((presignedUrl) => {
-				return presignedUrl.length > 0
+			const mediaManagementStatuses = await manageMedia({
+				mediaFiles: fundraiserMedia,
+				objectKeyGenFn: (mediaFile, fileIdx) => {
+					return `fundraisers/${successFundraiserId}/media/${fileIdx + 1}`
+				},
+				mediaMethod: "PUT",
+				stepCompletionCallbacks: {
+					onAcquirePresignedUrl: commonProgressCallback,
+					onStorageRequest: commonProgressCallback,
+					onAPIMediaCallback: commonProgressCallback
+				}
 			})
-			if (presignedUrls.length === fundraiserMedia.length){
-				fundraiserCreationStatus.getPresignedUrls = true
-			}
-		}
-		{
-			if (!fundraiserCreationStatus.getPresignedUrls){
-				return
-			}
-			// Put to each PresignedURL
-			let fileUploadStatuses = await Promise.all(
-				presignedUrls.map(async (presignedUrl, index) => {
-					const fileToPut = fundraiserMedia[index]
-					try {
-						await fetch(
-							presignedUrl,
-							{
-								method: "PUT",
-								body: fileToPut,
-								headers: {
-									"Content-Type": fileToPut.type
-								}
-							}
-						)
-						setFundraiserCreationProgressValue((oldProgress) => {
-							return oldProgress + 1
-						})
-						return true
-					} catch (e) {
-						console.error(e)
-						console.error(`Unable to upload file ${fileToPut.name}`)
-						return false
-					}
-				})
-			)
-			fileUploadStatuses = fileUploadStatuses.filter(Boolean)
-			if (fileUploadStatuses.length == fundraiserMedia.length){
-				fundraiserCreationStatus.uploadMediaToUrl = true
-			}
-		}
-		{
-			if (!fundraiserCreationStatus.uploadMediaToUrl){
-				return
-			}
-			let mediaCallbackStatuses = await Promise.all(
-				fundraiserMedia.map(async (mediaFile, fileIdx) => {
-					const objectKey = `fundraisers/${successFundraiserId}/media/${fileIdx + 1}`
-					const {type: objectContentType, size: objectSizeBytes} = mediaFile
-					const {isSuccess, isError, code, data, error} = await makeAPIRequest<MediaCallbackResponse, MediaCallbackBody>({
-						endpointPath: `/api/content/media_callback`,
-						requestMethod: "POST",
-						bodyParams: {
-							objectKey: objectKey,
-							requestMethod: "PUT",
-							objectContentType: objectContentType,
-							objectSizeBytes: objectSizeBytes
-						}
-					})
-					if (isSuccess && data){
-						const {requestStatus} = data
-						if (requestStatus === "SUCCESS"){
-							setFundraiserCreationProgressValue((oldProgress) => {
-								return oldProgress + 1
-							})
-							return true
-						}
-					}
-					return false
-				})
-			)
-			mediaCallbackStatuses = mediaCallbackStatuses.filter(Boolean)
-			if (mediaCallbackStatuses.length === fundraiserMedia.length){
-				fundraiserCreationStatus.contentMediaCallback = true
+			const [
+				presignedUrl,
+				urlRequest,
+				mediaCallback
+			] = mediaManagementStatuses
+			fundraiserCreationStatus = {
+				...fundraiserCreationStatus,
+				...{
+					getPresignedUrls: presignedUrl,
+					uploadMediaToUrl: urlRequest,
+					contentMediaCallback: mediaCallback
+				}
 			}
 		}
 		{
@@ -506,6 +442,7 @@ export default function CreateFundraiser(): JSX.Element {
 						<EuiProgress
 							value={fundraiserCreationProgressValue}
 							max={fundraiserMedia.length * 5}
+							color={fundraiserProgressColor}
 						/>
 						<EuiHorizontalRule />
 						<EuiFormRow
