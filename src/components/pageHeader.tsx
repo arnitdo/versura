@@ -21,10 +21,6 @@ export default function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
 	const {pathname} = useRouter()
 	
-	const buttonId = useGeneratedHtmlId({
-		prefix: "pageHeader_avatarButton"
-	})
-	
 	return (
 		<EuiHeader
 			style={{
