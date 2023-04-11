@@ -16,9 +16,8 @@ import Image from "next/image";
 import VersuraIcon from "@/assets/versura-icon.png"
 import {useRouter} from "next/router"
 import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
-import dynamic from "next/dynamic";
 
-function PageHeader(): JSX.Element {
+export default function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
 	const {pathname} = useRouter()
 	
@@ -139,10 +138,3 @@ function PageHeader(): JSX.Element {
 		</EuiHeader>
 	)
 }
-
-export default dynamic(
-	async () => PageHeader,
-	{
-		ssr: false
-	}
-)
