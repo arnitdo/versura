@@ -3,7 +3,7 @@ import {
 	EuiPageTemplate,
 	EuiText,
 	EuiFlexGroup,
-	EuiFlexItem
+	EuiFlexItem, EuiButton
 } from "@elastic/eui"
 
 import Image from 'next/image'
@@ -11,6 +11,7 @@ import Image from 'next/image'
 import EthereumIcon from "@/assets/eth-icon.png"
 import MetamaskFox from "@/assets/metamask-fox.svg"
 import BlockchainNetwork from "@/assets/blockchain-network.png"
+import Link from "next/link";
 
 export default function IndexPage() {
 	return (
@@ -110,6 +111,20 @@ export default function IndexPage() {
 									</h4>
 								</EuiText>
 							</EuiFlexItem>
+							<EuiFlexItem>
+								<EuiFlexGroup>
+									<Link
+										href={"/fundraisers/create"}
+									>
+										<EuiButton
+											color={"primary"}
+											fill
+										>
+											Create Your Own
+										</EuiButton>
+									</Link>
+								</EuiFlexGroup>
+							</EuiFlexItem>
 						</EuiFlexGroup>
 					</EuiFlexGroup>
 				</EuiPageTemplate.Section>
@@ -152,6 +167,20 @@ export default function IndexPage() {
 										All campaigns are verified before being publicly displayed.
 									</h4>
 								</EuiText>
+							</EuiFlexItem>
+							<EuiFlexItem>
+								<EuiFlexGroup>
+									<Link
+										href={"/fundraisers"}
+									>
+										<EuiButton
+											color={"primary"}
+											fill
+										>
+											Explore Fundraisers
+										</EuiButton>
+									</Link>
+								</EuiFlexGroup>
 							</EuiFlexItem>
 						</EuiFlexGroup>
 					</EuiFlexGroup>

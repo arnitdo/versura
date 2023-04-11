@@ -95,7 +95,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			await window.ethereum.request({
 				method: "wallet_switchEthereumChain",
 				params: [{
-					chainId: "0x5" // Goerli Testnet
+					chainId: process.env.NEXT_PUBLIC_EVM_CHAIN // Sepolia Testnet
 				}]
 			})
 			

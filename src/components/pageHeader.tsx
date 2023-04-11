@@ -5,7 +5,9 @@ import {
 	EuiHeaderSection,
 	EuiAvatar,
 	EuiHeaderLinks,
-	EuiHeaderLink
+	EuiHeaderLink,
+    EuiHeaderSectionItemButton,
+	useGeneratedHtmlId
 } from "@elastic/eui"
 import {useContext} from "react";
 import Link from "next/link";
@@ -14,10 +16,15 @@ import Image from "next/image";
 import VersuraIcon from "@/assets/versura-icon.png"
 import {useRouter} from "next/router"
 import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
+import dynamic from "next/dynamic";
 
-export default function PageHeader(): JSX.Element {
+function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
 	const {pathname} = useRouter()
+	
+	const buttonId = useGeneratedHtmlId({
+		prefix: "pageHeader_avatarButton"
+	})
 	
 	return (
 		<EuiHeader
@@ -28,6 +35,32 @@ export default function PageHeader(): JSX.Element {
 			<EuiHeaderSection
 				side={"left"}
 			>
+				<EuiHeaderLinks
+					popoverBreakpoints={"none"}
+				>
+					<EuiHeaderLink>
+						<Link
+							href={"/fundraisers"}
+							style={{
+								color: LINK_TEXT_COLOR_OVERRIDE
+							}}
+						>
+							Explore
+						</Link>
+					</EuiHeaderLink>
+					<EuiHeaderLink>
+						<Link
+							href={"/fundraisers/create"}
+							style={{
+								color: LINK_TEXT_COLOR_OVERRIDE
+							}}
+						>
+							Create
+						</Link>
+					</EuiHeaderLink>
+				</EuiHeaderLinks>
+			</EuiHeaderSection>
+			<EuiHeaderSection>
 				<Link
 					href={"/"}
 					key={"header-link-home"}
@@ -106,3 +139,10 @@ export default function PageHeader(): JSX.Element {
 		</EuiHeader>
 	)
 }
+
+export default dynamic(
+	async () => PageHeader,
+	{
+		ssr: false
+	}
+)

@@ -1,5 +1,5 @@
 import {FundraiserMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
-import {EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText} from "@elastic/eui";
+import {EuiAvatar, EuiFlexGroup, EuiLink, EuiFlexItem, EuiHorizontalRule, EuiText} from "@elastic/eui";
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
 import Image from "next/image";
@@ -62,7 +62,9 @@ function FundraiserCard(props: FundraiserCardProps){
 					width={240}
 					height={-1}
 					style={{
-						borderRadius: 12
+						borderRadius: 12,
+						maxHeight: 240,
+						aspectRatio: "preserve"
 					}}
 				/>
 			</EuiFlexItem>
@@ -71,15 +73,21 @@ function FundraiserCard(props: FundraiserCardProps){
 					direction={"column"}
 				>
 					<EuiFlexItem>
-						<Link
-							href={`/fundraisers/${fundraiserId}`}
+						<EuiLink
+							style={{
+								textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+							}}
 						>
-							<EuiText
-								color={LINK_TEXT_COLOR_OVERRIDE}
+							<Link
+								href={`/fundraisers/${fundraiserId}`}
 							>
-								<h3>{fundraiserTitle}</h3>
-							</EuiText>
-						</Link>
+								<EuiText
+									color={LINK_TEXT_COLOR_OVERRIDE}
+								>
+									<h3>{fundraiserTitle}</h3>
+								</EuiText>
+							</Link>
+						</EuiLink>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiText
