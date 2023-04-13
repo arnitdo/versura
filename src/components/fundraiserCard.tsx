@@ -144,7 +144,9 @@ function FundraiserCard(props: FundraiserCardProps){
 								</EuiText>
 							</EuiFlexItem>
 							<EuiFlexItem>
-								<EuiText>
+								<EuiText
+									textAlign={"center"}
+								>
 									<h5>Complete</h5>
 								</EuiText>
 							</EuiFlexItem>
@@ -165,7 +167,9 @@ function FundraiserCard(props: FundraiserCardProps){
 								</EuiText>
 							</EuiFlexItem>
 							<EuiFlexItem>
-								<EuiText>
+								<EuiText
+									textAlign={"center"}
+								>
 									<h5>Contributors</h5>
 								</EuiText>
 							</EuiFlexItem>
@@ -186,7 +190,9 @@ function FundraiserCard(props: FundraiserCardProps){
 								</EuiText>
 							</EuiFlexItem>
 							<EuiFlexItem>
-								<EuiText>
+								<EuiText
+									textAlign={"center"}
+								>
 									<h5>Milestones</h5>
 								</EuiText>
 							</EuiFlexItem>

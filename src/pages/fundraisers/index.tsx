@@ -64,9 +64,7 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 	const navRouter = useRouter()
 	
 	return (
-		<EuiPageTemplate
-			 grow={false}
-		>
+		<EuiPageTemplate>
 			{
 				feedData.length ? (
 					<EuiFlexGroup
@@ -79,7 +77,7 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 								return (
 									<EuiFlexItem
 										key={fundraiserData.fundraiserId}
-																	>
+									>
 										<EuiPanel
 											color={"plain"}
 											style={{
