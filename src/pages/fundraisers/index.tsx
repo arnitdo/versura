@@ -4,7 +4,8 @@ import {GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
 
 import {FundraiserCard} from "@/components/fundraiserCard"
-import {EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPageTemplate, EuiPagination, EuiText} from "@elastic/eui";
+import {EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPageTemplate, EuiPagination,
+	EuiPanel, EuiSpacer, EuiText} from "@elastic/eui";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -68,22 +69,32 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 		>
 			{
 				feedData.length ? (
-					feedData.map((fundraiserData, fundraiserIdx) => {
-						return (
-							<EuiPageTemplate.Section
-								key={fundraiserData.fundraiserId}
-								color={
-									fundraiserIdx % 2 ? "subdued" : "plain"
-								}
-								grow={false}
-							>
-								<FundraiserCard
-									{...fundraiserData}
-								/>
-							</EuiPageTemplate.Section>
-						)
-					})
-					
+					<EuiFlexGroup
+						direction={"column"}
+						alignItems={"center"}
+					>
+						<EuiSpacer />
+						{
+							feedData.map((fundraiserData, fundraiserIdx) => {
+								return (
+									<EuiFlexItem
+										key={fundraiserData.fundraiserId}
+																	>
+										<EuiPanel
+											color={"plain"}
+											style={{
+												width: "90vw"
+											}}
+										>
+											<FundraiserCard
+												{...fundraiserData}
+											/>
+										</EuiPanel>
+									</EuiFlexItem>
+								)
+							})
+						}
+					</EuiFlexGroup>
 				) : (
 					<EuiEmptyPrompt
 						color={"plain"}
@@ -142,6 +153,7 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 			{
 				feedData.length ? (
 					<>
+						<EuiSpacer />
 						<EuiHorizontalRule />
 						<EuiPageTemplate.Section
 							color={"subdued"}

@@ -8,9 +8,9 @@ import {
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
 import {CreateFundraiserRequestBody, GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
-import {FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
+import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
 import {NON_ZERO_NON_NEGATIVE, ALLOW_UNDEFINED_WITH_FN, STRLEN_GT} from "@/utils/validatorUtils";
-import {CreateFundraiserResponse, FundraiserMedia, GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
+import {CreateFundraiserResponse, GenericMedia, GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
 import {withMethodDispatcher} from "@/utils/methodDispatcher"
 import {getPresignedURL} from "@/utils/s3";
 
@@ -125,7 +125,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 		const feedRowsWithMedia = await Promise.all(
 			feedRows.map(async (feedRow) => {
 				const {fundraiserMediaObjectKeys} = feedRow
-				const fundraiserMedia: FundraiserMedia[] = []
+				const fundraiserMedia: GenericMedia[] = []
 				
 				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"

@@ -28,7 +28,7 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 					return ["GET", "PUT", "DELETE"].includes(reqMethod)
 				},
 				objectKey: async (objectKey: string) => {
-					// Check if object key exists if GET or DELETE content
+					// Check if object key exists if GET or DELETE media
 					if (req.body.requestMethod === "PUT"){
 						return true
 					}

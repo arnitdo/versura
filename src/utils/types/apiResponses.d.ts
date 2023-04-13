@@ -1,4 +1,4 @@
-import {FundRaisers, UserRole} from "@/utils/types/queryTypedefs";
+import {FundraiserMilestones, FundRaisers, UserRole} from "@/utils/types/queryTypedefs";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 500
@@ -39,9 +39,13 @@ interface CreateFundraiserResponse extends APIResponse {
 	fundraiserId: number,
 }
 
-interface FundraiserMedia {
+interface GenericMedia {
 	mediaURL: string,
 	mediaContentType: string
+}
+
+type FundraiserMilestone = Omit<FundraiserMilestones, "milestoneMediaObjectKeys"> & {
+	milestoneMedia: GenericMedia[]
 }
 
 interface GetFundraiserResponse extends APIResponse {
@@ -49,12 +53,16 @@ interface GetFundraiserResponse extends APIResponse {
 		FundRaisers,
 		"fundraiserMediaObjectKeys"
 	> & {
-		"fundraiserMedia": FundraiserMedia[]
+		fundraiserMedia: GenericMedia[],
+		fundraiserMilestones: FundraiserMilestone[]
 	}
 }
 
 interface GetFundraiserFeedResponse extends APIResponse {
-	feedData: GetFundraiserResponse["fundraiserData"][]
+	feedData: Omit<
+		GetFundraiserResponse["fundraiserData"],
+		"fundraiserMilestones"
+	>[]
 }
 
 interface PresignedURLResponse extends APIResponse {
@@ -63,6 +71,10 @@ interface PresignedURLResponse extends APIResponse {
 
 interface MediaCallbackResponse extends APIResponse {
 
+}
+
+interface CreateFundraiserMilestoneResponse extends APIResponse {
+	milestoneId: number
 }
 
 export {
@@ -74,6 +86,8 @@ export {
 	GetFundraiserResponse,
 	GetFundraiserFeedResponse,
 	PresignedURLResponse,
-	FundraiserMedia,
-	MediaCallbackResponse
+	GenericMedia,
+	MediaCallbackResponse,
+	CreateFundraiserMilestoneResponse,
+	FundraiserMilestone
 };

@@ -56,6 +56,7 @@ CREATE TABLE "fundraiserMilestones" (
     "milestoneId" SERIAL,
     "milestoneFundraiserId" INTEGER NOT NULL,
 
+    "milestoneTitle" TEXT NOT NULL,
     "milestoneAmount" NUMERIC,
     "milestoneStatus" BOOLEAN DEFAULT FALSE,
 

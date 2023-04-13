@@ -6,24 +6,24 @@ import {
 	requireMiddlewareChecks, requireQueryParams, requireQueryParamValidators, requireValidBody
 } from "@/utils/customMiddleware";
 import {
-	AddFundraiserContentBody,
-	AddFundraiserContentParams,
-	DeleteFundraiserContentBody, DeleteFundraiserContentParams
+	AddFundraiserMediaBody,
+	AddFundraiserMediaParams,
+	DeleteFundraiserMediaBody, DeleteFundraiserMediaParams
 } from "@/utils/types/apiRequests";
 import {withMethodDispatcher} from "@/utils/methodDispatcher";
 import { db } from "@/utils/db";
 
-type FundraiserContentBodyMap = {
-	POST: AddFundraiserContentBody,
-	DELETE: DeleteFundraiserContentBody
+type FundraiserMediaBodyMap = {
+	POST: AddFundraiserMediaBody,
+	DELETE: DeleteFundraiserMediaBody
 }
 
-type FundraiserContentQueryMap = {
-	POST: AddFundraiserContentParams,
-	DELETE: DeleteFundraiserContentParams
+type FundraiserMediaQueryMap = {
+	POST: AddFundraiserMediaParams,
+	DELETE: DeleteFundraiserMediaParams
 }
 
-async function addFundraiserContent(req: CustomApiRequest<AddFundraiserContentBody, AddFundraiserContentParams>, res: CustomApiResponse){
+async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse){
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -90,7 +90,7 @@ async function addFundraiserContent(req: CustomApiRequest<AddFundraiserContentBo
 	})
 }
 
-async function deleteFundraiserContent(req: CustomApiRequest<DeleteFundraiserContentBody, DeleteFundraiserContentParams>, res: CustomApiResponse){
+async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMediaBody, DeleteFundraiserMediaParams>, res: CustomApiResponse){
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -158,7 +158,7 @@ async function deleteFundraiserContent(req: CustomApiRequest<DeleteFundraiserCon
 	})
 }
 
-export default withMethodDispatcher<FundraiserContentBodyMap, FundraiserContentQueryMap>({
-	POST: addFundraiserContent,
-	DELETE: deleteFundraiserContent
+export default withMethodDispatcher<FundraiserMediaBodyMap, FundraiserMediaQueryMap>({
+	POST: addFundraiserMedia,
+	DELETE: deleteFundraiserMedia
 })

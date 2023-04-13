@@ -9,8 +9,8 @@ import {
 import {db} from "@/utils/db";
 import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
 import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
-import {FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
-import {FundraiserMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
+import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
 import {getPresignedURL} from "@/utils/s3";
 
 type FundraiserBodyDispatch = {
@@ -71,12 +71,13 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		)
 		
 		const objectKeyContentMap: {[objKey: string]: string} = {}
+		
 		for (const objectContentTypeRow of objectContentTypeRows) {
 			const {objectKey, objectContentType} = objectContentTypeRow
 			objectKeyContentMap[objectKey] = objectContentType
 		}
 		
-		const fundraiserMedia: FundraiserMedia[] = []
+		const fundraiserMedia: GenericMedia[] = []
 		
 		for (const objectKey of fundraiserMediaObjectKeys) {
 			const presignedURL = await getPresignedURL({
@@ -90,9 +91,57 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			})
 		}
 		
+		const {rows: dbMilestoneRows} = await dbClient.query<FundraiserMilestones>(
+			`SELECT * FROM "fundraiserMilestones" WHERE "milestoneFundraiserId" = $1`,
+			[fundraiserId]
+		)
+		
+		const fundraiserResponseMilestones: FundraiserMilestone[] = await Promise.all(
+			dbMilestoneRows.map(async (milestoneRow) => {
+				const {milestoneMediaObjectKeys} = milestoneRow
+				
+				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
+					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
+                    WHERE "objectKey" = ANY($1)`,
+					[milestoneMediaObjectKeys]
+				)
+				
+				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
+					const {objectKey, objectContentType} = mediaObjectContentTypeRow
+					objectKeyContentMap[objectKey] = objectContentType
+				}
+				
+				const milestoneMedia: GenericMedia[] = await Promise.all(
+					milestoneMediaObjectKeys.map(async (objectKey) => {
+						const presignedUrl = await getPresignedURL({
+							objectKey: objectKey,
+							requestMethod: "GET"
+						})
+						
+						const mappedContentType = objectKeyContentMap[objectKey]
+						return {
+							mediaURL: presignedUrl,
+							mediaContentType: mappedContentType
+						}
+					})
+				)
+				
+				const resolvedMilestoneData = {
+					...milestoneRow,
+					milestoneMedia: milestoneMedia
+				}
+				
+				// @ts-ignore
+				delete resolvedMilestoneData["milestoneMediaObjectKeys"]
+				
+				return resolvedMilestoneData
+			})
+		)
+		
 		const fundraiserData = {
 			...selectedFundraiser,
-			fundraiserMedia: fundraiserMedia
+			fundraiserMedia: fundraiserMedia,
+			fundraiserMilestones: fundraiserResponseMilestones
 		}
 		
 		// @ts-ignore

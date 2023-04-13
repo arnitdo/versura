@@ -29,3 +29,13 @@ export type S3BucketObjects = {
 	objectSizeBytes: number,
 	objectContentType: string
 }
+
+export type FundraiserMilestones = {
+	milestoneId: number,
+	milestoneFundraiserId: number,
+	milestoneTitle: string,
+	milestoneAmount: number,
+	milestoneStatus: boolean,
+	milestoneMediaObjectKeys: string[],
+	milestoneReachedOn: string,
+}

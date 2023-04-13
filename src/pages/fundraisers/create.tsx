@@ -22,8 +22,8 @@ import Image from "next/image"
 import {EuiSelectOption} from "@elastic/eui/src/components/form/select/select";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {
-	AddFundraiserContentBody,
-	AddFundraiserContentParams,
+	AddFundraiserMediaBody,
+	AddFundraiserMediaParams,
 	CreateFundraiserRequestBody,
 	MediaCallbackBody,
 	PresignedURLBody
@@ -202,8 +202,8 @@ export default function CreateFundraiser(): JSX.Element {
 			let fundraiserContentUpdateStatus = await Promise.all(
 				fundraiserMedia.map(async (mediaFile, mediaIdx) => {
 					const objectKey = `fundraisers/${successFundraiserId}/media/${mediaIdx + 1}`
-					const {isSuccess, isError, code, data, error} = await makeAPIRequest<APIResponse, AddFundraiserContentBody, AddFundraiserContentParams>({
-						endpointPath: "/api/fundraisers/:fundraiserId/content",
+					const {isSuccess, isError, code, data, error} = await makeAPIRequest<APIResponse, AddFundraiserMediaBody, AddFundraiserMediaParams>({
+						endpointPath: "/api/fundraisers/:fundraiserId/media",
 						requestMethod: "POST",
 						queryParams: {
 							fundraiserId: successFundraiserId.toString()

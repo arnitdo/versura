@@ -1,4 +1,4 @@
-import {FundraiserMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
 import {EuiAvatar, EuiFlexGroup, EuiLink, EuiFlexItem, EuiHorizontalRule, EuiText} from "@elastic/eui";
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
@@ -6,7 +6,10 @@ import Image from "next/image";
 import {LINK_TEXT_COLOR_OVERRIDE, useValueScale} from "@/utils/common";
 import Link from "next/link";
 
-type FundraiserCardProps = GetFundraiserResponse["fundraiserData"]
+type FundraiserCardProps = Omit<
+	GetFundraiserResponse["fundraiserData"],
+	"fundraiserMilestones"
+>
 
 function FundraiserCard(props: FundraiserCardProps){
 	const {
@@ -35,7 +38,7 @@ function FundraiserCard(props: FundraiserCardProps){
 		fundraiserCompletionPercentage.toString()
 	)
 	
-	let selectedFundraiserImage: FundraiserMedia | null = null;
+	let selectedFundraiserImage: GenericMedia | null = null;
 	for (const media of fundraiserMedia) {
 		const {mediaContentType} = media
 		if (mediaContentType.startsWith("image")){
@@ -63,8 +66,7 @@ function FundraiserCard(props: FundraiserCardProps){
 					height={-1}
 					style={{
 						borderRadius: 12,
-						maxHeight: 240,
-						aspectRatio: "preserve"
+						maxHeight: 180
 					}}
 				/>
 			</EuiFlexItem>

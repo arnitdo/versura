@@ -42,26 +42,29 @@ interface MediaCallbackBody {
 	objectContentType: string
 }
 
-interface AddFundraiserContentBody {
+interface AddFundraiserMediaBody {
 	objectKey: string
 }
 
-interface AddFundraiserContentParams {
+interface AddFundraiserMediaParams {
 	fundraiserId: string
 }
 
-interface DeleteFundraiserContentBody {
+interface DeleteFundraiserMediaBody {
 	objectKey: string
 }
 
-interface DeleteFundraiserContentParams {
+interface DeleteFundraiserMediaParams {
 	fundraiserId: string
 }
 
 interface AddFundraiserMilestoneBody {
 	milestoneTitle: string,
-	milestoneDescription: string,
 	milestoneAmount: number,
+}
+
+interface AddFundraiserMilestoneParams {
+	fundraiserId: string
 }
 
 interface AddMilestoneMediaContent {
@@ -78,8 +81,11 @@ export {
 	GetFundraiserFeedRequestParams,
 	PresignedURLBody,
 	MediaCallbackBody,
-	AddFundraiserContentBody,
-	AddFundraiserContentParams,
-	DeleteFundraiserContentBody,
-	DeleteFundraiserContentParams
+	AddFundraiserMediaBody,
+	AddFundraiserMediaParams,
+	DeleteFundraiserMediaBody,
+	DeleteFundraiserMediaParams,
+	AddFundraiserMilestoneBody,
+	AddFundraiserMilestoneParams,
+	AddMilestoneMediaContent,
 }
