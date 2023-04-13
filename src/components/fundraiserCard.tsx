@@ -121,13 +121,7 @@ function FundraiserCard(props: FundraiserCardProps){
 			<EuiFlexItem
 				grow={0}
 			>
-				<EuiFlexGroup
-					style={{
-						borderRadius: "10px",
-						border: `1px solid ${LINK_TEXT_COLOR_OVERRIDE}`,
-						padding: `10px`
-					}}
-				>
+				<EuiFlexGroup>
 					<EuiFlexItem>
 						<EuiFlexGroup
 							direction={"column"}

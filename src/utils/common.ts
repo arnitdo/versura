@@ -5,6 +5,16 @@ import {MediaCallbackBody, PresignedURLBody} from "@/utils/types/apiRequests";
 
 const LINK_TEXT_COLOR_OVERRIDE = "#DFE5EF" as const
 
+const ETH_GAS_FEES_WEI = (50 * 1e-10)
+
+const gasTokenMap = {
+	"ETH": "WEI"
+}
+
+const gasAmountMap = {
+	"ETH": ETH_GAS_FEES_WEI
+}
+
 export type ValidationResultMap<T> = {
 	[propName in keyof T]: boolean
 }
@@ -192,5 +202,7 @@ export {
 	LINK_TEXT_COLOR_OVERRIDE,
 	manageMedia,
 	useValueScale,
-	requireBasicObjectValidation
+	requireBasicObjectValidation,
+	gasAmountMap,
+	gasTokenMap
 }

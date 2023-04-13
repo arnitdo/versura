@@ -62,6 +62,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		}
 		
 		const selectedFundraiser = dbRows[0]
+		console.log(typeof selectedFundraiser.fundraiserMinDonationAmount)
 		const {fundraiserMediaObjectKeys} = selectedFundraiser
 		
 		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
