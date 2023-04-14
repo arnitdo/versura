@@ -5,7 +5,7 @@ import {MediaCallbackBody, PresignedURLBody} from "@/utils/types/apiRequests";
 
 const LINK_TEXT_COLOR_OVERRIDE = "#DFE5EF" as const
 
-const ETH_GAS_FEES_WEI = (50 * 1e-10)
+const ETH_GAS_FEES_WEI = 30 * 1e12
 
 const gasTokenMap = {
 	"ETH": "WEI"

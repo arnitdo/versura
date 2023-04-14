@@ -62,7 +62,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 		} = req.body;
 		
 		fundraiserToken = fundraiserToken || "ETH"
-		fundraiserMinDonationAmount = fundraiserMinDonationAmount || 1e-10
+		fundraiserMinDonationAmount = fundraiserMinDonationAmount || 1e-18
 		
 		const {walletAddress} = req.user!
 		

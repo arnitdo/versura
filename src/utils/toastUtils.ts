@@ -1,11 +1,11 @@
-import {useCallback, useRef, useState} from 'react';
+import {ReactChild, ReactNode, useCallback, useRef, useState} from 'react';
 import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 
 type ToastType = "primary" | "success" | "warning" | "danger"
 
 type ToastUtils = {
 	toasts: Toast[]
-	addToast: (toastTitle: string, toastText: string, toastType?: ToastType) => void,
+	addToast: (toastTitle: string, toastText: ReactChild, toastType?: ToastType) => void,
 	dismissToast: (dismissedToast: Toast) => void
 }
 
@@ -17,7 +17,7 @@ function useToastList(toastListArgs: ToastListHookArgs): ToastUtils{
 	const [toasts, setToasts] = useState<Toast[]>([])
 	const internalToastCountRef = useRef<number>(0)
 	
-	const addToast = useCallback((toastTitle: string, toastText: string, toastType?: ToastType) => {
+	const addToast = useCallback((toastTitle: string, toastText: ReactChild, toastType?: ToastType) => {
 		const generatedToastId = toastListArgs.toastIdFactoryFn(internalToastCountRef.current, toastType)
 		internalToastCountRef.current += 1
 		setToasts((oldToasts) => {

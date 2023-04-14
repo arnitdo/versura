@@ -20,11 +20,15 @@ import {
 	EuiAvatar,
 	EuiHorizontalRule,
 	EuiForm,
-	EuiFieldText, EuiFormRow, EuiButton
+	EuiFieldText, EuiFormRow, EuiButton, EuiGlobalToastList, EuiCheckbox, useGeneratedHtmlId
 } from "@elastic/eui";
 import Image from "next/image";
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
+import {useCallback, useContext, useState} from "react";
+import {AuthContext} from "@/pages/_app";
+import {useToastList} from "@/utils/toastUtils";
+import Link from "next/link";
 
 
 type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
@@ -126,6 +130,8 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 }
 
 export default function FundraiserPage(props: FundraiserPageProps): JSX.Element {
+	const authCtx = useContext(AuthContext)
+	
 	const {
 		fundraiserId, fundraiserTarget, fundraiserMedia, fundraiserCreatedOn,
 		fundraiserToken, fundraiserMilestoneCount, fundraiserContributorCount,
@@ -133,10 +139,28 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		fundraiserMilestones, fundraiserRaisedAmount, fundraiserMinDonationAmount
 	} = props
 	
+	const parsedFundraiserCreationDate = new Date(fundraiserCreatedOn)
+	
+	const relativeFundraiserDate = parsedFundraiserCreationDate.toDateString()
+	
+	// @ts-ignore
+	const selectedGasToken = gasTokenMap[fundraiserToken]
+	// @ts-ignore
+	const gasAmountWei = gasAmountMap[fundraiserToken]
+	
+	const [donationAmount, setDonationAmount] = useState<number>(fundraiserMinDonationAmount)
+	const [donationInvalid, setDonationInvalid] = useState<boolean>(false);
+	
+	const [conditionsAccepted, setConditionsAccepted] = useState<boolean>(false)
+	
+	const {toasts, addToast, dismissToast} = useToastList({
+		toastIdFactoryFn: (toastCount, toastType) => {
+			return `fundraiser-page-${toastCount}`
+		}
+	})
+	
 	const progressStatusColors = ["danger", "orange", "yellow", "green", "success"]
-	
 	const fundraiserCompletionPercentage = (fundraiserRaisedAmount * 100) / fundraiserTarget
-	
 	const selectedColor = useValueScale({
 		minScale: 0,
 		maxScale: 4,
@@ -145,10 +169,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		currValue: fundraiserCompletionPercentage,
 		scaledValues: progressStatusColors
 	})
-	
-	const fundraiserPercentageInt = Number.parseInt(
-		fundraiserCompletionPercentage.toString()
-	)
+	const fundraiserPercentageInt = fundraiserCompletionPercentage.toFixed(0)
 	
 	let selectedFundraiserMedia: GenericMedia | null = null
 	for (const media of fundraiserMedia){
@@ -159,16 +180,108 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 	}
 	
+	const calculatedServiceFeeWei = (
+		/* SELECTED GAS AMT */gasAmountWei +
+		/* SELECTED DONATION AMT */ donationAmount * 1e12
+	)
 	
-	// @ts-ignore
-	const selectedGasToken = gasTokenMap[fundraiserToken]
-	// @ts-ignore
-	const selectedGasAmount = gasAmountMap[fundraiserToken]
+	const calculatedServiceFeeEth = calculatedServiceFeeWei * 1e-18
 	
-	const calculatedServiceFee = (
-		/* SELECTED GAS AMT */selectedGasAmount +
-		/* SELECTED DONATION AMT */ fundraiserMinDonationAmount * 1e-8
-	) * 1e10
+	const finalAmountEth = (
+		donationAmount +
+		calculatedServiceFeeWei * 1e-18
+	)
+	
+	const sendFundraiserDonation = useCallback(async () => {
+		if (!authCtx.isAuthenticated){
+			addToast(
+				"Log in to send funds",
+				"You must be authenticated to send funds",
+				"danger"
+			)
+			return
+		}
+		
+		if (donationInvalid){
+			addToast(
+				"Invalid amount entered",
+				`Please enter a value greater than ${fundraiserMinDonationAmount} ${fundraiserToken}`,
+				"danger"
+			)
+			return
+		}
+		
+		if (!conditionsAccepted){
+			addToast(
+				"You must accept the Terms and Conditions",
+				"",
+				"danger"
+			)
+			return
+		}
+		
+		const holdingAccountAddress = process.env.NEXT_PUBLIC_VERSURA_ACCOUNT_ADDRESS
+		
+		try {
+			const finalAmountWei = finalAmountEth * 1e18
+			const finalAmountString = finalAmountWei.toString(16)
+			
+			console.log(finalAmountWei)
+			
+			const requestParams = {
+				from: authCtx.metamaskAddress!,
+				to: holdingAccountAddress,
+				value: finalAmountString
+			}
+			
+			
+			// @ts-ignore
+			const ethResponse = await window.ethereum.request({
+				method: "eth_sendTransaction",
+				params: [
+					requestParams
+				]
+			})
+
+			addToast(
+				"Transaction created successfully!",
+				(
+					<Link
+						href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/tx/${ethResponse}`}
+					>
+						<EuiText
+							color={LINK_TEXT_COLOR_OVERRIDE}
+						>
+							View on Etherscan
+						</EuiText>
+					</Link>
+				),
+				"success"
+			)
+			
+		} catch (err){
+			// @ts-ignore
+			if (err.code === 4001){
+				addToast(
+					"Transaction was cancelled",
+					"Transaction was cancelled by the user",
+					"warning"
+				)
+				return
+			}
+			console.error(err)
+			addToast(
+				"An unexpected error occurred",
+				"We weren't able to complete your transaction",
+				"danger"
+			)
+			return
+		}
+	}, [donationAmount, gasAmountWei, calculatedServiceFeeWei, finalAmountEth, authCtx, conditionsAccepted])
+	
+	const checkboxId = useGeneratedHtmlId({
+		prefix: "fundraiser-checkbox"
+	})
 	
 	return (
 		<EuiFlexGroup
@@ -184,7 +297,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				<EuiFlexGroup
 					direction={"row"}
 					alignItems={"center"}
-					justifyContent={"spaceAround"}
+					justifyContent={"spaceBetween"}
 				>
 					{
 						selectedFundraiserMedia  && (
@@ -209,6 +322,11 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 							<h2>{fundraiserTitle}</h2>
 						</EuiText>
 					</EuiFlexItem>
+					<EuiFlexItem grow={0}>
+						<EuiText grow={false}>
+							<h4>{relativeFundraiserDate}</h4>
+						</EuiText>
+					</EuiFlexItem>
 				</EuiFlexGroup>
 			</EuiPanel>
 			<EuiFlexGroup
@@ -218,7 +336,9 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			>
 				<EuiFlexItem grow={7}>
 					<EuiPanel>
-						<EuiMarkdownFormat>
+						<EuiMarkdownFormat
+							grow={true}
+						>
 							{fundraiserDescription}
 						</EuiMarkdownFormat>
 					</EuiPanel>
@@ -290,7 +410,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															textAlign={"center"}
 														>
 															<h3>
-																{fundraiserContributorCount}
+																{`${fundraiserTarget} ${fundraiserToken}`}
 															</h3>
 														</EuiText>
 													</EuiFlexItem>
@@ -298,7 +418,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 														<EuiText
 															textAlign={"center"}
 														>
-															<h5>Contributors</h5>
+															<h5>Target</h5>
 														</EuiText>
 													</EuiFlexItem>
 												</EuiFlexGroup>
@@ -313,7 +433,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															textAlign={"center"}
 														>
 															<h3>
-																{fundraiserMilestoneCount}
+																{fundraiserContributorCount}
 															</h3>
 														</EuiText>
 													</EuiFlexItem>
@@ -321,7 +441,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 														<EuiText
 															textAlign={"center"}
 														>
-															<h5>Milestones</h5>
+															<h5>Contributors</h5>
 														</EuiText>
 													</EuiFlexItem>
 												</EuiFlexGroup>
@@ -339,53 +459,91 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 								>
 									<EuiFlexItem>
 										<EuiText>
-											<h2>Fund this Campaign</h2>
+											<h1>Fund this Campaign</h1>
 										</EuiText>
 									</EuiFlexItem>
+									<EuiHorizontalRule margin={"none"}/>
 									<EuiFlexItem>
-										<EuiForm>
+										<EuiForm fullWidth>
 											<EuiFormRow
 												label={"Base Amount"}
+												helpText={"This amount will directly go to the fundraiser creator"}
 											>
 												<EuiFieldText
 													placeholder={`${fundraiserMinDonationAmount}`}
 													defaultValue={fundraiserMinDonationAmount}
 													append={fundraiserToken}
-												/>
-											</EuiFormRow>
-											<EuiFormRow
-												label={"Gas Fees"}
-											>
-												<EuiFieldText
-													// @ts-ignore
-													placeholder={selectedGasAmount * 1e10}
-													// @ts-ignore
-													defaultValue={selectedGasAmount * 1e10}
-													// @ts-ignore
-													append={selectedGasToken + " (GAS)"}
+													onChange={(e) => {
+														const parsedDonationAmount = Number.parseFloat(e.target.value)
+														if (Number.isNaN(parsedDonationAmount)){
+															setDonationInvalid(true)
+															return
+														}
+														if (parsedDonationAmount < fundraiserMinDonationAmount){
+															setDonationInvalid(true)
+															return
+														}
+														setDonationAmount(parsedDonationAmount)
+														setDonationInvalid(false)
+													}}
+													isInvalid={donationInvalid}
 												/>
 											</EuiFormRow>
 											<EuiFormRow
 												label={"Service Fees"}
+												helpText={"This service fee is levied by Versura"}
 											>
 												<EuiFieldText
 													readOnly
-													defaultValue={calculatedServiceFee}
-													append={selectedGasToken}
+													value={calculatedServiceFeeEth.toFixed(8)}
+													append={fundraiserToken}
 												/>
 											</EuiFormRow>
 											<EuiFormRow
 												label={"Final Transaction Amount"}
+												fullWidth
+												helpText={"Final Amount Payable"}
 											>
 												<EuiFieldText
-													defaultValue={(
-														fundraiserMinDonationAmount +
-														selectedGasAmount +
-														calculatedServiceFee * 1e-10
-													)}
+													value={finalAmountEth.toFixed(8)}
 													readOnly
 													append={fundraiserToken}
+													fullWidth
 												/>
+											</EuiFormRow>
+											<EuiFormRow>
+												<EuiCheckbox
+													id={checkboxId}
+													checked={conditionsAccepted}
+													onChange={(e) => {
+														setConditionsAccepted(e.target.checked)
+													}}
+													label={"I accept the Terms and Conditions"}
+												/>
+											</EuiFormRow>
+											<EuiFormRow
+												fullWidth
+											>
+												{authCtx.isAuthenticated ? (
+													<EuiButton
+														color={"primary"}
+														fill
+														fullWidth
+														onClick={sendFundraiserDonation}
+														disabled={!donationInvalid && !conditionsAccepted}
+													>
+														{`Send ${fundraiserToken}`}
+													</EuiButton>
+												) : (
+													<EuiButton
+														color={"primary"}
+														fill
+														disabled
+														fullWidth
+													>
+														Log in to donate funds
+													</EuiButton>
+												)}
 											</EuiFormRow>
 										</EuiForm>
 									</EuiFlexItem>
@@ -396,6 +554,11 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				</EuiFlexItem>
 			</EuiFlexGroup>
 			<EuiSpacer />
+			<EuiGlobalToastList
+				dismissToast={dismissToast}
+				toasts={toasts}
+				toastLifeTimeMs={5000}
+			/>
 		</EuiFlexGroup>
 	)
 }

@@ -19,7 +19,15 @@ import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
 
 export default function PageHeader(): JSX.Element {
 	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
-	const {pathname} = useRouter()
+	const {pathname, query} = useRouter()
+	
+	let returnPagePath = pathname
+	for (const queryElement in query){
+		returnPagePath = returnPagePath.replace(
+			`[${queryElement}]`,
+			query[queryElement]! as string
+		)
+	}
 	
 	return (
 		<EuiHeader
@@ -86,7 +94,7 @@ export default function PageHeader(): JSX.Element {
 						>
 							<EuiHeaderLink>
 								<Link
-									href={`/auth/logout?returnTo=${pathname}`}
+									href={`/auth/logout?returnTo=${returnPagePath}`}
 									style={{
 										color: LINK_TEXT_COLOR_OVERRIDE
 									}}
@@ -110,7 +118,7 @@ export default function PageHeader(): JSX.Element {
 						>
 							<EuiHeaderLink>
 								<Link
-									href={`/auth/login?returnTo=${pathname}`}
+									href={`/auth/login?returnTo=${returnPagePath}`}
 									style={{
 										color: LINK_TEXT_COLOR_OVERRIDE
 									}}
@@ -120,7 +128,7 @@ export default function PageHeader(): JSX.Element {
 							</EuiHeaderLink>
 							<EuiHeaderLink>
 								<Link
-									href={`/auth/signup?returnTo=${pathname}`}
+									href={`/auth/signup?returnTo=${returnPagePath}`}
 									style={{
 										color: LINK_TEXT_COLOR_OVERRIDE
 									}}

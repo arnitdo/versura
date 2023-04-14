@@ -19,7 +19,7 @@ CREATE TABLE "fundRaisers" (
 
     "fundraiserTarget" NUMERIC NOT NULL,
     "fundraiserToken" TEXT NOT NULL DEFAULT 'ETH',
-    "fundraiserMinDonationAmount" NUMERIC DEFAULT 1e-10,
+    "fundraiserMinDonationAmount" NUMERIC DEFAULT 1e-18,
 
     "fundraiserRaisedAmount" NUMERIC NOT NULL DEFAULT 0,
 
