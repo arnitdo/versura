@@ -75,7 +75,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 			mediaFiles.map(async (mediaFile, mediaIdx) => {
 				const objectKey = objectKeyGenFn(mediaFile, mediaIdx)
 				const {isSuccess, isError, code, data, error, } = await makeAPIRequest<PresignedURLResponse, PresignedURLBody>({
-					endpointPath: `/api/content/presigned_url`,
+					endpointPath: `/api/media/presigned_url`,
 					requestMethod: "POST",
 					bodyParams: {
 						objectKey: objectKey,
@@ -151,7 +151,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 				const objectKey = objectKeyGenFn(mediaFile, fileIdx)
 				const {type: objectContentType, size: objectSizeBytes} = mediaFile
 				const {isSuccess, isError, code, data, error} = await makeAPIRequest<MediaCallbackResponse, MediaCallbackBody>({
-					endpointPath: `/api/content/media_callback`,
+					endpointPath: `/api/media/media_callback`,
 					requestMethod: "POST",
 					bodyParams: {
 						objectKey: objectKey,
