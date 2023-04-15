@@ -151,7 +151,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 				const objectKey = objectKeyGenFn(mediaFile, fileIdx)
 				const {type: objectContentType, size: objectSizeBytes} = mediaFile
 				const {isSuccess, isError, code, data, error} = await makeAPIRequest<MediaCallbackResponse, MediaCallbackBody>({
-					endpointPath: `/api/media/media_callback`,
+					endpointPath: `/api/media/callback`,
 					requestMethod: "POST",
 					bodyParams: {
 						objectKey: objectKey,

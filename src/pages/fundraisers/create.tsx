@@ -37,7 +37,7 @@ import {
 } from "@/utils/types/apiResponses";
 import {useToastList} from "@/utils/toastUtils";
 import {useRouter} from "next/router";
-import {manageMedia, useValueScale} from "@/utils/common";
+import {manageMedia, requireBasicObjectValidation, useValueScale} from "@/utils/common";
 
 type InvalidMap<T> = {
 	[propName in keyof Required<T>]: boolean
@@ -62,6 +62,8 @@ export default function CreateFundraiser(): JSX.Element {
 		fundraiserDescription: false,
 		fundraiserTitle: false
 	})
+	
+	const [creationProcessActive, setCreationProcessActive] = useState<boolean>(false);
 	
 	const navRouter = useRouter()
 	
@@ -117,8 +119,19 @@ export default function CreateFundraiser(): JSX.Element {
 			})
 		}
 		
+		// Require media before creating fundraisers
+		if (fundraiserMedia.length === 0){
+			addToast(
+				"Please attach media to your campaign",
+				"Images will attract more contributors to your fundraiser",
+				"danger"
+			)
+			return
+		}
+		
 		// Create fundraiser in API
 		{
+			setCreationProcessActive(true)
 			const {isSuccess, isError, code, data, error} = await makeAPIRequest<CreateFundraiserResponse>({
 				endpointPath: `/api/fundraisers`,
 				requestMethod: "POST",
@@ -130,6 +143,7 @@ export default function CreateFundraiser(): JSX.Element {
 					(error as Error).message || "",
 					"danger"
 				)
+				setCreationProcessActive(false)
 				return
 			}
 			if (isSuccess && data){
@@ -147,6 +161,7 @@ export default function CreateFundraiser(): JSX.Element {
 						"",
 						"danger"
 					)
+					setCreationProcessActive(false)
 					return
 				}
 				if (requestStatus === "ERR_AUTH_REQUIRED"){
@@ -155,6 +170,7 @@ export default function CreateFundraiser(): JSX.Element {
 						"Log in or Create an account to set up fundraisers",
 						"danger"
 					)
+					setCreationProcessActive(false)
 					return
 				}
 				if (requestStatus === "SUCCESS"){
@@ -167,6 +183,7 @@ export default function CreateFundraiser(): JSX.Element {
 		}
 		{
 			if (!fundraiserCreationStatus.createFundraiser){
+				setCreationProcessActive(false)
 				return
 			}
 			const mediaManagementStatuses = await manageMedia({
@@ -197,6 +214,7 @@ export default function CreateFundraiser(): JSX.Element {
 		}
 		{
 			if (!fundraiserCreationStatus.contentMediaCallback){
+				setCreationProcessActive(false)
 				return
 			}
 			let fundraiserContentUpdateStatus = await Promise.all(
@@ -241,7 +259,18 @@ export default function CreateFundraiser(): JSX.Element {
 					},
 					FUNDRAISER_REDIR_TIMEOUT_S * 1000
 				)
+				setCreationProcessActive(false)
+				return
 			}
+			
+			// Fundraiser creation failed, somewhere along the way!
+			addToast(
+				"We had trouble creating your fundraiser",
+				"Please try again later",
+				"danger"
+			)
+			setCreationProcessActive(false)
+			return
 		}
 	}, [fundraiserFormData, fundraiserMedia, addToast])
 	
@@ -326,6 +355,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
+								defaultValue={fundraiserTitle}
 								isInvalid={isTitleInvalid}
 							/>
 						</EuiFormRow>
@@ -346,6 +376,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
+								defaultValue={fundraiserDescription}
 								isInvalid={isDescriptionInvalid}
 							/>
 						</EuiFormRow>
@@ -366,6 +397,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
+								defaultValue={fundraiserDescription}
 								isInvalid={isTokenInvalid}
 							/>
 						</EuiFormRow>
@@ -390,6 +422,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
+								defaultValue={fundraiserToken}
 								append={fundraiserToken}
 								isInvalid={isTargetInvalid}
 							/>
@@ -416,6 +449,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
+								defaultValue={fundraiserMinDonationAmount}
 								append={fundraiserToken}
 								isInvalid={isDonationAmtInvalid}
 							/>
@@ -439,12 +473,20 @@ export default function CreateFundraiser(): JSX.Element {
 							/>
 						</EuiFormRow>
 						<EuiHorizontalRule />
-						<EuiProgress
-							value={fundraiserCreationProgressValue}
-							max={fundraiserMedia.length * 5}
-							color={fundraiserProgressColor}
-						/>
-						<EuiHorizontalRule />
+						{
+							creationProcessActive ? (
+								<>
+									<EuiProgress
+										value={fundraiserCreationProgressValue}
+										max={fundraiserMedia.length * 5}
+										color={fundraiserProgressColor}
+									/>
+									<EuiHorizontalRule />
+								</>
+							) : (
+								null
+							)
+						}
 						<EuiFormRow
 							label={""}
 							fullWidth
@@ -457,6 +499,7 @@ export default function CreateFundraiser(): JSX.Element {
 									onClick={createFundraiserWithMedia}
 									fullWidth
 									fill
+									disabled={creationProcessActive || !fundraiserMedia.length}
 								>
 									Create Fundraiser
 								</EuiButton>
