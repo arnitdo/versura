@@ -36,7 +36,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
 			})
-			await dbClient.release()
+			dbClient.release()
 			return
 		}
 		
@@ -47,14 +47,14 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 			[walletAddress, hashedPassword]
 		)
 		await dbClient.query("COMMIT")
-		await dbClient.release()
+		dbClient.release()
 		res.status(200).json({
 			requestStatus: "SUCCESS"
 		})
 	} catch (err: unknown){
 		console.error(err)
 		await dbClient.query("ROLLBACK")
-		await dbClient.release()
+		dbClient.release()
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"
 		})

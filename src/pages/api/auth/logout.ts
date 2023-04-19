@@ -23,7 +23,7 @@ export default async function logoutUser(req: CustomApiRequest<LogoutUserRequest
 	
 	res.setHeader(
 		"Set-Cookie",
-		"versura-auth-token=; HttpOnly; Max-Age=-1"
+		`versura-auth-token=""; HttpOnly; Path=/; Max-Age=0; SameSite=Strict`
 	)
 	
 	res.status(200).json({

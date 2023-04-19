@@ -39,7 +39,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
 			})
-			await dbClient.release()
+			dbClient.release()
 			return
 		}
 		
@@ -58,25 +58,25 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 					algorithm: "HS256"
 				}
 			)
-			res.setHeader("Set-Cookie", `versura-auth-token=${authToken}; Path=/; HttpOnly`)
+			res.setHeader("Set-Cookie", `versura-auth-token=${authToken}; Path=/; HttpOnly; SameSite=Strict`)
 			res.status(200).json<LoginResponse>({
 				requestStatus: "SUCCESS",
 				userRole: userRole
 			})
-			await dbClient.release()
+			dbClient.release()
 			return
 		} else {
 			res.status(400).json<LoginResponse>({
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["userPass"]
 			})
-			await dbClient.release()
+			dbClient.release()
 			return
 		}
 	} catch (err: unknown){
 		console.error(err)
 		await dbClient.query("ROLLBACK")
-		await dbClient.release()
+		dbClient.release()
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"
 		})
