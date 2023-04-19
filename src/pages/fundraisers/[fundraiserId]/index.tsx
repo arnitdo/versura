@@ -583,7 +583,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 													>
 														<EuiFieldText
 															fullWidth
-															defaultValue={withdrawalAmount}
+															defaultValue={maxWithdrawableAmount}
 															append={fundraiserToken}
 															isInvalid={withdrawalInvalid}
 															onChange={(e) => {
