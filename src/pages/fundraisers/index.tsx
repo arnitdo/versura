@@ -4,10 +4,20 @@ import {GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
 
 import {FundraiserCard} from "@/components/fundraiserCard"
-import {EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPageTemplate, EuiPagination,
-	EuiPanel, EuiSpacer, EuiText} from "@elastic/eui";
+import {
+	EuiButton,
+	EuiEmptyPrompt,
+	EuiFlexGroup,
+	EuiFlexItem,
+	EuiHorizontalRule,
+	EuiIcon,
+	EuiPageTemplate,
+	EuiPanel,
+	EuiSpacer,
+	EuiText
+} from "@elastic/eui";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import {useRouter} from "next/router";
 
 type FundraiserFeedData = {
 	feedPage: number
@@ -168,7 +178,9 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 											}
 										>
 											<EuiText>
-												<h5>&lt; Previous</h5>
+												<h5>
+													<EuiIcon type={"arrowLeft"}/> Previous
+												</h5>
 											</EuiText>
 										</EuiButton>
 									</Link>
@@ -186,7 +198,9 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 											}
 										>
 											<EuiText>
-												<h5>Next &gt;</h5>
+												<h5>
+													Next <EuiIcon type={"arrowRight"} />
+												</h5>
 											</EuiText>
 										</EuiButton>
 									</Link>

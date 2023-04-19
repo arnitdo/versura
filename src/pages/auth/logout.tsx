@@ -2,14 +2,7 @@ import React, {useCallback, useContext, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import {useRouter} from "next/router"
 import Image from 'next/image'
-import {
-	EuiFlexItem,
-	EuiButton,
-	EuiPanel,
-	EuiFlexGroup,
-	EuiGlobalToastList,
-    EuiLoadingSpinner
-} from "@elastic/eui";
+import {EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastList, EuiLoadingSpinner, EuiPanel} from "@elastic/eui";
 
 import VersuraIcon from "@/assets/versura-icon.png";
 import {useToastList} from "@/utils/toastUtils";
@@ -18,7 +11,7 @@ import {makeAPIRequest} from "@/utils/apiHandler";
 import Link from "next/link";
 import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
-import { LogoutResponse } from "@/utils/types/apiResponses";
+import {LogoutResponse} from "@/utils/types/apiResponses";
 
 function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const authCtx = useContext<AuthContextType>(AuthContext)

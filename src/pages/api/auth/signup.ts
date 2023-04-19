@@ -1,14 +1,16 @@
 import {hash} from "bcryptjs";
 import {
-	requireValidBody,
-	requireBodyParams,
-	requireMiddlewareChecks,
+	CustomApiRequest,
 	CustomApiResponse,
-	requireMethods, CustomApiRequest
+	requireBodyParams,
+	requireMethods,
+	requireMiddlewareChecks,
+	requireValidBody
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
 import {SignupResponse} from "@/utils/types/apiResponses";
 import {SignupUserRequestBody} from "@/utils/types/apiRequests";
+
 export default async function signupUser(req: CustomApiRequest<SignupUserRequestBody>, res: CustomApiResponse){
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,

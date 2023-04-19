@@ -3,16 +3,16 @@ import EuiCenter from '@/components/customCenter'
 import Link from "next/link"
 import Image from 'next/image'
 import {
-	EuiFlexItem,
 	EuiButton,
-	EuiPanel,
+	EuiFieldPassword,
+	EuiFieldText,
 	EuiFlexGroup,
+	EuiFlexItem,
 	EuiForm,
 	EuiFormRow,
-	EuiFieldText,
-	EuiFieldPassword,
 	EuiGlobalToastList,
-    EuiLoadingSpinner
+	EuiLoadingSpinner,
+	EuiPanel
 } from "@elastic/eui";
 
 import VersuraIcon from "@/assets/versura-icon.png";

@@ -1,6 +1,6 @@
 import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import {EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiText} from "@elastic/eui";
-import { useEffect } from "react";
+import {useEffect} from "react";
 import CustomCenter from "@/components/customCenter";
 
 import Link from "next/link"

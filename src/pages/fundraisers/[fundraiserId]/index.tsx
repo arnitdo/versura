@@ -2,10 +2,11 @@ import {GetServerSideProps} from "next";
 import {
 	FundraiserDonationBody,
 	FundraiserDonationParams,
-	FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams,
+	FundraiserWithdrawalRequestBody,
+	FundraiserWithdrawalRequestParams,
 	GetFundraiserRequestParams
 } from "@/utils/types/apiRequests";
-import {APIResponse, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {APIResponse, GetFundraiserResponse} from "@/utils/types/apiResponses";
 import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
 import {
 	calculateServiceFeeWeiForAmount,
@@ -17,22 +18,21 @@ import {
 } from "@/utils/common";
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {
+	EuiButton,
+	EuiCheckbox,
+	EuiFieldText,
 	EuiFlexGroup,
 	EuiFlexItem,
+	EuiForm,
+	EuiFormRow,
+	EuiGlobalToastList,
+	EuiHorizontalRule,
+	EuiLoadingSpinner,
+	EuiMarkdownFormat,
 	EuiPanel,
 	EuiSpacer,
 	EuiText,
-	EuiMarkdownFormat,
-	EuiAvatar,
-	EuiHorizontalRule,
-	EuiForm,
-	EuiFieldText,
-	EuiFormRow,
-	EuiButton,
-	EuiGlobalToastList,
-	EuiCheckbox,
-	useGeneratedHtmlId,
-	EuiLoadingSpinner
+	useGeneratedHtmlId
 } from "@elastic/eui";
 import Image from "next/image";
 

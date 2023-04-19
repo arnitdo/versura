@@ -1,5 +1,5 @@
 import {GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
-import {EuiAvatar, EuiFlexGroup, EuiLink, EuiFlexItem, EuiHorizontalRule, EuiText} from "@elastic/eui";
+import {EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText} from "@elastic/eui";
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
 import Image from "next/image";

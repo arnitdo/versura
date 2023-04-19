@@ -1,4 +1,4 @@
-import {ReactChild, ReactNode, useCallback, useRef, useState} from 'react';
+import {ReactChild, useCallback, useRef, useState} from 'react';
 import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 
 type ToastType = "primary" | "success" | "warning" | "danger"

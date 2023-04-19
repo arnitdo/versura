@@ -1,10 +1,5 @@
 import Head from 'next/head'
-import {
-	EuiPageTemplate,
-	EuiText,
-	EuiFlexGroup,
-	EuiFlexItem, EuiButton
-} from "@elastic/eui"
+import {EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiText} from "@elastic/eui"
 
 import Image from 'next/image'
 

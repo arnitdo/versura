@@ -1,4 +1,3 @@
-import {MediaCallbackBody} from "@/utils/types/apiRequests";
 import {WithdrawalStatus} from "@/utils/types/apiTypedefs";
 
 export type UserRole = "CLIENT" | "ADMIN"

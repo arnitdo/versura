@@ -1,14 +1,13 @@
 import EuiCenter from "@/components/customCenter";
 import {
 	EuiButton,
-	EuiFieldNumber,
 	EuiFieldText,
 	EuiFilePicker,
-	EuiFlexGrid,
 	EuiFlexGroup,
 	EuiFlexItem,
 	EuiForm,
-	EuiFormRow, EuiGlobalToastList,
+	EuiFormRow,
+	EuiGlobalToastList,
 	EuiHorizontalRule,
 	EuiPanel,
 	EuiProgress,
@@ -20,24 +19,13 @@ import VersuraIcon from "@/assets/versura-icon.png";
 import Link from "next/link"
 import Image from "next/image"
 import {EuiSelectOption} from "@elastic/eui/src/components/form/select/select";
-import {useCallback, useEffect, useRef, useState} from "react";
-import {
-	AddFundraiserMediaBody,
-	AddFundraiserMediaParams,
-	CreateFundraiserRequestBody,
-	MediaCallbackBody,
-	PresignedURLBody
-} from "@/utils/types/apiRequests";
+import {useCallback, useRef, useState} from "react";
+import {AddFundraiserMediaBody, AddFundraiserMediaParams, CreateFundraiserRequestBody} from "@/utils/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {
-	PresignedURLResponse,
-	CreateFundraiserResponse,
-	MediaCallbackResponse,
-	APIResponse
-} from "@/utils/types/apiResponses";
+import {APIResponse, CreateFundraiserResponse} from "@/utils/types/apiResponses";
 import {useToastList} from "@/utils/toastUtils";
 import {useRouter} from "next/router";
-import {manageMedia, requireBasicObjectValidation, useValueScale} from "@/utils/common";
+import {manageMedia, useValueScale} from "@/utils/common";
 
 type InvalidMap<T> = {
 	[propName in keyof Required<T>]: boolean

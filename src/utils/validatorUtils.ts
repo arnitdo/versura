@@ -1,4 +1,4 @@
-import {Client, PoolClient} from "pg";
+import {PoolClient} from "pg";
 
 function NON_ZERO(value: number){
 	return value != 0

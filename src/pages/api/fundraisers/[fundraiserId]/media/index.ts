@@ -1,17 +1,23 @@
 import {
 	CustomApiRequest,
-	CustomApiResponse, requireAuthenticatedUser, requireBodyParams,
+	CustomApiResponse,
+	requireAuthenticatedUser,
+	requireBodyParams,
 	requireBodyValidators,
 	requireMethods,
-	requireMiddlewareChecks, requireQueryParams, requireQueryParamValidators, requireValidBody
+	requireMiddlewareChecks,
+	requireQueryParams,
+	requireQueryParamValidators,
+	requireValidBody
 } from "@/utils/customMiddleware";
 import {
 	AddFundraiserMediaBody,
 	AddFundraiserMediaParams,
-	DeleteFundraiserMediaBody, DeleteFundraiserMediaParams
+	DeleteFundraiserMediaBody,
+	DeleteFundraiserMediaParams
 } from "@/utils/types/apiRequests";
 import {withMethodDispatcher} from "@/utils/methodDispatcher";
-import { db } from "@/utils/db";
+import {db} from "@/utils/db";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 
 type FundraiserMediaBodyMap = {

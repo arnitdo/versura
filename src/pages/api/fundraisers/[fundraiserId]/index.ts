@@ -4,11 +4,12 @@ import {
 	CustomApiResponse,
 	requireMethods,
 	requireMiddlewareChecks,
-	requireQueryParams, requireQueryParamValidators
+	requireQueryParams,
+	requireQueryParamValidators
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
 import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
-import {NON_ZERO_NON_NEGATIVE, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
+import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
 import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
 import {getPresignedURL} from "@/utils/s3";

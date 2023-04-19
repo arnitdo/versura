@@ -1,14 +1,17 @@
 import {
 	CustomApiRequest,
-	CustomApiResponse, requireAuthenticatedUser, requireBodyParams, requireBodyValidators,
+	CustomApiResponse,
+	requireAuthenticatedUser,
+	requireBodyParams,
+	requireBodyValidators,
 	requireMethods,
 	requireMiddlewareChecks,
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {MediaCallbackBody} from "@/utils/types/apiRequests";
-import {NON_NEGATIVE, STRLEN_NZ} from "@/utils/validatorUtils";
+import {NON_NEGATIVE} from "@/utils/validatorUtils";
 import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
-import { db } from "@/utils/db";
+import {db} from "@/utils/db";
 
 export default async function mediaCallback(req: CustomApiRequest<MediaCallbackBody>, res: CustomApiResponse){
 	const dbClient = await db.connect()

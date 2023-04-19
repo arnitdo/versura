@@ -1,8 +1,13 @@
 import {
 	CustomApiRequest,
-	CustomApiResponse, requireAuthenticatedUser, requireBodyParams, requireBodyValidators,
+	CustomApiResponse,
+	requireAuthenticatedUser,
+	requireBodyParams,
+	requireBodyValidators,
 	requireMethods,
-	requireMiddlewareChecks, requireQueryParams, requireQueryParamValidators,
+	requireMiddlewareChecks,
+	requireQueryParams,
+	requireQueryParamValidators,
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {FundraiserDonationBody, FundraiserDonationParams} from "@/utils/types/apiRequests";

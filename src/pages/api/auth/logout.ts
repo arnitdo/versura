@@ -1,7 +1,8 @@
 import {
 	CustomApiRequest,
 	CustomApiResponse,
-	requireAuthenticatedUser, requireMethods,
+	requireAuthenticatedUser,
+	requireMethods,
 	requireMiddlewareChecks
 } from "@/utils/customMiddleware";
 import {LogoutUserRequestBody} from "@/utils/types/apiRequests";

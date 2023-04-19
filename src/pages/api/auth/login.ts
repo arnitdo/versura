@@ -1,11 +1,12 @@
 import {compare} from "bcryptjs";
 import {sign} from "jsonwebtoken"
 import {
-	requireValidBody,
-	requireBodyParams,
-	requireMiddlewareChecks,
+	CustomApiRequest,
 	CustomApiResponse,
-	requireMethods, CustomApiRequest
+	requireBodyParams,
+	requireMethods,
+	requireMiddlewareChecks,
+	requireValidBody
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
 import type {AuthUsers} from "@/utils/types/queryTypedefs";

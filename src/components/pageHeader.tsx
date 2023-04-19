@@ -1,14 +1,6 @@
 import {AuthContext} from "@/pages/_app";
-import { AuthContextType } from "@/utils/types/componentTypedefs";
-import {
-	EuiHeader,
-	EuiHeaderSection,
-	EuiAvatar,
-	EuiHeaderLinks,
-	EuiHeaderLink,
-    EuiHeaderSectionItemButton,
-	useGeneratedHtmlId
-} from "@elastic/eui"
+import {AuthContextType} from "@/utils/types/componentTypedefs";
+import {EuiAvatar, EuiHeader, EuiHeaderLink, EuiHeaderLinks, EuiHeaderSection} from "@elastic/eui"
 import {useContext} from "react";
 import Link from "next/link";
 import Image from "next/image";

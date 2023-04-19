@@ -1,10 +1,14 @@
-import {web3Eth} from "@/utils/web3Provider"
 import {
 	CustomApiRequest,
 	CustomApiResponse,
-	requireAuthenticatedUser, requireBodyParams, requireBodyValidators,
+	requireAuthenticatedUser,
+	requireBodyParams,
+	requireBodyValidators,
 	requireMethods,
-	requireMiddlewareChecks, requireQueryParams, requireQueryParamValidators, requireValidBody
+	requireMiddlewareChecks,
+	requireQueryParams,
+	requireQueryParamValidators,
+	requireValidBody
 } from "@/utils/customMiddleware";
 import {FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams} from "@/utils/types/apiRequests";
 import {db} from "@/utils/db";

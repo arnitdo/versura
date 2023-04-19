@@ -2,16 +2,16 @@ import React, {useCallback, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import Image from 'next/image'
 import {
-	EuiFlexItem,
 	EuiButton,
-	EuiPanel,
+	EuiFieldPassword,
+	EuiFieldText,
 	EuiFlexGroup,
+	EuiFlexItem,
 	EuiForm,
 	EuiFormRow,
-	EuiFieldText,
-	EuiFieldPassword,
 	EuiGlobalToastList,
-    EuiLoadingSpinner
+	EuiLoadingSpinner,
+	EuiPanel
 } from "@elastic/eui";
 import Link from "next/link"
 import VersuraIcon from "@/assets/versura-icon.png";
@@ -20,8 +20,8 @@ import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 import {useToastList} from "@/utils/toastUtils";
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
-import { useRouter } from "next/router";
-import {LoginResponse, SignupResponse} from "@/utils/types/apiResponses";
+import {useRouter} from "next/router";
+import {SignupResponse} from "@/utils/types/apiResponses";
 import {SignupUserRequestBody} from "@/utils/types/apiRequests";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
