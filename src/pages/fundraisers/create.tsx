@@ -423,7 +423,7 @@ export default function CreateFundraiser(): JSX.Element {
 										}
 									})
 								}}
-								defaultValue={fundraiserToken}
+								defaultValue={fundraiserTarget}
 								append={fundraiserToken}
 								isInvalid={isTargetInvalid}
 							/>
