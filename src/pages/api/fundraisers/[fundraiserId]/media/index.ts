@@ -12,6 +12,7 @@ import {
 } from "@/utils/types/apiRequests";
 import {withMethodDispatcher} from "@/utils/methodDispatcher";
 import { db } from "@/utils/db";
+import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 
 type FundraiserMediaBodyMap = {
 	POST: AddFundraiserMediaBody,
@@ -35,17 +36,7 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: async (fundraiserId) => {
-					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
-						[fundraiserId]
-					)
-					if (rows.length == 1){
-						return true
-					}
-					dbClient.release()
-					return false
-				}
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
 			}),
 			[requireBodyParams.name]: requireBodyParams("objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({
@@ -65,7 +56,6 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 						}
 						return true
 					}
-					dbClient.release()
 					return false
 				}
 			})
@@ -102,16 +92,7 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: async (fundraiserId) => {
-					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
-						[fundraiserId]
-					)
-					if (rows.length == 1){
-						return true
-					}
-					return false
-				}
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
 			}),
 			[requireBodyParams.name]: requireBodyParams("objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({

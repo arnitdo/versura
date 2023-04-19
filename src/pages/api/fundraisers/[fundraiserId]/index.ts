@@ -8,7 +8,7 @@ import {
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
 import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
-import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
+import {NON_ZERO_NON_NEGATIVE, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
 import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
 import {getPresignedURL} from "@/utils/s3";
@@ -22,6 +22,8 @@ type FundraiserQueryDispatch = {
 }
 
 async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestParams>, res: CustomApiResponse): Promise<void> {
+	const dbClient = await db.connect()
+	
 	const middlewareStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -31,26 +33,20 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 				"fundraiserId"
 			),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: (fundraiserId) => {
-					const parsedFundraiserId = Number.parseInt(fundraiserId)
-					if (Number.isNaN(parsedFundraiserId)){
-						return false
-					}
-					return NON_ZERO_NON_NEGATIVE(parsedFundraiserId);
-				}
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
 			})
 		}
 	)
 	
 	if (!middlewareStatus){
+		dbClient.release()
 		return
 	}
 	
-	const dbClient = await db.connect()
 	try {
 		const {fundraiserId} = req.query
 		const dbResponse = await db.query<FundRaisers>(
-			`SELECT * FROM "fundRaisers" WHERE "fundraiserId" = $1`,
+			`SELECT * FROM "fundRaisers" WHERE "fundraiserId" = $1 AND "fundraiserStatus" = 'OPEN'`,
 			[fundraiserId]
 		)
 		const {rows: dbRows} = dbResponse

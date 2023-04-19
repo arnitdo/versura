@@ -6,7 +6,7 @@ import {
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {AddFundraiserMilestoneBody, AddFundraiserMilestoneParams} from "@/utils/types/apiRequests";
-import {STRLEN_GT} from "@/utils/validatorUtils";
+import {STRLEN_GT, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 import {db} from "@/utils/db";
 import {FundraiserMilestones, FundRaisers} from "@/utils/types/queryTypedefs";
 import {CreateFundraiserMilestoneResponse} from "@/utils/types/apiResponses";
@@ -22,17 +22,7 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: async (fundraiserId) => {
-					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
-						[fundraiserId]
-					)
-					if (rows.length == 1){
-						return true
-					}
-					dbClient.release()
-					return false
-				}
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
 			}),
 			[requireBodyParams.name]: requireBodyParams(
 				"milestoneTitle", "milestoneAmount"
@@ -48,7 +38,6 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 					const selectedFundraiser = rows[0]
 					const {fundraiserTarget} = selectedFundraiser
 					if (fundraiserTarget < milestoneAmt){
-						dbClient.release()
 						return false
 					}
 					return true
