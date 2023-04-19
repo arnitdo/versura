@@ -5,7 +5,7 @@ import {MediaCallbackBody, PresignedURLBody} from "@/utils/types/apiRequests";
 
 const LINK_TEXT_COLOR_OVERRIDE = "#DFE5EF" as const
 
-const ETH_GAS_FEES_WEI = 30 * 1e12
+const ETH_GAS_FEES_WEI = 21 * 1e12
 
 const gasTokenMap = {
 	"ETH": "WEI"
@@ -198,11 +198,22 @@ function useValueScale<T>(args: UseValueScaleArgs<T>): T {
 	return scaledValue
 }
 
+function calculateServiceFeeWeiForAmount(tokenAmount: number, chainToken: string){
+	// @ts-ignore
+	const gasAmountWei = gasAmountMap[chainToken]
+	
+	return (
+		gasAmountWei +
+		(tokenAmount * 2) * 1e14
+	)
+}
+
 export {
 	LINK_TEXT_COLOR_OVERRIDE,
 	manageMedia,
 	useValueScale,
 	requireBasicObjectValidation,
 	gasAmountMap,
-	gasTokenMap
+	gasTokenMap,
+	calculateServiceFeeWeiForAmount
 }

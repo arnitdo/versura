@@ -41,7 +41,13 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 					fundraiserTarget: NON_ZERO_NON_NEGATIVE,
 					fundraiserTitle: STRLEN_GT(16),
 					fundraiserDescription: STRLEN_GT(200),
-					fundraiserMinDonationAmount: ALLOW_UNDEFINED_WITH_FN(NON_ZERO_NON_NEGATIVE),
+					fundraiserMinDonationAmount: ALLOW_UNDEFINED_WITH_FN((minAmount: number) => {
+						const target = req.body.fundraiserTarget
+						if (minAmount >= target){
+							return false
+						}
+						return true
+					}),
 					fundraiserToken: ALLOW_UNDEFINED_WITH_FN((fundraiserToken: string) => {
 						return fundraiserToken === "ETH"
 					})
@@ -68,7 +74,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 		
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
 			`INSERT INTO "fundRaisers" VALUES
-                (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT) RETURNING "fundraiserId"`,
+                (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT) RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)
 		
@@ -118,7 +124,8 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 		
 		const {rows: feedRows} = await dbClient.query<FundRaisers>(
 			`SELECT * FROM "fundRaisers"
-        ORDER BY "fundraiserCreatedOn" DESC OFFSET $1 LIMIT $2`,
+        	WHERE "fundraiserStatus" = 'OPEN'
+        	ORDER BY "fundraiserCreatedOn" DESC OFFSET $1 LIMIT $2`,
 			[feedPageOffset, FEED_PAGE_SIZE]
 		)
 		

@@ -11,7 +11,8 @@ import {
 	EuiFormRow,
 	EuiFieldText,
 	EuiFieldPassword,
-	EuiGlobalToastList
+	EuiGlobalToastList,
+    EuiLoadingSpinner
 } from "@elastic/eui";
 
 import VersuraIcon from "@/assets/versura-icon.png";
@@ -62,6 +63,8 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return `login-page-${toastCount}`
 		}
 	})
+	
+	const [loginHandlerActive, setLoginHandlerActive] = useState<boolean>(false);
 	
 	const navRouter = useRouter()
 	const {query} = navRouter
@@ -131,6 +134,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
+		setLoginHandlerActive(true)
 		const loginAPIResponse = await makeAPIRequest<LoginResponse, LoginUserRequestBody>({
 			endpointPath: `/api/auth/login`,
 			requestMethod: "POST",
@@ -147,6 +151,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 				(error as Error).message || "",
 				"danger"
 			)
+			setLoginHandlerActive(false)
 			return
 		}
 		
@@ -162,6 +167,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 							"Make sure the password matches the one used when signing up",
 							"danger"
 						)
+						setLoginHandlerActive(false)
 					}
 					if (invalidParams && invalidParams.includes("walletAddress")){
 						addToast(
@@ -169,6 +175,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 							"Make sure you are connecting with the right Metamask Account",
 							"danger"
 						)
+						setLoginHandlerActive(false)
 					}
 					return
 				}
@@ -185,6 +192,8 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 						`You will be redirected in ${LOGIN_SUCCESS_REDIR_TIMEOUT_S} seconds`,
 						"success"
 					)
+					setLoginHandlerActive(false)
+					navRouter.prefetch(returnTo as string || '/')
 					setTimeout(() => {
 						navRouter.push(returnTo as string || "/")
 					}, LOGIN_SUCCESS_REDIR_TIMEOUT_S * 1000)
@@ -275,8 +284,15 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 									<EuiButton
 										fill fullWidth
 										onClick={attemptUserLogin}
+										disabled={!metamaskConnected || loginHandlerActive}
 									>
-										Log In
+										{
+											loginHandlerActive ? (
+												<EuiLoadingSpinner />
+											) : (
+												"Log In"
+											)
+										}
 									</EuiButton>
 								</EuiFormRow>
 								<EuiFormRow

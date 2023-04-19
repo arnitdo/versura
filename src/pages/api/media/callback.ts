@@ -38,7 +38,6 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 						return true
 					}
 					
-					dbClient.release()
 					return false
 				},
 				objectSizeBytes: NON_NEGATIVE,

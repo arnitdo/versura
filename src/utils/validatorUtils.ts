@@ -1,3 +1,5 @@
+import {Client, PoolClient} from "pg";
+
 function NON_ZERO(value: number){
 	return value != 0
 }
@@ -62,6 +64,33 @@ function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean){
 	}
 }
 
+function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient){
+	return async function (fundraiserId: string){
+		const {rows} = await dbClient.query(
+			`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+		
+		if (rows.length){
+			return true
+		}
+		
+		return false
+	}
+}
+
+function IN_ARR<T>(elemArray: T[]){
+	return function (value: T){
+		return elemArray.includes(value)
+	}
+}
+
+function NOT_IN_ARR<T>(elemArray: T[]){
+	return function (value: T){
+		return !elemArray.includes(value)
+	}
+}
+
 export {
 	NON_ZERO,
 	NON_NEGATIVE,
@@ -76,5 +105,10 @@ export {
 	STRLEN_EQ,
 	STRLEN_LT_EQ,
 	STRLEN_GT_EQ,
-	STRLEN_NZ
+	STRLEN_NZ,
+	
+	IN_ARR,
+	NOT_IN_ARR,
+	
+	VALID_FUNDRAISER_ID_CHECK
 }

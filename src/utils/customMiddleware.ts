@@ -200,6 +200,29 @@ function requireAuthenticatedUser(): MiddlewareFn {
 	}
 }
 
+function requireAdminUser(): MiddlewareFn {
+	return async function (req, res, opts){
+		const {middlewareCallStack, nextMiddleware} = opts
+		if (!middlewareCallStack.includes(requireAuthenticatedUser.name)){
+			throw new Error(
+				"requireAdminUser was called without verifying authentication status"
+			)
+		}
+		
+		const currentUser = req.user!
+		const {userRole} = currentUser
+		if (userRole == "ADMIN"){
+			nextMiddleware(true)
+			return
+		}
+		
+		res.status(403).json({
+			requestStatus: "ERR_ADMIN_REQUIRED"
+		})
+		nextMiddleware(false)
+	}
+}
+
 function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipBodyParamRequirement: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
@@ -339,6 +362,7 @@ export {
 	requireBodyParams,
 	requireQueryParams,
 	requireAuthenticatedUser,
+	requireAdminUser,
 	requireBodyValidators,
 	requireQueryParamValidators,
 	

@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import {useRouter} from "next/router"
 import Image from 'next/image'
@@ -7,7 +7,8 @@ import {
 	EuiButton,
 	EuiPanel,
 	EuiFlexGroup,
-	EuiGlobalToastList
+	EuiGlobalToastList,
+    EuiLoadingSpinner
 } from "@elastic/eui";
 
 import VersuraIcon from "@/assets/versura-icon.png";
@@ -36,6 +37,8 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 		}
 	})
 	
+	const [logoutHandlerActive, setLogoutHandlerActive] = useState<boolean>(false);
+	
 	const navRouter = useRouter()
 	const {query} = navRouter
 	const {returnTo} = query
@@ -46,6 +49,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [navRouter])
 	
 	const attemptUserLogout = useCallback(async () => {
+		setLogoutHandlerActive(true)
 		const {isSuccess, isError, code, data, error} = await makeAPIRequest<LogoutResponse, LogoutUserRequestBody>({
 			endpointPath: `/api/auth/logout`,
 			requestMethod: "POST"
@@ -68,6 +72,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 					"An internal error occurred",
 					"danger"
 				)
+				setLogoutHandlerActive(false)
 				return
 			}
 			if (code === 403 && requestStatus === "ERR_AUTH_REQUIRED"){
@@ -76,6 +81,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 					"Log in before attempting to log out of an account",
 					"danger"
 				)
+				setLogoutHandlerActive(false)
 				return
 			}
 			if (code === 200 && requestStatus === "SUCCESS"){
@@ -89,6 +95,8 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 					metamaskAddress: undefined,
 					userRole: undefined
 				})
+				setLogoutHandlerActive(false)
+				navRouter.prefetch(returnTo as string || '/')
 				setTimeout(() => {
 					navRouter.push(returnTo as string || '/')
 				}, LOGOUT_REDIRECT_TIMER_S * 1000)
@@ -147,8 +155,15 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 										color={"primary"}
 										fill
 										onClick={attemptUserLogout}
+										disabled={logoutHandlerActive}
 									>
-										Yes, Log me out
+										{
+											logoutHandlerActive ? (
+												<EuiLoadingSpinner />
+											) : (
+												'Yes, Log me out'
+											)
+										}
 									</EuiButton>
 								</EuiFlexItem>
 								<EuiFlexItem>
@@ -156,6 +171,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 										color={"danger"}
 										fill
 										onClick={returnToPreviousPage}
+										disabled={logoutHandlerActive}
 									>
 										No, take me back
 									</EuiButton>

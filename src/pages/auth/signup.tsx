@@ -10,7 +10,8 @@ import {
 	EuiFormRow,
 	EuiFieldText,
 	EuiFieldPassword,
-	EuiGlobalToastList
+	EuiGlobalToastList,
+    EuiLoadingSpinner
 } from "@elastic/eui";
 import Link from "next/link"
 import VersuraIcon from "@/assets/versura-icon.png";
@@ -58,6 +59,8 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const [confirmPassword, setConfirmPassword] = useState<string>("");
 	
 	const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
+	
+	const [signupHandlerActive, setSignupHandlerActive] = useState(false);
 	
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
@@ -122,6 +125,8 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
+		setSignupHandlerActive(true)
+		
 		const signupAPIResponse = await makeAPIRequest<SignupResponse, SignupUserRequestBody>({
 			endpointPath: `/api/auth/signup`,
 			requestMethod: "POST",
@@ -138,6 +143,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 				(error as Error).message || "",
 				"danger"
 			)
+			setSignupHandlerActive(false)
 			return
 		}
 		
@@ -152,6 +158,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 							"Try logging in with that wallet and password",
 							"danger"
 						)
+						setSignupHandlerActive(false)
 						return
 					}
 				}
@@ -163,9 +170,11 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 						`You will be redirected in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
 						"success"
 					)
+					navRouter.prefetch(returnTo as string || '/')
 					setTimeout(() => {
 						navRouter.push(returnTo as string || '/')
 					}, SIGNUP_SUCCESS_REDIR_TIMEOUT_S * 1000)
+					setSignupHandlerActive(false)
 				}
 			}
 		}
@@ -263,8 +272,15 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 									<EuiButton
 										fill fullWidth
 										onClick={attemptUserSignup}
+										disabled={signupHandlerActive || !metamaskConnected}
 									>
-										Sign Up
+										{
+											signupHandlerActive ? (
+												<EuiLoadingSpinner />
+											) : (
+												"Sign Up"
+											)
+										}
 									</EuiButton>
 								</EuiFormRow>
 								<EuiFormRow>
