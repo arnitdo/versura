@@ -66,7 +66,7 @@ function FundraiserCard(props: FundraiserCardProps){
 					height={-1}
 					style={{
 						borderRadius: 12,
-						maxHeight: 180
+						maxHeight: 150
 					}}
 				/>
 			</EuiFlexItem>
