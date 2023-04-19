@@ -1,4 +1,5 @@
 import {MediaCallbackBody} from "@/utils/types/apiRequests";
+import {WithdrawalStatus} from "@/utils/types/apiTypedefs";
 
 export type UserRole = "CLIENT" | "ADMIN"
 
@@ -20,7 +21,8 @@ export type FundRaisers = {
 	fundraiserContributorCount: number,
 	fundraiserMilestoneCount: number,
 	fundraiserMediaObjectKeys: string[]
-	fundraiserCreatedOn: string
+	fundraiserCreatedOn: string,
+	fundraiserWithdrawnAmount: number
 }
 
 export type S3BucketObjects = {
@@ -38,4 +40,13 @@ export type FundraiserMilestones = {
 	milestoneStatus: boolean,
 	milestoneMediaObjectKeys: string[],
 	milestoneReachedOn: string,
+}
+
+export type FundraiserWithdrawalRequests = {
+	requestId: number,
+	walletAddress: string,
+	targetFundraiser: number,
+	withdrawalAmount: number,
+	withdrawalToken: string,
+	requestStatus: WithdrawalStatus,
 }

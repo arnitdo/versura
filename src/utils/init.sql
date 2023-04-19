@@ -22,6 +22,7 @@ CREATE TABLE "fundRaisers" (
     "fundraiserMinDonationAmount" NUMERIC DEFAULT 1e-18,
 
     "fundraiserRaisedAmount" NUMERIC NOT NULL DEFAULT 0,
+    "fundraiserWithdrawnAmount" NUMERIC NOT NULL DEFAULT 0,
 
     "fundraiserContributorCount" INTEGER NOT NULL DEFAULT 0,
     "fundraiserMilestoneCount" INTEGER NOT NULL DEFAULT 0,
@@ -29,10 +30,14 @@ CREATE TABLE "fundRaisers" (
     "fundraiserCreatedOn" TIMESTAMP WITH TIME ZONE,
 
     "fundraiserMediaObjectKeys" TEXT[] DEFAULT '{}'::text[],
+    "fundraiserStatus" TEXT DEFAULT 'IN_QUEUE',
 
     CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletAddress"
         FOREIGN KEY ("fundraiserCreator")
-            REFERENCES "authUsers"("walletAddress")
+            REFERENCES "authUsers"("walletAddress"),
+
+    CONSTRAINT "chk_fundRaisers_fundraiserStatus_validStatus"
+        CHECK ( "fundraiserStatus" IN ('IN_QUEUE', 'OPEN', 'CLOSED') )
 );
 
 CREATE TABLE "fundraiserUpdates" (
@@ -76,6 +81,7 @@ CREATE TABLE "fundraiserDonations" (
     "donatedFundraiser" INTEGER NOT NULL,
     "donorAddress" TEXT NOT NULL,
     "donatedAmount" NUMERIC,
+    "transactionHash" TEXT NOT NULL,
 
     "donationTimestamp" TIMESTAMP WITH TIME ZONE NOT NULL,
 
@@ -85,6 +91,24 @@ CREATE TABLE "fundraiserDonations" (
     CONSTRAINT "fk_fundraiserDonations_donatorAddress_authUsers_walletAddress"
         FOREIGN KEY ("donorAddress") REFERENCES "authUsers"("walletAddress")
 
+);
+
+CREATE TABLE "fundraiserWithdrawalRequests" (
+    "requestId" SERIAL PRIMARY KEY,
+    "walletAddress" TEXT NOT NULL,
+    "targetFundraiser" INTEGER NOT NULL,
+    "withdrawalAmount" NUMERIC NOT NULL,
+    "withdrawalToken" TEXT NOT NULL DEFAULT 'ETH',
+    "requestStatus" TEXT DEFAULT 'OPEN',
+
+    CONSTRAINT "fk_withdrawalRequests_walletAddress_authUsers_walletAddress"
+        FOREIGN KEY ("walletAddress") REFERENCES "authUsers"("walletAddress"),
+
+    CONSTRAINT "fk_withdrawalRequests_targetFundraiser_fundRaisers_fundraiserId"
+        FOREIGN KEY ("targetFundraiser") REFERENCES "fundRaisers"("fundraiserId"),
+
+    CONSTRAINT "chk_withdrawalRequests_requestStatus_validStatus"
+        CHECK ( "requestStatus" IN ('OPEN', 'APPROVED', 'REJECTED'))
 );
 
 CREATE TABLE "internalS3Buckets" (

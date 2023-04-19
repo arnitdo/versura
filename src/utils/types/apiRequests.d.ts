@@ -1,4 +1,4 @@
-import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
+import {S3ObjectMethods, WithdrawalStatus} from "@/utils/types/apiTypedefs";
 
 interface SignupUserRequestBody {
 	walletAddress: string,
@@ -67,8 +67,34 @@ interface AddFundraiserMilestoneParams {
 	fundraiserId: string
 }
 
-interface AddMilestoneMediaContent {
+interface AddMilestoneMediaContentBody {
 	objectKey: string
+}
+
+interface FundraiserDonationBody {
+	donatedAmount: number,
+	transactionHash: string,
+}
+
+interface FundraiserDonationParams {
+	fundraiserId: string
+}
+
+interface FundraiserWithdrawalRequestBody {
+	withdrawalAmount: number
+}
+
+interface FundraiserWithdrawalRequestParams {
+	fundraiserId: string
+}
+
+interface FundraiserWithdrawalUpdateBody {
+	withdrawalStatus: WithdrawalStatus
+}
+
+interface FundraiserWithdrawalUpdateParams {
+	fundraiserId: string,
+	withdrawalId: string
 }
 
 export {
@@ -87,5 +113,11 @@ export {
 	DeleteFundraiserMediaParams,
 	AddFundraiserMilestoneBody,
 	AddFundraiserMilestoneParams,
-	AddMilestoneMediaContent,
+	AddMilestoneMediaContentBody,
+	FundraiserDonationBody,
+	FundraiserDonationParams,
+	FundraiserWithdrawalRequestParams,
+	FundraiserWithdrawalRequestBody,
+	FundraiserWithdrawalUpdateBody,
+	FundraiserWithdrawalUpdateParams
 }

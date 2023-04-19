@@ -1,4 +1,5 @@
 import {FundraiserMilestones, FundRaisers, UserRole} from "@/utils/types/queryTypedefs";
+import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 500
@@ -15,6 +16,7 @@ type APIResponseRequestStatus =
 	"ERR_INVALID_QUERY_PARAMS" |
 	"ERR_MISSING_QUERY_PARAMS" |
 	"ERR_AUTH_REQUIRED"	|
+	"ERR_ADMIN_REQUIRED" |
 	"ERR_NOT_FOUND"
 
 interface APIResponse {
@@ -33,6 +35,11 @@ interface SignupResponse extends APIResponse {
 
 interface LogoutResponse extends APIResponse {
 
+}
+
+interface AuthRefreshResponse extends APIResponse {
+	authStatus: "NO_AUTH" | "AUTH_ACTIVE",
+	authData?: DecodedJWTCookie
 }
 
 interface CreateFundraiserResponse extends APIResponse {
@@ -81,6 +88,7 @@ export {
 	SignupResponse,
 	LoginResponse,
 	LogoutResponse,
+	AuthRefreshResponse,
 	APIResponse,
 	CreateFundraiserResponse,
 	GetFundraiserResponse,
