@@ -170,7 +170,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 						`You will be redirected in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
 						"success"
 					)
-					navRouter.prefetch(returnTo as string || '/')
+					await navRouter.prefetch(returnTo as string || '/')
 					setTimeout(() => {
 						navRouter.push(returnTo as string || '/')
 					}, SIGNUP_SUCCESS_REDIR_TIMEOUT_S * 1000)

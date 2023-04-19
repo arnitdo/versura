@@ -253,7 +253,7 @@ export default function CreateFundraiser(): JSX.Element {
 					`You will be redirected in ${FUNDRAISER_REDIR_TIMEOUT_S} seconds`,
 					"success"
 				)
-				navRouter.prefetch(`/fundraisers/${successFundraiserId}`)
+				await navRouter.prefetch(`/fundraisers/${successFundraiserId}`)
 				setTimeout(
 					() => {
 						navRouter.push(`/fundraisers/${successFundraiserId}`)

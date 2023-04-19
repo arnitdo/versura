@@ -193,7 +193,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 						"success"
 					)
 					setLoginHandlerActive(false)
-					navRouter.prefetch(returnTo as string || '/')
+					await navRouter.prefetch(returnTo as string || '/')
 					setTimeout(() => {
 						navRouter.push(returnTo as string || "/")
 					}, LOGIN_SUCCESS_REDIR_TIMEOUT_S * 1000)

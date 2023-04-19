@@ -96,7 +96,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 					userRole: undefined
 				})
 				setLogoutHandlerActive(false)
-				navRouter.prefetch(returnTo as string || '/')
+				await navRouter.prefetch(returnTo as string || '/')
 				setTimeout(() => {
 					navRouter.push(returnTo as string || '/')
 				}, LOGOUT_REDIRECT_TIMER_S * 1000)
