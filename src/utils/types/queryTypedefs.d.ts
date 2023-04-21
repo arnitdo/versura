@@ -1,6 +1,7 @@
 import {WithdrawalStatus} from "@/utils/types/apiTypedefs";
 
 export type UserRole = "CLIENT" | "ADMIN"
+export type FundraiserStatus = "IN_QUEUE" | "OPEN" | "CLOSED"
 
 export type AuthUsers = {
 	walletAddress: string,
@@ -21,7 +22,8 @@ export type FundRaisers = {
 	fundraiserMilestoneCount: number,
 	fundraiserMediaObjectKeys: string[]
 	fundraiserCreatedOn: string,
-	fundraiserWithdrawnAmount: number
+	fundraiserWithdrawnAmount: number,
+	fundraiserStatus: FundraiserStatus
 }
 
 export type S3BucketObjects = {
