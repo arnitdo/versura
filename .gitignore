@@ -38,3 +38,7 @@ next-env.d.ts
 #Editor files
 .idea
 .code
+
+# Build Artifacts and deps
+yarn.lock
+.yarn
