@@ -11,7 +11,7 @@ import {db} from "@/utils/db";
 import {SignupResponse} from "@/utils/types/apiResponses";
 import {SignupUserRequestBody} from "@/utils/types/apiRequests";
 
-export default async function signupUser(req: CustomApiRequest<SignupUserRequestBody>, res: CustomApiResponse){
+export default async function signupUser(req: CustomApiRequest<SignupUserRequestBody>, res: CustomApiResponse) {
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
@@ -21,7 +21,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 			[requireBodyParams.name]: requireBodyParams("walletAddress", "userPass")
 		}
 	)
-	if (!middlewarePassed){
+	if (!middlewarePassed) {
 		return
 	}
 	
@@ -33,7 +33,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 			[walletAddress]
 		)
 		
-		if (rows.length > 0){
+		if (rows.length > 0) {
 			res.status(400).json<SignupResponse>({
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
@@ -53,7 +53,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 		res.status(200).json({
 			requestStatus: "SUCCESS"
 		})
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		console.error(err)
 		await dbClient.query("ROLLBACK")
 		dbClient.release()

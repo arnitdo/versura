@@ -35,7 +35,7 @@ export type NextMiddleware = (currentMiddlewareStatus: boolean) => void
 
 export type ValidRequestMethods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
-type MiddlewareCallArgs<T, P> = {[middlewareFnName: string]: MiddlewareFn<T, P>}
+type MiddlewareCallArgs<T, P> = { [middlewareFnName: string]: MiddlewareFn<T, P> }
 
 export type ValidatorMapType<T> = {
 	[validateProperty in keyof T]: (propValue: T[validateProperty]) => (Promise<boolean> | boolean);
@@ -64,7 +64,7 @@ function requireValidBody(): MiddlewareFn {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		
 		const acceptedRequestMethods: ValidRequestMethods[] = ["POST", "PUT", "PATCH"]
-		if (!acceptedRequestMethods.includes(req.method as ValidRequestMethods || "GET")){
+		if (!acceptedRequestMethods.includes(req.method as ValidRequestMethods || "GET")) {
 			if (!middlewareCallStack.includes(requireMethods.name)) {
 				throw new Error(`Incorrect body check called for method ${req.method}. Are you calling requireMethod?`)
 			} else {
@@ -96,13 +96,13 @@ function requireBodyParams<T>(...bodyParams: (keyof T)[]): MiddlewareFn<T> {
 		}
 		const requestBodyKeys = Object.keys(req.body) as (keyof T)[]
 		const missingBodyParams: (keyof T)[] = bodyParams.filter((bodyParam) => {
-			if (requestBodyKeys.includes(bodyParam as keyof T) && req.body[bodyParam] !== undefined){
+			if (requestBodyKeys.includes(bodyParam as keyof T) && req.body[bodyParam] !== undefined) {
 				return false
 			}
 			return true
 		})
 		
-		if (missingBodyParams.length > 0){
+		if (missingBodyParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_BODY_PARAMS",
 				missingParams: missingBodyParams as string[]
@@ -120,13 +120,13 @@ function requireQueryParams<T, P>(...queryParams: (keyof P)[]): MiddlewareFn<T, 
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		const requestQueryKeys = Object.keys(req.query) as (keyof P)[]
 		const missingQueryParams: (keyof P)[] = queryParams.filter((queryParam) => {
-			if (requestQueryKeys.includes(queryParam as keyof P) && req.query[queryParam] !== undefined){
+			if (requestQueryKeys.includes(queryParam as keyof P) && req.query[queryParam] !== undefined) {
 				return false
 			}
 			return true
 		})
 		
-		if (missingQueryParams.length > 0){
+		if (missingQueryParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_QUERY_PARAMS",
 				missingParams: missingQueryParams as string[]
@@ -201,9 +201,9 @@ function requireAuthenticatedUser(): MiddlewareFn {
 }
 
 function requireAdminUser(): MiddlewareFn {
-	return async function (req, res, opts){
+	return async function (req, res, opts) {
 		const {middlewareCallStack, nextMiddleware} = opts
-		if (!middlewareCallStack.includes(requireAuthenticatedUser.name)){
+		if (!middlewareCallStack.includes(requireAuthenticatedUser.name)) {
 			throw new Error(
 				"requireAdminUser was called without verifying authentication status"
 			)
@@ -211,7 +211,7 @@ function requireAdminUser(): MiddlewareFn {
 		
 		const currentUser = req.user!
 		const {userRole} = currentUser
-		if (userRole == "ADMIN"){
+		if (userRole == "ADMIN") {
 			nextMiddleware(true)
 			return
 		}
@@ -224,9 +224,9 @@ function requireAdminUser(): MiddlewareFn {
 }
 
 function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipBodyParamRequirement: boolean = false): MiddlewareFn<T, P> {
-	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
+	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions) {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!skipBodyParamRequirement && !middlewareCallStack.includes(requireBodyParams.name)){
+		if (!skipBodyParamRequirement && !middlewareCallStack.includes(requireBodyParams.name)) {
 			throw new Error(
 				"requireBodyValidators was called without verifying all properties in body (requireBodyParams)"
 			)
@@ -238,13 +238,13 @@ function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipB
 			const paramValue = req.body[paramKey]
 			const validatorToRun = validatorsToRun[paramKey]
 			const validatorResult = await validatorToRun(paramValue)
-			if (validatorResult == true){
+			if (validatorResult == true) {
 				validParams.push(paramKey)
 			} else {
 				invalidParams.push(paramKey)
 			}
 		}
-		if (invalidParams.length > 0){
+		if (invalidParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: invalidParams
@@ -258,9 +258,9 @@ function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipB
 }
 
 function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>, skipQueryParamRequirement: boolean = false): MiddlewareFn<T, P> {
-	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions){
+	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions) {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		if (!skipQueryParamRequirement && !middlewareCallStack.includes(requireQueryParams.name)){
+		if (!skipQueryParamRequirement && !middlewareCallStack.includes(requireQueryParams.name)) {
 			throw new Error(
 				"requireQueryParamValidators was called without verifying all properties in body (requireQueryParams)"
 			)
@@ -272,13 +272,13 @@ function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>,
 			const paramValue = req.query[paramKey]
 			const validatorToRun = validatorsToRun[paramKey]
 			const validatorResult = await validatorToRun(paramValue)
-			if (validatorResult == true){
+			if (validatorResult == true) {
 				validParams.push(paramKey)
 			} else {
 				invalidParams.push(paramKey)
 			}
 		}
-		if (invalidParams.length > 0){
+		if (invalidParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_INVALID_QUERY_PARAMS",
 				invalidParams: invalidParams
@@ -291,7 +291,7 @@ function requireQueryParamValidators<T, P>(validatorsToRun: ValidatorMapType<P>,
 	}
 }
 
-async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs<T, P>): Promise<boolean> {
+async function requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewaresToCall: MiddlewareCallArgs<T, P>): Promise<boolean> {
 	const middlewareStack: string[] = []
 	let middlewareExecutionStatus: boolean = true
 	// true & successfulMiddleware => true
@@ -299,7 +299,7 @@ async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: 
 	// false & true | false & false => false
 	
 	for (const middlewareName in middlewaresToCall) {
-		if (!middlewareExecutionStatus){
+		if (!middlewareExecutionStatus) {
 			break
 		}
 		const middlewareFnToExecute = middlewaresToCall[middlewareName]
@@ -319,7 +319,7 @@ async function 	requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: 
 				middlewareOptions
 			)
 			middlewareStack.push(middlewareName)
-		} catch (err: unknown){
+		} catch (err: unknown) {
 			console.error(err)
 			res.status(500).json({
 				"requestStatus": "ERR_INTERNAL_ERROR"

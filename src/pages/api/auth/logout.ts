@@ -7,7 +7,7 @@ import {
 } from "@/utils/customMiddleware";
 import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
 
-export default async function logoutUser(req: CustomApiRequest<LogoutUserRequestBody>, res: CustomApiResponse){
+export default async function logoutUser(req: CustomApiRequest<LogoutUserRequestBody>, res: CustomApiResponse) {
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
@@ -18,7 +18,7 @@ export default async function logoutUser(req: CustomApiRequest<LogoutUserRequest
 		}
 	)
 	
-	if (!middlewarePassed){
+	if (!middlewarePassed) {
 		return
 	}
 	

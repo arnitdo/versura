@@ -30,7 +30,7 @@ type FundraiserMediaQueryMap = {
 	DELETE: DeleteFundraiserMediaParams
 }
 
-async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse){
+async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -51,12 +51,12 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
 						[objectKey]
 					)
-					if (objectRows.length == 1){
+					if (objectRows.length == 1) {
 						const {rows: fundraiserMediaRows} = await dbClient.query(
 							`SELECT 1 FROM "fundRaisers" WHERE $1 = ANY("fundraiserMediaObjectKeys")`,
 							[objectKey]
 						)
-						if (fundraiserMediaRows.length > 0){
+						if (fundraiserMediaRows.length > 0) {
 							// Don't allow duplication
 							return false
 						}
@@ -86,7 +86,7 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 	})
 }
 
-async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMediaBody, DeleteFundraiserMediaParams>, res: CustomApiResponse){
+async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMediaBody, DeleteFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -107,12 +107,12 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
 						[objectKey]
 					)
-					if (rows.length == 1){
+					if (rows.length == 1) {
 						const {rows: fundraiserMediaRows} = await dbClient.query(
 							`SELECT 1 FROM "fundRaisers" WHERE $1 = ANY("fundraiserMediaObjectKeys")`,
 							[objectKey]
 						)
-						if (fundraiserMediaRows.length > 0){
+						if (fundraiserMediaRows.length > 0) {
 							// Only allow deletion on existing object keys
 							return true
 						}

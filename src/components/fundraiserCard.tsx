@@ -11,7 +11,7 @@ type FundraiserCardProps = Omit<
 	"fundraiserMilestones"
 >
 
-function FundraiserCard(props: FundraiserCardProps){
+function FundraiserCard(props: FundraiserCardProps) {
 	const {
 		fundraiserId, fundraiserTitle,
 		fundraiserDescription, fundraiserCreator,
@@ -41,7 +41,7 @@ function FundraiserCard(props: FundraiserCardProps){
 	let selectedFundraiserImage: GenericMedia | null = null;
 	for (const media of fundraiserMedia) {
 		const {mediaContentType} = media
-		if (mediaContentType.startsWith("image")){
+		if (mediaContentType.startsWith("image")) {
 			selectedFundraiserImage = media
 			break
 		}

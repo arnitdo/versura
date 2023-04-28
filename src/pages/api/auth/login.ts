@@ -14,7 +14,7 @@ import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 import {LoginResponse} from "@/utils/types/apiResponses";
 import {LoginUserRequestBody} from "@/utils/types/apiRequests";
 
-export default async function loginUser(req: CustomApiRequest<LoginUserRequestBody>, res: CustomApiResponse){
+export default async function loginUser(req: CustomApiRequest<LoginUserRequestBody>, res: CustomApiResponse) {
 	const middlewarePassed = await requireMiddlewareChecks(
 		req,
 		res,
@@ -24,7 +24,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 			"requireBodyParams": requireBodyParams("walletAddress", "userPass")
 		}
 	)
-	if (!middlewarePassed){
+	if (!middlewarePassed) {
 		return
 	}
 	
@@ -35,7 +35,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 			`SELECT "userPass", "userRole" FROM "authUsers" WHERE "walletAddress" = $1`,
 			[walletAddress]
 		)
-		if (rows.length === 0){
+		if (rows.length === 0) {
 			res.status(400).json<LoginResponse>({
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
 				invalidParams: ["walletAddress"]
@@ -48,7 +48,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 		const {userPass: hashedPass, userRole} = currentUserRow
 		
 		const isPassMatch = await compare(userPass, hashedPass)
-		if (isPassMatch){
+		if (isPassMatch) {
 			const authToken = sign(
 				{
 					walletAddress: walletAddress,
@@ -74,7 +74,7 @@ export default async function loginUser(req: CustomApiRequest<LoginUserRequestBo
 			dbClient.release()
 			return
 		}
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		console.error(err)
 		await dbClient.query("ROLLBACK")
 		dbClient.release()

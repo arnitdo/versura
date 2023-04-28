@@ -48,7 +48,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 			requestMethod: "POST"
 		})
 		
-		if (isError && error){
+		if (isError && error) {
 			addToast(
 				"An error occurred when processing your request",
 				(error as Error).message || "",
@@ -57,9 +57,9 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		if (isSuccess && data){
+		if (isSuccess && data) {
 			const {requestStatus} = data
-			if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR"){
+			if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR") {
 				addToast(
 					"An error occurred when processing your request",
 					"An internal error occurred",
@@ -68,7 +68,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 				setLogoutHandlerActive(false)
 				return
 			}
-			if (code === 403 && requestStatus === "ERR_AUTH_REQUIRED"){
+			if (code === 403 && requestStatus === "ERR_AUTH_REQUIRED") {
 				addToast(
 					"You are not authenticated yet",
 					"Log in before attempting to log out of an account",
@@ -77,7 +77,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 				setLogoutHandlerActive(false)
 				return
 			}
-			if (code === 200 && requestStatus === "SUCCESS"){
+			if (code === 200 && requestStatus === "SUCCESS") {
 				addToast(
 					"You have been logged out successfully",
 					`You will be redirected in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
@@ -97,7 +97,6 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 			}
 		}
 	}, [navRouter])
-	
 	
 	
 	return (
@@ -152,7 +151,7 @@ function LogoutPage(props: PageHeaderControlComponentProps): JSX.Element {
 									>
 										{
 											logoutHandlerActive ? (
-												<EuiLoadingSpinner />
+												<EuiLoadingSpinner/>
 											) : (
 												'Yes, Log me out'
 											)

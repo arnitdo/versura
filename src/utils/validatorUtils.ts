@@ -1,62 +1,62 @@
 import {PoolClient} from "pg";
 
-function NON_ZERO(value: number){
+function NON_ZERO(value: number) {
 	return value != 0
 }
 
-function NON_NEGATIVE(value: number){
+function NON_NEGATIVE(value: number) {
 	return value >= 0
 }
 
-function NON_ZERO_NON_NEGATIVE(value: number){
+function NON_ZERO_NON_NEGATIVE(value: number) {
 	return value > 0
 }
 
-function NON_ZERO_NON_POSITIVE(value: number){
+function NON_ZERO_NON_POSITIVE(value: number) {
 	return value < 0
 }
 
-function PASSTHROUGH<T>(value: T){
+function PASSTHROUGH<T>(value: T) {
 	return true
 }
 
-function STRLEN_GT(len: number){
+function STRLEN_GT(len: number) {
 	return (value: string) => {
 		return value.length > len
 	}
 }
 
-function STRLEN_GT_EQ(len: number){
+function STRLEN_GT_EQ(len: number) {
 	return (value: string) => {
 		return value.length >= len
 	}
 }
 
-function STRLEN_EQ(len: number){
+function STRLEN_EQ(len: number) {
 	return (value: string) => {
 		return value.length == len
 	}
 }
 
-function STRLEN_LT_EQ(len: number){
+function STRLEN_LT_EQ(len: number) {
 	return (value: string) => {
 		return value.length <= len
 	}
 }
 
-function STRLEN_LT(len: number){
+function STRLEN_LT(len: number) {
 	return (value: string) => {
 		return value.length < len
 	}
 }
 
-function STRLEN_NZ(value: string){
+function STRLEN_NZ(value: string) {
 	return value.length > 0
 }
 
-function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean){
-	return function(value: T | undefined){
-		if (!value){
+function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean) {
+	return function (value: T | undefined) {
+		if (!value) {
 			return true
 		} else {
 			return fn(value)
@@ -64,14 +64,14 @@ function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean){
 	}
 }
 
-function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient){
-	return async function (fundraiserId: string){
+function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient) {
+	return async function (fundraiserId: string) {
 		const {rows} = await dbClient.query(
 			`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
 		
-		if (rows.length){
+		if (rows.length) {
 			return true
 		}
 		
@@ -79,14 +79,14 @@ function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient){
 	}
 }
 
-function IN_ARR<T>(elemArray: T[]){
-	return function (value: T){
+function IN_ARR<T>(elemArray: T[]) {
+	return function (value: T) {
 		return elemArray.includes(value)
 	}
 }
 
-function NOT_IN_ARR<T>(elemArray: T[]){
-	return function (value: T){
+function NOT_IN_ARR<T>(elemArray: T[]) {
+	return function (value: T) {
 		return !elemArray.includes(value)
 	}
 }

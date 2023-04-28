@@ -15,7 +15,7 @@ import {db} from "@/utils/db";
 import {FundRaisers} from "@/utils/types/queryTypedefs";
 import {STRLEN_NZ, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 
-export default async function donateToFundraiser(req: CustomApiRequest<FundraiserDonationBody, FundraiserDonationParams>, res: CustomApiResponse){
+export default async function donateToFundraiser(req: CustomApiRequest<FundraiserDonationBody, FundraiserDonationParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -46,7 +46,7 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 					const selectedFundraiser = rows[0]
 					const {fundraiserMinDonationAmount} = selectedFundraiser
 					
-					if (donatedAmount < fundraiserMinDonationAmount){
+					if (donatedAmount < fundraiserMinDonationAmount) {
 						return false
 					}
 					
@@ -57,7 +57,7 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 		}
 	)
 	
-	if (!middlewareStatus){
+	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
@@ -72,7 +72,7 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 			[fundraiserId, walletAddress, donatedAmount, transactionHash]
 		)
 		
-		const {rows: donorRows} = await dbClient.query<{contributorCount: number}>(
+		const {rows: donorRows} = await dbClient.query<{ contributorCount: number }>(
 			`SELECT COUNT(DISTINCT "donorAddress") AS "contributorCount" FROM "fundraiserDonations" WHERE "donatedFundraiser" = $1`,
 			[fundraiserId]
 		)

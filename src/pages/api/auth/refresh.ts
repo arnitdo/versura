@@ -3,10 +3,10 @@ import {verify} from "jsonwebtoken";
 import {AuthRefreshResponse} from "@/utils/types/apiResponses";
 import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 
-export default async function authRefresh(req: CustomApiRequest, res: CustomApiResponse){
+export default async function authRefresh(req: CustomApiRequest, res: CustomApiResponse) {
 	try {
 		const authCookie = req.cookies["versura-auth-token"]
-		if (authCookie == null){
+		if (authCookie == null) {
 			res.status(200).json<AuthRefreshResponse>({
 				requestStatus: "SUCCESS",
 				authStatus: "NO_AUTH"
@@ -24,7 +24,7 @@ export default async function authRefresh(req: CustomApiRequest, res: CustomApiR
 			authStatus: "AUTH_ACTIVE",
 			authData: decodedCookie
 		})
-	} catch (err){
+	} catch (err) {
 		console.error(err)
 		res.status(500).json({
 			requestStatus: "ERR_INTERNAL_ERROR"

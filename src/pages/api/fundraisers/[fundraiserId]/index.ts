@@ -39,7 +39,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		}
 	)
 	
-	if (!middlewareStatus){
+	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
@@ -51,7 +51,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			[fundraiserId]
 		)
 		const {rows: dbRows} = dbResponse
-		if (dbRows.length === 0){
+		if (dbRows.length === 0) {
 			res.status(404).json({
 				requestStatus: "ERR_NOT_FOUND",
 			})
@@ -67,7 +67,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			[fundraiserMediaObjectKeys]
 		)
 		
-		const objectKeyContentMap: {[objKey: string]: string} = {}
+		const objectKeyContentMap: { [objKey: string]: string } = {}
 		
 		for (const objectContentTypeRow of objectContentTypeRows) {
 			const {objectKey, objectContentType} = objectContentTypeRow
@@ -149,7 +149,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			requestStatus: "SUCCESS",
 			fundraiserData: fundraiserData
 		})
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		console.error(err)
 		dbClient.release()
 		res.status(500).json({

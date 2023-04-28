@@ -13,7 +13,7 @@ import {NON_NEGATIVE} from "@/utils/validatorUtils";
 import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
 import {db} from "@/utils/db";
 
-export default async function mediaCallback(req: CustomApiRequest<MediaCallbackBody>, res: CustomApiResponse){
+export default async function mediaCallback(req: CustomApiRequest<MediaCallbackBody>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareExecStatus = await requireMiddlewareChecks(
@@ -29,7 +29,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 					return ["PUT", "DELETE"].includes(requestMethod)
 				},
 				objectKey: async (objectKey) => {
-					if (req.body.requestMethod !== "DELETE"){
+					if (req.body.requestMethod !== "DELETE") {
 						return true
 					}
 					const {rows} = await dbClient.query(
@@ -37,7 +37,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 						[objectKey]
 					)
 					
-					if (rows.length > 0){
+					if (rows.length > 0) {
 						return true
 					}
 					
@@ -50,7 +50,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 			})
 		}
 	)
-	if (!middlewareExecStatus){
+	if (!middlewareExecStatus) {
 		dbClient.release()
 		return
 	}
@@ -58,7 +58,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 	try {
 		const {requestMethod, objectKey, objectSizeBytes, objectContentType} = req.body
 		
-		switch (requestMethod){
+		switch (requestMethod) {
 			case "DELETE":
 				await dbClient.query(
 					`DELETE FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,

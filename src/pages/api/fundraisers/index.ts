@@ -27,7 +27,7 @@ type FundraiserRequestParamsMap = {
 	POST: any
 }
 
-async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBody>, res: CustomApiResponse){
+async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBody>, res: CustomApiResponse) {
 	const dbClient = await db.connect();
 	try {
 		const middlewareCheckPassed = await requireMiddlewareChecks(
@@ -46,7 +46,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 					fundraiserDescription: STRLEN_GT(200),
 					fundraiserMinDonationAmount: ALLOW_UNDEFINED_WITH_FN((minAmount: number) => {
 						const target = req.body.fundraiserTarget
-						if (minAmount >= target){
+						if (minAmount >= target) {
 							return false
 						}
 						return true
@@ -58,7 +58,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 			}
 		)
 		
-		if (!middlewareCheckPassed){
+		if (!middlewareCheckPassed) {
 			return
 		}
 		
@@ -90,7 +90,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 			fundraiserId: fundraiserId
 		})
 		
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		console.error(err)
 		dbClient.release()
 		res.status(500).json({
@@ -99,7 +99,7 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 	}
 }
 
-async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedRequestParams>, res: CustomApiResponse){
+async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedRequestParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	try {
 		const middlewareExecStatus = await requireMiddlewareChecks(
@@ -113,7 +113,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 			}
 		)
 		
-		if (!middlewareExecStatus){
+		if (!middlewareExecStatus) {
 			dbClient.release()
 			return
 		}
@@ -143,7 +143,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 					[fundraiserMediaObjectKeys]
 				)
 				
-				const objectKeyContentMap: {[objKey: string]: string} = {}
+				const objectKeyContentMap: { [objKey: string]: string } = {}
 				for (const objectContentTypeRow of objectContentTypeRows) {
 					const {objectKey, objectContentType} = objectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
@@ -179,7 +179,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 			feedData: feedRowsWithMedia
 		})
 		
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		console.error(err)
 		dbClient.release()
 		res.status(500).json({

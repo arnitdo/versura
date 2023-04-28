@@ -32,12 +32,12 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 	
 	try {
 		let resolvedQueryString = ``;
-		if (bodyMethods.includes(requestMethod)){
+		if (bodyMethods.includes(requestMethod)) {
 			requestOptions.body = JSON.stringify(bodyParams)
 		}
 		if (queryParams) {
 			for (const queryParam in queryParams) {
-				if (endpointPath.includes(`:${queryParam}`)){
+				if (endpointPath.includes(`:${queryParam}`)) {
 					endpointPath = endpointPath.replace(
 						`:${queryParam}`,
 						// @ts-ignore
@@ -58,7 +58,7 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 		
 		let resolvedUrl: string = `${endpointPath}${resolvedQueryString}`
 		
-		if (ssrContext){
+		if (ssrContext) {
 			const {
 				req: {
 					headers: {
@@ -67,9 +67,9 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 				}
 			} = ssrContext
 			resolvedUrl = `${hostName}${resolvedUrl}`
-			if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined){
+			if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined) {
 				resolvedUrl = `http://${resolvedUrl}`
-			} else if (process.env.NODE_ENV === "production"){
+			} else if (process.env.NODE_ENV === "production") {
 				resolvedUrl = `https://${resolvedUrl}`
 			} else {
 				throw new Error(
@@ -92,7 +92,7 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 			data: responseJSON,
 			error: undefined
 		}
-	} catch (err: unknown){
+	} catch (err: unknown) {
 		return {
 			isSuccess: false,
 			isError: true,

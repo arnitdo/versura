@@ -27,14 +27,20 @@ type FundraiserFeedData = {
 export const getServerSideProps: GetServerSideProps<FundraiserFeedData> = async (ctx) => {
 	const feedPage = ctx.query.feedPage as string || "1"
 	const parsedFeedPage = Number.parseInt(feedPage)
-	if (Number.isNaN(parsedFeedPage) || parsedFeedPage < 1){
+	if (Number.isNaN(parsedFeedPage) || parsedFeedPage < 1) {
 		return {
 			redirect: {
 				destination: "404"
 			}
 		}
 	}
-	const {isSuccess, isError, code, data, error} = await makeAPIRequest<GetFundraiserFeedResponse, {}, GetFundraiserFeedRequestParams>({
+	const {
+		isSuccess,
+		isError,
+		code,
+		data,
+		error
+	} = await makeAPIRequest<GetFundraiserFeedResponse, {}, GetFundraiserFeedRequestParams>({
 		endpointPath: "/api/fundraisers",
 		requestMethod: "GET",
 		queryParams: {
@@ -42,9 +48,9 @@ export const getServerSideProps: GetServerSideProps<FundraiserFeedData> = async 
 		},
 		ssrContext: ctx
 	})
-	if (isSuccess && data){
+	if (isSuccess && data) {
 		const {requestStatus} = data
-		if (requestStatus === "SUCCESS"){
+		if (requestStatus === "SUCCESS") {
 			const {feedData} = data
 			return {
 				props: {
@@ -53,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserFeedData> = async 
 				}
 			}
 		}
-		if (requestStatus === "ERR_INTERNAL_ERROR"){
+		if (requestStatus === "ERR_INTERNAL_ERROR") {
 			return {
 				redirect: {
 					destination: "500"
@@ -81,7 +87,7 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 						direction={"column"}
 						alignItems={"center"}
 					>
-						<EuiSpacer />
+						<EuiSpacer/>
 						{
 							feedData.map((fundraiserData, fundraiserIdx) => {
 								return (
@@ -161,8 +167,8 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 			{
 				feedData.length ? (
 					<>
-						<EuiSpacer />
-						<EuiHorizontalRule />
+						<EuiSpacer/>
+						<EuiHorizontalRule/>
 						<EuiPageTemplate.Section
 							color={"subdued"}
 						>
@@ -199,7 +205,7 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 										>
 											<EuiText>
 												<h5>
-													Next <EuiIcon type={"arrowRight"} />
+													Next <EuiIcon type={"arrowRight"}/>
 												</h5>
 											</EuiText>
 										</EuiButton>

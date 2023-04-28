@@ -6,10 +6,10 @@ import CustomCenter from "@/components/customCenter";
 import Link from "next/link"
 
 
-export default function NotFoundPage({setShowPageHeader}: PageHeaderControlComponentProps){
+export default function NotFoundPage({setShowPageHeader}: PageHeaderControlComponentProps) {
 	useEffect(() => {
 		setShowPageHeader(false)
-
+		
 		return () => {
 			setShowPageHeader(true)
 		}

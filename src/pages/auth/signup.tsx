@@ -70,7 +70,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
-		if (!window.ethereum){
+		if (!window.ethereum) {
 			addToast(
 				"We couldn't connect to MetaMask",
 				"Check if you have the MetaMask extension installed!",
@@ -79,7 +79,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		// @ts-ignore
-		if (!window.ethereum.isMetaMask){
+		if (!window.ethereum.isMetaMask) {
 			addToast(
 				"Non-MetaMask wallet detected",
 				"We only support Metamask wallets as of now",
@@ -95,7 +95,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			const selectedAccount = ethAccounts[0]
 			
 			setMetamaskInfo([true, selectedAccount])
-		} catch (err: unknown){
+		} catch (err: unknown) {
 			addToast(
 				"Please authenticate with MetaMask",
 				"Connect your MetaMask account with Versura to continue",
@@ -106,7 +106,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [])
 	
 	const attemptUserSignup = useCallback(async () => {
-		if (!metamaskConnected){
+		if (!metamaskConnected) {
 			addToast(
 				"Metamask Authentication is required",
 				"Connect to Metamask by clicking the \"Connect\" button",
@@ -115,7 +115,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		if (userPassword !== confirmPassword){
+		if (userPassword !== confirmPassword) {
 			setPasswordMismatch(true)
 			addToast(
 				"Passwords do not match",
@@ -137,7 +137,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 		})
 		
 		const {isSuccess, isError, code, data, error} = signupAPIResponse
-		if (isError && error){
+		if (isError && error) {
 			addToast(
 				"An error occurred when processing your request",
 				(error as Error).message || "",
@@ -147,12 +147,12 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		if (isSuccess && data){
+		if (isSuccess && data) {
 			const {requestStatus} = data
-			if (code === 400){
-				if (requestStatus === "ERR_INVALID_BODY_PARAMS"){
+			if (code === 400) {
+				if (requestStatus === "ERR_INVALID_BODY_PARAMS") {
 					const {invalidParams} = data
-					if (invalidParams && invalidParams.includes("walletAddress")){
+					if (invalidParams && invalidParams.includes("walletAddress")) {
 						addToast(
 							"An account already exists with that wallet",
 							"Try logging in with that wallet and password",
@@ -163,8 +163,8 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 					}
 				}
 			}
-			if (code === 200){
-				if (requestStatus === "SUCCESS"){
+			if (code === 200) {
+				if (requestStatus === "SUCCESS") {
 					addToast(
 						"You have signed up successfully",
 						`You will be redirected in ${SIGNUP_SUCCESS_REDIR_TIMEOUT_S} seconds`,
@@ -276,7 +276,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 									>
 										{
 											signupHandlerActive ? (
-												<EuiLoadingSpinner />
+												<EuiLoadingSpinner/>
 											) : (
 												"Sign Up"
 											)

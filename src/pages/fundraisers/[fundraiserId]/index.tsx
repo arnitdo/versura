@@ -46,7 +46,7 @@ type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
 
 // @ts-ignore
 export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFundraiserRequestParams> = async (ctx) => {
-	if (ctx.params === undefined){
+	if (ctx.params === undefined) {
 		return {
 			redirect: {
 				destination: "/404"
@@ -59,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 		{
 			fundraiserId: (fundraiserId) => {
 				const parsedFundraiserId = Number.parseInt(fundraiserId)
-				if (Number.isNaN(parsedFundraiserId)){
+				if (Number.isNaN(parsedFundraiserId)) {
 					return false
 				}
 				return NON_ZERO_NON_NEGATIVE(parsedFundraiserId);
@@ -67,7 +67,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 		}
 	)
 	
-	if (!isValidFundraiserId){
+	if (!isValidFundraiserId) {
 		return {
 			redirect: {
 				destination: "/400",
@@ -78,7 +78,13 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 	
 	const {fundraiserId} = ctx.params
 	
-	const {isSuccess, isError, code, data, error} = await makeAPIRequest<GetFundraiserResponse, {}, GetFundraiserRequestParams>({
+	const {
+		isSuccess,
+		isError,
+		code,
+		data,
+		error
+	} = await makeAPIRequest<GetFundraiserResponse, {}, GetFundraiserRequestParams>({
 		endpointPath: `/api/fundraisers/:fundraiserId`,
 		requestMethod: "GET",
 		queryParams: {
@@ -88,7 +94,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 		ssrContext: ctx
 	})
 	
-	if (isError){
+	if (isError) {
 		console.error(error)
 		return {
 			redirect: {
@@ -98,9 +104,9 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 		}
 	}
 	
-	if (isSuccess){
+	if (isSuccess) {
 		const {requestStatus} = data!
-		if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR"){
+		if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR") {
 			return {
 				redirect: {
 					destination: "/500",
@@ -108,12 +114,12 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 				}
 			}
 		}
-		if (code === 200 && requestStatus === "SUCCESS"){
+		if (code === 200 && requestStatus === "SUCCESS") {
 			return {
 				props: data!.fundraiserData
 			}
 		}
-		if (code === 400 && requestStatus === "ERR_INVALID_QUERY_PARAMS"){
+		if (code === 400 && requestStatus === "ERR_INVALID_QUERY_PARAMS") {
 			return {
 				redirect: {
 					destination: "/404",
@@ -121,7 +127,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 				}
 			}
 		}
-		if (code === 404 && requestStatus === "ERR_NOT_FOUND"){
+		if (code === 404 && requestStatus === "ERR_NOT_FOUND") {
 			return {
 				redirect: {
 					destination: "/404",
@@ -200,7 +206,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 	)
 	
 	const sendFundraiserDonation = useCallback(async () => {
-		if (!authCtx.isAuthenticated){
+		if (!authCtx.isAuthenticated) {
 			addToast(
 				"Log in to send funds",
 				"You must be authenticated to send funds",
@@ -209,7 +215,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			return
 		}
 		
-		if (donationInvalid){
+		if (donationInvalid) {
 			addToast(
 				"Invalid amount entered",
 				`Please enter a value greater than ${fundraiserMinDonationAmount} ${fundraiserToken}`,
@@ -218,7 +224,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			return
 		}
 		
-		if (!conditionsAccepted){
+		if (!conditionsAccepted) {
 			addToast(
 				"You must accept the Terms and Conditions",
 				"",
@@ -249,8 +255,14 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 					requestParams
 				]
 			})
-
-			const {isSuccess, isError, code, data, error} = await makeAPIRequest<APIResponse, FundraiserDonationBody, FundraiserDonationParams>({
+			
+			const {
+				isSuccess,
+				isError,
+				code,
+				data,
+				error
+			} = await makeAPIRequest<APIResponse, FundraiserDonationBody, FundraiserDonationParams>({
 				endpointPath: `/api/fundraisers/:fundraiserId/donations`,
 				requestMethod: "POST",
 				queryParams: {
@@ -262,7 +274,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				}
 			})
 			
-			if (isError && error){
+			if (isError && error) {
 				addToast(
 					"We encountered an error when processing your request",
 					(error as Error).message || "",
@@ -272,9 +284,9 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				return
 			}
 			
-			if (isSuccess && data){
+			if (isSuccess && data) {
 				const {requestStatus} = data
-				if (requestStatus === "SUCCESS"){
+				if (requestStatus === "SUCCESS") {
 					setRaisedAmount((prevAmount) => {
 						return prevAmount + donationAmount
 					})
@@ -309,9 +321,9 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 					return
 				}
 			}
-		} catch (err){
+		} catch (err) {
 			// @ts-ignore
-			if (err.code === 4001){
+			if (err.code === 4001) {
 				addToast(
 					"Transaction was cancelled",
 					"Transaction was cancelled by the user",
@@ -340,13 +352,13 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 	
 	useEffect(() => {
 		setWithdrawalAmount(maxWithdrawableAmount)
-		if (maxWithdrawableAmount == 0){
+		if (maxWithdrawableAmount == 0) {
 			setWithdrawalInvalid(true)
 		}
 	}, [raisedAmount])
 	
-	const createWithdrawalRequest = useCallback(async() => {
-		if (withdrawalInvalid){
+	const createWithdrawalRequest = useCallback(async () => {
+		if (withdrawalInvalid) {
 			addToast(
 				"Invalid withdrawal amount provided",
 				"The withdrawal amount cannot be greater than the funds accumulated",
@@ -356,7 +368,13 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 		
 		setWithdrawalRequestActive(true)
-		const {isSuccess, isError, code, data, error} = await makeAPIRequest<APIResponse, FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams>({
+		const {
+			isSuccess,
+			isError,
+			code,
+			data,
+			error
+		} = await makeAPIRequest<APIResponse, FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams>({
 			endpointPath: "/api/fundraisers/:fundraiserId/withdrawals",
 			requestMethod: "POST",
 			queryParams: {
@@ -367,7 +385,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			}
 		})
 		
-		if (isError && error){
+		if (isError && error) {
 			addToast(
 				"We encountered an error when processing your request",
 				(error as Error).message || "",
@@ -377,7 +395,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			return
 		}
 		
-		if (isSuccess && data){
+		if (isSuccess && data) {
 			const {requestStatus, invalidParams} = data
 			if (requestStatus === "SUCCESS") {
 				addToast(
@@ -388,7 +406,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				setWithdrawalRequestActive(false)
 				return
 			} else if (requestStatus === "ERR_INVALID_BODY_PARAMS") {
-				if (invalidParams!.includes("withdrawalAmount")){
+				if (invalidParams!.includes("withdrawalAmount")) {
 					addToast(
 						"Invalid withdrawal amount specified",
 						"The amount you entered has not been acquired yet",
@@ -418,7 +436,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			direction={"column"}
 			alignItems={"center"}
 		>
-			<EuiSpacer />
+			<EuiSpacer/>
 			<EuiPanel
 				style={{
 					width: "90vw"
@@ -589,7 +607,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															onChange={(e) => {
 																const withdrawalAmtString = e.target.value
 																const parsedAmount = Number.parseFloat(withdrawalAmtString)
-																if (Number.isNaN(parsedAmount)){
+																if (Number.isNaN(parsedAmount)) {
 																	setWithdrawalInvalid(true)
 																	return
 																}
@@ -597,7 +615,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 																	setWithdrawalInvalid(true)
 																	return;
 																}
-																if (parsedAmount <= 0){
+																if (parsedAmount <= 0) {
 																	setWithdrawalInvalid(true)
 																	return
 																}
@@ -616,7 +634,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 														>
 															{
 																withdrawalRequestActive ? (
-																	<EuiLoadingSpinner />
+																	<EuiLoadingSpinner/>
 																) : (
 																	`Create Request`
 																)
@@ -653,11 +671,11 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															append={fundraiserToken}
 															onChange={(e) => {
 																const parsedDonationAmount = Number.parseFloat(e.target.value)
-																if (Number.isNaN(parsedDonationAmount)){
+																if (Number.isNaN(parsedDonationAmount)) {
 																	setDonationInvalid(true)
 																	return
 																}
-																if (parsedDonationAmount < fundraiserMinDonationAmount){
+																if (parsedDonationAmount < fundraiserMinDonationAmount) {
 																	setDonationInvalid(true)
 																	return
 																}
@@ -708,10 +726,10 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 																fill
 																fullWidth
 																onClick={sendFundraiserDonation}
-																disabled={(!donationInvalid && !conditionsAccepted) || donationRequestActive }
+																disabled={(!donationInvalid && !conditionsAccepted) || donationRequestActive}
 															>
 																{donationRequestActive ? (
-																	<EuiLoadingSpinner />
+																	<EuiLoadingSpinner/>
 																) : (
 																	`Send ${fundraiserToken}`
 																)}
@@ -737,7 +755,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 					</EuiFlexGroup>
 				</EuiFlexItem>
 			</EuiFlexGroup>
-			<EuiSpacer />
+			<EuiSpacer/>
 			<EuiGlobalToastList
 				dismissToast={dismissToast}
 				toasts={toasts}

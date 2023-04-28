@@ -55,10 +55,12 @@ export default function IndexPage() {
 							<EuiFlexItem>
 								<EuiText>
 									<h4>
-										Versura is a revolutionary crowdfunding platform that assists founders to acquire crucial seed funding for the next big thing.
-										Using revolutionary Ethereum blockchain technology, we guarantee* management of funds to the last <i>wei</i>.
+										Versura is a revolutionary crowdfunding platform that assists founders to
+										acquire crucial seed funding for the next big thing.
+										Using revolutionary Ethereum blockchain technology, we guarantee* management of
+										funds to the last <i>wei</i>.
 									</h4>
-									<br />
+									<br/>
 									<small>
 										<i>* Terms and Conditions Apply</i>
 									</small>
@@ -101,7 +103,8 @@ export default function IndexPage() {
 							<EuiFlexItem>
 								<EuiText>
 									<h4>
-										Connect your MetaMask wallet dive right into sourcing and contributing funds to projects.
+										Connect your MetaMask wallet dive right into sourcing and contributing funds to
+										projects.
 										Kickstart your project idea while keeping your identity private*
 									</h4>
 								</EuiText>
@@ -157,7 +160,8 @@ export default function IndexPage() {
 							<EuiFlexItem>
 								<EuiText>
 									<h4>
-										We employ multiple security measures to ensure that your funds reach exactly where they need to be.
+										We employ multiple security measures to ensure that your funds reach exactly
+										where they need to be.
 										No <i>wei</i> is left unaccounted for.
 										All campaigns are verified before being publicly displayed.
 									</h4>

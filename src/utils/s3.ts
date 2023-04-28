@@ -17,9 +17,9 @@ type PresignedURLOpts = {
 
 type RequestCommandMap = {
 	[reqMethod in S3ObjectMethods]:
-		typeof GetObjectCommand |
-		typeof PutObjectCommand |
-		typeof DeleteObjectCommand
+	typeof GetObjectCommand |
+	typeof PutObjectCommand |
+	typeof DeleteObjectCommand
 }
 
 const requestCommandMap: RequestCommandMap = {

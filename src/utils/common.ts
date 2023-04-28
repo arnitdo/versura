@@ -41,7 +41,7 @@ export type UseValueScaleArgs<T> = {
 	scaledValues: T[]
 }
 
-async function requireBasicObjectValidation<T>(objToValidate: T, validationMap: ValidatorMapType<T>): Promise<[boolean, ValidationResultMap<T>]>{
+async function requireBasicObjectValidation<T>(objToValidate: T, validationMap: ValidatorMapType<T>): Promise<[boolean, ValidationResultMap<T>]> {
 	const keysToValidate = Object.keys(validationMap) as (keyof T)[]
 	const validationResultMap: ValidationResultMap<T> = {} as ValidationResultMap<T>
 	const validationResultAcc = await Promise.all(
@@ -74,7 +74,13 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 		presignedUrls = await Promise.all(
 			mediaFiles.map(async (mediaFile, mediaIdx) => {
 				const objectKey = objectKeyGenFn(mediaFile, mediaIdx)
-				const {isSuccess, isError, code, data, error, } = await makeAPIRequest<PresignedURLResponse, PresignedURLBody>({
+				const {
+					isSuccess,
+					isError,
+					code,
+					data,
+					error,
+				} = await makeAPIRequest<PresignedURLResponse, PresignedURLBody>({
 					endpointPath: `/api/media/presigned_url`,
 					requestMethod: "POST",
 					bodyParams: {
@@ -82,9 +88,9 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 						requestMethod: mediaMethod
 					}
 				})
-				if (isSuccess && data){
+				if (isSuccess && data) {
 					const {requestStatus} = data
-					if (requestStatus === "SUCCESS"){
+					if (requestStatus === "SUCCESS") {
 						const {presignedUrl} = data
 						stepCompletionCallbacks?.onAcquirePresignedUrl(mediaIdx)
 						return presignedUrl
@@ -98,12 +104,12 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 		presignedUrls = presignedUrls.filter((presignedUrl) => {
 			return presignedUrl.length > 0
 		})
-		if (presignedUrls.length === mediaFiles.length){
+		if (presignedUrls.length === mediaFiles.length) {
 			mediaManagementStatuses[0] = true
 		}
 	}
 	{
-		if (!mediaManagementStatuses[0]){
+		if (!mediaManagementStatuses[0]) {
 			return mediaManagementStatuses
 		}
 		// Put to each PresignedURL
@@ -113,7 +119,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 				
 				const fetchOpts: RequestInit = {}
 				
-				if (mediaMethod === "PUT"){
+				if (mediaMethod === "PUT") {
 					fetchOpts.body = fileToPut
 					fetchOpts.headers = {
 						"Content-Type": fileToPut.type
@@ -138,19 +144,25 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 			})
 		)
 		mediaStatuses = mediaStatuses.filter(Boolean)
-		if (mediaStatuses.length == mediaFiles.length){
+		if (mediaStatuses.length == mediaFiles.length) {
 			mediaManagementStatuses[1] = true
 		}
 	}
 	{
-		if (!mediaManagementStatuses[1]){
+		if (!mediaManagementStatuses[1]) {
 			return mediaManagementStatuses
 		}
 		let mediaCallbackStatuses = await Promise.all(
 			mediaFiles.map(async (mediaFile, fileIdx) => {
 				const objectKey = objectKeyGenFn(mediaFile, fileIdx)
 				const {type: objectContentType, size: objectSizeBytes} = mediaFile
-				const {isSuccess, isError, code, data, error} = await makeAPIRequest<MediaCallbackResponse, MediaCallbackBody>({
+				const {
+					isSuccess,
+					isError,
+					code,
+					data,
+					error
+				} = await makeAPIRequest<MediaCallbackResponse, MediaCallbackBody>({
 					endpointPath: `/api/media/callback`,
 					requestMethod: "POST",
 					bodyParams: {
@@ -160,9 +172,9 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 						objectSizeBytes: objectSizeBytes
 					}
 				})
-				if (isSuccess && data){
+				if (isSuccess && data) {
 					const {requestStatus} = data
-					if (requestStatus === "SUCCESS"){
+					if (requestStatus === "SUCCESS") {
 						stepCompletionCallbacks?.onAPIMediaCallback(fileIdx)
 						return true
 					}
@@ -171,7 +183,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 			})
 		)
 		mediaCallbackStatuses = mediaCallbackStatuses.filter(Boolean)
-		if (mediaCallbackStatuses.length === mediaFiles.length){
+		if (mediaCallbackStatuses.length === mediaFiles.length) {
 			mediaManagementStatuses[2] = true
 		}
 	}
@@ -188,17 +200,17 @@ function useValueScale<T>(args: UseValueScaleArgs<T>): T {
 	const scaleUnit = minMaxDelta / scaleDelta
 	const currValueMultiplier = currValue - (currValue % scaleUnit)
 	let currValueScaled = currValueMultiplier / scaleUnit
-	if (currValueScaled < minScale){
+	if (currValueScaled < minScale) {
 		currValueScaled = minScale
 	}
-	if (currValueScaled > maxScale){
+	if (currValueScaled > maxScale) {
 		currValueScaled = maxScale
 	}
 	const scaledValue = scaledValues[currValueScaled]
 	return scaledValue
 }
 
-function calculateServiceFeeWeiForAmount(tokenAmount: number, chainToken: string){
+function calculateServiceFeeWeiForAmount(tokenAmount: number, chainToken: string) {
 	// @ts-ignore
 	const gasAmountWei = gasAmountMap[chainToken]
 	

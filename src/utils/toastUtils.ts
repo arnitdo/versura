@@ -13,7 +13,7 @@ type ToastListHookArgs = {
 	toastIdFactoryFn: (toastCount: number, toastType?: ToastType) => string
 }
 
-function useToastList(toastListArgs: ToastListHookArgs): ToastUtils{
+function useToastList(toastListArgs: ToastListHookArgs): ToastUtils {
 	const [toasts, setToasts] = useState<Toast[]>([])
 	const internalToastCountRef = useRef<number>(0)
 	

@@ -72,7 +72,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
-		if (!window.ethereum){
+		if (!window.ethereum) {
 			addToast(
 				"We couldn't connect to MetaMask",
 				"Check if you have the MetaMask extension installed!",
@@ -81,7 +81,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		// @ts-ignore
-		if (!window.ethereum.isMetaMask){
+		if (!window.ethereum.isMetaMask) {
 			addToast(
 				"Non-MetaMask wallet detected",
 				"We only support Metamask wallets as of now",
@@ -106,7 +106,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			
 			setMetamaskInfo([true, selectedAccount])
 			
-		} catch (err: unknown){
+		} catch (err: unknown) {
 			addToast(
 				"Please authenticate with MetaMask",
 				"Connect your MetaMask account with Versura to continue",
@@ -117,7 +117,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [])
 	
 	const attemptUserLogin = useCallback(async () => {
-		if (!metamaskConnected){
+		if (!metamaskConnected) {
 			addToast(
 				"Metamask Authentication is required",
 				"Connect to Metamask by clicking the \"Connect\" button",
@@ -125,7 +125,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		if (userPassword.trim() === ""){
+		if (userPassword.trim() === "") {
 			addToast(
 				"Input a valid password",
 				"Make sure the password matches the one used when signing up",
@@ -145,7 +145,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 		})
 		
 		const {isSuccess, isError, code, data, error} = loginAPIResponse
-		if (isError && error){
+		if (isError && error) {
 			addToast(
 				"An error occurred when processing your request",
 				(error as Error).message || "",
@@ -155,12 +155,12 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 		
-		if (isSuccess && data){
+		if (isSuccess && data) {
 			const {requestStatus} = data
 			if (code === 400) {
-				if (requestStatus === "ERR_INVALID_BODY_PARAMS"){
+				if (requestStatus === "ERR_INVALID_BODY_PARAMS") {
 					const {invalidParams} = data
-					if (invalidParams && invalidParams.includes("userPass")){
+					if (invalidParams && invalidParams.includes("userPass")) {
 						setPasswordInvalid(true)
 						addToast(
 							"Invalid password provided",
@@ -169,7 +169,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 						)
 						setLoginHandlerActive(false)
 					}
-					if (invalidParams && invalidParams.includes("walletAddress")){
+					if (invalidParams && invalidParams.includes("walletAddress")) {
 						addToast(
 							"That account doesn't exist",
 							"Make sure you are connecting with the right Metamask Account",
@@ -179,8 +179,8 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 					}
 					return
 				}
-			} else if (code === 200){
-				if (requestStatus === "SUCCESS"){
+			} else if (code === 200) {
+				if (requestStatus === "SUCCESS") {
 					const {userRole} = data
 					authCtx.updateAuthData({
 						isAuthenticated: true,
@@ -288,7 +288,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 									>
 										{
 											loginHandlerActive ? (
-												<EuiLoadingSpinner />
+												<EuiLoadingSpinner/>
 											) : (
 												"Log In"
 											)

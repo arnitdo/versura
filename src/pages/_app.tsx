@@ -46,14 +46,14 @@ export default function App({Component, pageProps}: AppProps) {
 			requestMethod: "POST"
 		}).then((responseData) => {
 			const {isSuccess, isError, code, data, error} = responseData
-			if (isError && error){
+			if (isError && error) {
 				console.error(error)
 				return
 			}
-			if (isSuccess && data){
+			if (isSuccess && data) {
 				const {requestStatus, authStatus, authData} = data
-				if (requestStatus === "SUCCESS"){
-					if (authStatus === "NO_AUTH"){
+				if (requestStatus === "SUCCESS") {
+					if (authStatus === "NO_AUTH") {
 						setAuthData({
 							isAuthenticated: false,
 							metamaskAddress: undefined,
@@ -61,7 +61,7 @@ export default function App({Component, pageProps}: AppProps) {
 						})
 						return
 					}
-					if (authStatus === "AUTH_ACTIVE"){
+					if (authStatus === "AUTH_ACTIVE") {
 						const {userRole, walletAddress} = authData!
 						setAuthData({
 							isAuthenticated: true,
@@ -82,7 +82,7 @@ export default function App({Component, pageProps}: AppProps) {
 			<EuiProvider colorMode={"dark"}>
 				<AuthContext.Provider value={authContextValue}>
 					{showPageHeader ? (
-						<PageHeader />
+						<PageHeader/>
 					) : null}
 					<Component
 						{...pageProps}

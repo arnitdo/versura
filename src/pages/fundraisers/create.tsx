@@ -55,7 +55,13 @@ export default function CreateFundraiser(): JSX.Element {
 	
 	const navRouter = useRouter()
 	
-	const {fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount} = fundraiserFormData
+	const {
+		fundraiserTitle,
+		fundraiserDescription,
+		fundraiserTarget,
+		fundraiserToken,
+		fundraiserMinDonationAmount
+	} = fundraiserFormData
 	const {
 		fundraiserToken: isTokenInvalid,
 		fundraiserTarget: isTargetInvalid,
@@ -108,7 +114,7 @@ export default function CreateFundraiser(): JSX.Element {
 		}
 		
 		// Require media before creating fundraisers
-		if (fundraiserMedia.length === 0){
+		if (fundraiserMedia.length === 0) {
 			addToast(
 				"Please attach media to your campaign",
 				"Images will attract more contributors to your fundraiser",
@@ -125,7 +131,7 @@ export default function CreateFundraiser(): JSX.Element {
 				requestMethod: "POST",
 				bodyParams: fundraiserFormData
 			})
-			if (isError && error){
+			if (isError && error) {
 				addToast(
 					"An error occurred when processing your request",
 					(error as Error).message || "",
@@ -134,9 +140,9 @@ export default function CreateFundraiser(): JSX.Element {
 				setCreationProcessActive(false)
 				return
 			}
-			if (isSuccess && data){
+			if (isSuccess && data) {
 				const {requestStatus} = data
-				if (requestStatus === "ERR_MISSING_BODY_PARAMS" || requestStatus === "ERR_INVALID_BODY_PARAMS"){
+				if (requestStatus === "ERR_MISSING_BODY_PARAMS" || requestStatus === "ERR_INVALID_BODY_PARAMS") {
 					const missingParams = data.missingParams || data.invalidParams || []
 					const clonedInvalidMap = {...invalidInputMap}
 					for (const missingParam of missingParams) {
@@ -152,7 +158,7 @@ export default function CreateFundraiser(): JSX.Element {
 					setCreationProcessActive(false)
 					return
 				}
-				if (requestStatus === "ERR_AUTH_REQUIRED"){
+				if (requestStatus === "ERR_AUTH_REQUIRED") {
 					addToast(
 						"You need to be authenticated to create fundraisers",
 						"Log in or Create an account to set up fundraisers",
@@ -161,7 +167,7 @@ export default function CreateFundraiser(): JSX.Element {
 					setCreationProcessActive(false)
 					return
 				}
-				if (requestStatus === "SUCCESS"){
+				if (requestStatus === "SUCCESS") {
 					const {fundraiserId} = data
 					successFundraiserId = fundraiserId
 					fundraiserCreationStatus.createFundraiser = true
@@ -170,7 +176,7 @@ export default function CreateFundraiser(): JSX.Element {
 			}
 		}
 		{
-			if (!fundraiserCreationStatus.createFundraiser){
+			if (!fundraiserCreationStatus.createFundraiser) {
 				setCreationProcessActive(false)
 				return
 			}
@@ -201,14 +207,20 @@ export default function CreateFundraiser(): JSX.Element {
 			}
 		}
 		{
-			if (!fundraiserCreationStatus.contentMediaCallback){
+			if (!fundraiserCreationStatus.contentMediaCallback) {
 				setCreationProcessActive(false)
 				return
 			}
 			let fundraiserContentUpdateStatus = await Promise.all(
 				fundraiserMedia.map(async (mediaFile, mediaIdx) => {
 					const objectKey = `fundraisers/${successFundraiserId}/media/${mediaIdx + 1}`
-					const {isSuccess, isError, code, data, error} = await makeAPIRequest<APIResponse, AddFundraiserMediaBody, AddFundraiserMediaParams>({
+					const {
+						isSuccess,
+						isError,
+						code,
+						data,
+						error
+					} = await makeAPIRequest<APIResponse, AddFundraiserMediaBody, AddFundraiserMediaParams>({
 						endpointPath: "/api/fundraisers/:fundraiserId/media",
 						requestMethod: "POST",
 						queryParams: {
@@ -218,9 +230,9 @@ export default function CreateFundraiser(): JSX.Element {
 							objectKey: objectKey
 						}
 					})
-					if (isSuccess && data){
+					if (isSuccess && data) {
 						const {requestStatus} = data
-						if (requestStatus === "SUCCESS"){
+						if (requestStatus === "SUCCESS") {
 							setFundraiserCreationProgressValue((oldProgress) => {
 								return oldProgress + 1
 							})
@@ -230,12 +242,12 @@ export default function CreateFundraiser(): JSX.Element {
 					return false
 				})
 			)
-			if (fundraiserContentUpdateStatus.length === fundraiserMedia.length){
+			if (fundraiserContentUpdateStatus.length === fundraiserMedia.length) {
 				fundraiserCreationStatus.fundraiserContentUpdate = true
 			}
 		}
 		{
-			if (fundraiserCreationStatus.fundraiserContentUpdate == true){
+			if (fundraiserCreationStatus.fundraiserContentUpdate == true) {
 				addToast(
 					"Fundraiser created successfully",
 					`You will be redirected in ${FUNDRAISER_REDIR_TIMEOUT_S} seconds`,
@@ -320,7 +332,7 @@ export default function CreateFundraiser(): JSX.Element {
 						</Link>
 					</EuiFlexItem>
 				</EuiFlexGroup>
-				<EuiHorizontalRule />
+				<EuiHorizontalRule/>
 				<EuiFlexGroup
 					direction={"column"}
 				>
@@ -401,8 +413,8 @@ export default function CreateFundraiser(): JSX.Element {
 								onChange={e => {
 									setFundraiserFormData((oldFormData) => {
 										const targetAmtString = e.target.value
-										const parsedTargetAmt= Number.parseFloat(targetAmtString)
-										if (Number.isNaN(parsedTargetAmt)){
+										const parsedTargetAmt = Number.parseFloat(targetAmtString)
+										if (Number.isNaN(parsedTargetAmt)) {
 											return oldFormData
 										}
 										return {
@@ -428,7 +440,7 @@ export default function CreateFundraiser(): JSX.Element {
 									setFundraiserFormData((oldFormData) => {
 										const minDonationAmtString = e.target.value
 										const parsedDonationAmt = Number.parseFloat(minDonationAmtString)
-										if (Number.isNaN(parsedDonationAmt)){
+										if (Number.isNaN(parsedDonationAmt)) {
 											return oldFormData
 										}
 										
@@ -443,13 +455,13 @@ export default function CreateFundraiser(): JSX.Element {
 								isInvalid={isDonationAmtInvalid}
 							/>
 						</EuiFormRow>
-						<EuiHorizontalRule />
+						<EuiHorizontalRule/>
 						<EuiFormRow
 							label={"Fundraiser Media"}
 							fullWidth
 						>
 							<EuiFilePicker
-							 	display={"large"}
+								display={"large"}
 								fullWidth
 								multiple
 								initialPromptText={"Select or drag and drop multiple files"}
@@ -461,7 +473,7 @@ export default function CreateFundraiser(): JSX.Element {
 								ref={filePickerRef}
 							/>
 						</EuiFormRow>
-						<EuiHorizontalRule />
+						<EuiHorizontalRule/>
 						{
 							creationProcessActive ? (
 								<>
@@ -470,7 +482,7 @@ export default function CreateFundraiser(): JSX.Element {
 										max={fundraiserMedia.length * 5}
 										color={fundraiserProgressColor}
 									/>
-									<EuiHorizontalRule />
+									<EuiHorizontalRule/>
 								</>
 							) : (
 								null

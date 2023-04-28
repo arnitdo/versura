@@ -12,17 +12,17 @@ export type MethodDispatchMap<T, P> = {
 	[reqMethod in keyof T]: APIHandler<MethodDispatchTypeMap<T>[reqMethod], MethodDispatchTypeMap<P>[reqMethod]>;
 };
 
-async function unsupportedMethod(req: CustomApiRequest, res: CustomApiResponse){
+async function unsupportedMethod(req: CustomApiRequest, res: CustomApiResponse) {
 	res.status(400).json({
 		requestStatus: "ERR_INVALID_METHOD"
 	})
 }
 
 function withMethodDispatcher<BodyT, ParamT>(dispatchMap: MethodDispatchMap<BodyT, ParamT>): APIHandler {
-	return async function (req, res){
-		for (const dispatchMapKey in dispatchMap){
+	return async function (req, res) {
+		for (const dispatchMapKey in dispatchMap) {
 			const reqMethod = req.method as ValidRequestMethods
-			if (reqMethod === dispatchMapKey){
+			if (reqMethod === dispatchMapKey) {
 				const dispatchFn = dispatchMap[dispatchMapKey]
 				await dispatchFn(
 					// @ts-ignore

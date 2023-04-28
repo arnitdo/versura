@@ -20,7 +20,7 @@ import {versuraAccount, versuraAddress, web3Client, web3Eth} from "@/utils/web3P
 import {calculateServiceFeeWeiForAmount, gasAmountMap} from "@/utils/common";
 
 
-export default async function updateWithdrawalStatus(req: CustomApiRequest<FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams>, res: CustomApiResponse){
+export default async function updateWithdrawalStatus(req: CustomApiRequest<FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -44,7 +44,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 						[withdrawalId, fundraiserId]
 					)
 					
-					if (rows.length){
+					if (rows.length) {
 						return true
 					}
 					
@@ -61,7 +61,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 		}
 	)
 	
-	if (!middlewareStatus){
+	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
@@ -78,7 +78,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 		const selectedRequest = dbRows[0]
 		const {walletAddress, withdrawalAmount, withdrawalToken} = selectedRequest
 		
-		switch (withdrawalStatus){
+		switch (withdrawalStatus) {
 			case "APPROVED": {
 				const currentWalletBalance = await web3Eth.getBalance(
 					web3Eth.defaultAccount!
@@ -99,7 +99,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 				// @ts-ignore
 				const gasFee = gasAmountMap[withdrawalToken]
 				
-				if (parsedBalanceEth <= outgoingAmountEth){
+				if (parsedBalanceEth <= outgoingAmountEth) {
 					dbClient.release()
 					console.error(
 						`ERROR: Holding account address may have run out of funds!`
@@ -151,7 +151,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 				return
 			}
 		}
-	} catch (err){
+	} catch (err) {
 		console.error(err)
 		dbClient.release()
 		res.status(500).json({

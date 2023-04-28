@@ -15,7 +15,7 @@ import {db} from "@/utils/db";
 import {FundRaisers} from "@/utils/types/queryTypedefs";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 
-export default async function addWithdrawalRequest(req: CustomApiRequest<FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams>, res: CustomApiResponse){
+export default async function addWithdrawalRequest(req: CustomApiRequest<FundraiserWithdrawalRequestBody, FundraiserWithdrawalRequestParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	
 	const middlewareChecks = await requireMiddlewareChecks(
@@ -46,7 +46,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 					const selectedFundraiser = fundraiserRows[0]
 					const {fundraiserRaisedAmount} = selectedFundraiser
 					
-					const {rows: withdrawalRows} = await dbClient.query<{accumulatedSum: number}>(
+					const {rows: withdrawalRows} = await dbClient.query<{ accumulatedSum: number }>(
 						`SELECT SUM("withdrawalAmount") AS "accumulatedSum" FROM "fundraiserWithdrawalRequests"
 						WHERE "requestStatus" IN ('OPEN', 'APPROVED') AND "targetFundraiser" = $1`,
 						[fundraiserId]
@@ -55,7 +55,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 					const withdrawalSumRow = withdrawalRows[0]
 					const {accumulatedSum} = withdrawalSumRow
 					
-					if (accumulatedSum + withdrawalAmount > fundraiserRaisedAmount){
+					if (accumulatedSum + withdrawalAmount > fundraiserRaisedAmount) {
 						return false
 					}
 					
@@ -65,7 +65,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 		}
 	)
 	
-	if (!middlewareChecks){
+	if (!middlewareChecks) {
 		dbClient.release()
 		return
 	}
@@ -87,13 +87,13 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 			`INSERT INTO "fundraiserWithdrawalRequests" VALUES (DEFAULT, $1, $2, $3, $4, DEFAULT)`,
 			[walletAddress, fundraiserId, withdrawalAmount, fundraiserToken]
 		)
-	
+		
 		
 		dbClient.release()
 		res.status(200).json({
 			requestStatus: "SUCCESS"
 		})
-	} catch (err){
+	} catch (err) {
 		console.error(err)
 		dbClient.release()
 		res.status(500).json({

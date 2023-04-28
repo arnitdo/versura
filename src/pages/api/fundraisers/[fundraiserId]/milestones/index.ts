@@ -16,7 +16,7 @@ import {db} from "@/utils/db";
 import {FundraiserMilestones, FundRaisers} from "@/utils/types/queryTypedefs";
 import {CreateFundraiserMilestoneResponse} from "@/utils/types/apiResponses";
 
-export default async function createMilestone(req: CustomApiRequest<AddFundraiserMilestoneBody, AddFundraiserMilestoneParams>, res: CustomApiResponse){
+export default async function createMilestone(req: CustomApiRequest<AddFundraiserMilestoneBody, AddFundraiserMilestoneParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 	const middlewareChecks = await requireMiddlewareChecks(
 		req,
@@ -37,12 +37,14 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 				milestoneAmount: async (milestoneAmt: number) => {
 					const fundraiserId = req.query.fundraiserId
 					const {rows} = await dbClient.query<Pick<FundRaisers, "fundraiserTarget">>(
-						`SELECT "fundraiserTarget" FROM "fundRaisers" WHERE "fundraiserId" = $1`,
+						`SELECT "fundraiserTarget"
+                         FROM "fundRaisers"
+                         WHERE "fundraiserId" = $1`,
 						[fundraiserId]
 					)
 					const selectedFundraiser = rows[0]
 					const {fundraiserTarget} = selectedFundraiser
-					if (fundraiserTarget < milestoneAmt){
+					if (fundraiserTarget < milestoneAmt) {
 						return false
 					}
 					return true
@@ -50,7 +52,7 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 			})
 		}
 	)
-	if (!middlewareChecks){
+	if (!middlewareChecks) {
 		dbClient.release()
 		return
 	}
@@ -59,8 +61,8 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 		const {fundraiserId} = req.query
 		const {rows: createdMilestoneRows} = await dbClient.query<Pick<FundraiserMilestones, "milestoneId">>(
 			`INSERT INTO "fundraiserMilestones"
-			VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT, DEFAULT)
-			RETURNING "milestoneId"`,
+             VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT, DEFAULT)
+             RETURNING "milestoneId"`,
 			[fundraiserId, milestoneTitle, milestoneAmount]
 		)
 		const createdMilestoneRow = createdMilestoneRows[0]

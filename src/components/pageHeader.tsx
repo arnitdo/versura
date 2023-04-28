@@ -14,7 +14,7 @@ export default function PageHeader(): JSX.Element {
 	const {pathname, query} = useRouter()
 	
 	let returnPagePath = pathname
-	for (const queryElement in query){
+	for (const queryElement in query) {
 		returnPagePath = returnPagePath.replace(
 			`[${queryElement}]`,
 			query[queryElement]! as string
@@ -105,30 +105,30 @@ export default function PageHeader(): JSX.Element {
 						/>
 					</>
 				) : (
-						<EuiHeaderLinks
-							popoverBreakpoints={"none"}
-						>
-							<EuiHeaderLink>
-								<Link
-									href={`/auth/login?returnTo=${returnPagePath}`}
-									style={{
-										color: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									Log In
-								</Link>
-							</EuiHeaderLink>
-							<EuiHeaderLink>
-								<Link
-									href={`/auth/signup?returnTo=${returnPagePath}`}
-									style={{
-										color: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									Sign Up
-								</Link>
-							</EuiHeaderLink>
-						</EuiHeaderLinks>
+					<EuiHeaderLinks
+						popoverBreakpoints={"none"}
+					>
+						<EuiHeaderLink>
+							<Link
+								href={`/auth/login?returnTo=${returnPagePath}`}
+								style={{
+									color: LINK_TEXT_COLOR_OVERRIDE
+								}}
+							>
+								Log In
+							</Link>
+						</EuiHeaderLink>
+						<EuiHeaderLink>
+							<Link
+								href={`/auth/signup?returnTo=${returnPagePath}`}
+								style={{
+									color: LINK_TEXT_COLOR_OVERRIDE
+								}}
+							>
+								Sign Up
+							</Link>
+						</EuiHeaderLink>
+					</EuiHeaderLinks>
 				)}
 			</EuiHeaderSection>
 		</EuiHeader>
