@@ -11,7 +11,7 @@ if (!db) {
 	)
 }
 
-types.setTypeParser(types.TypeId.NUMERIC, (numericValue) => {
+types.setTypeParser(1700 /* NUMERIC */, (numericValue) => {
 	return Number.parseFloat(numericValue)
 })
 

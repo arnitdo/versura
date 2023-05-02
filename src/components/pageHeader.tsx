@@ -1,17 +1,26 @@
 import {AuthContext} from "@/pages/_app";
 import {AuthContextType} from "@/utils/types/componentTypedefs";
 import {EuiAvatar, EuiHeader, EuiHeaderLink, EuiHeaderLinks, EuiHeaderSection} from "@elastic/eui"
-import {useContext} from "react";
+import {useCallback, useContext, useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 import VersuraIcon from "@/assets/versura-icon.png"
 import {useRouter} from "next/router"
 import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
+import {makeAPIRequest} from "@/utils/apiHandler";
+import {LogoutResponse} from "@/utils/types/apiResponses";
+import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
+import {useToastList} from "@/utils/toastUtils";
 
 export default function PageHeader(): JSX.Element {
-	const {isAuthenticated, metamaskAddress} = useContext<AuthContextType>(AuthContext)
-	const {pathname, query} = useRouter()
+	const LOGOUT_REDIRECT_TIMER_S = 5 as const
+	
+	const authCtx = useContext<AuthContextType>(AuthContext)
+	const {isAuthenticated, metamaskAddress} = authCtx
+	const navRouter = useRouter()
+	const {pathname, query} = navRouter
+	const {returnTo} = query
 	
 	let returnPagePath = pathname
 	for (const queryElement in query) {
@@ -20,6 +29,75 @@ export default function PageHeader(): JSX.Element {
 			query[queryElement]! as string
 		)
 	}
+	
+	const {toasts, addToast, dismissToast} = useToastList({
+		toastIdFactoryFn: (toastCount, toastType) => {
+			return `global-${toastType}-toast-${toastCount}`
+		}
+	})
+	
+	const [logoutHandlerActive, setLogoutHandlerActive] = useState<boolean>(false)
+	
+	const attemptUserLogout = useCallback(async () => {
+		if (!isAuthenticated) {
+			navRouter.push(returnTo as string || "/")
+		}
+		
+		setLogoutHandlerActive(true)
+		const {isSuccess, isError, code, data, error} = await makeAPIRequest<LogoutResponse, LogoutUserRequestBody>({
+			endpointPath: `/api/auth/logout`,
+			requestMethod: "POST"
+		})
+		
+		if (isError && error) {
+			addToast(
+				"An error occurred when processing your request",
+				(error as Error).message || "",
+				"danger"
+			)
+			return
+		}
+		
+		if (isSuccess && data) {
+			const {requestStatus} = data
+			if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR") {
+				addToast(
+					"An error occurred when processing your request",
+					"An internal error occurred",
+					"danger"
+				)
+				setLogoutHandlerActive(false)
+				return
+			}
+			if (code === 403 && requestStatus === "ERR_AUTH_REQUIRED") {
+				addToast(
+					"You are not authenticated yet",
+					"Log in before attempting to log out of an account",
+					"danger"
+				)
+				setLogoutHandlerActive(false)
+				return
+			}
+			if (code === 200 && requestStatus === "SUCCESS") {
+				addToast(
+					"You have been logged out successfully",
+					`You will be redirected in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
+					"success"
+				)
+				authCtx.updateAuthData({
+					isAuthenticated: false,
+					metamaskAddress: undefined,
+					userRole: undefined
+				})
+				setLogoutHandlerActive(false)
+				await navRouter.prefetch(returnTo as string || '/')
+				setTimeout(() => {
+					navRouter.push(returnTo as string || '/')
+				}, LOGOUT_REDIRECT_TIMER_S * 1000)
+				return
+			}
+		}
+	}, [navRouter, authCtx])
 	
 	return (
 		<EuiHeader
@@ -84,15 +162,10 @@ export default function PageHeader(): JSX.Element {
 						<EuiHeaderLinks
 							popoverBreakpoints={"none"}
 						>
-							<EuiHeaderLink>
-								<Link
-									href={`/auth/logout?returnTo=${returnPagePath}`}
-									style={{
-										color: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									Log Out
-								</Link>
+							<EuiHeaderLink
+								onClick={attemptUserLogout}
+							>
+								Log Out
 							</EuiHeaderLink>
 						</EuiHeaderLinks>
 						<EuiAvatar
