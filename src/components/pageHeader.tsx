@@ -1,6 +1,6 @@
 import {AuthContext} from "@/pages/_app";
 import {AuthContextType} from "@/utils/types/componentTypedefs";
-import {EuiAvatar, EuiHeader, EuiHeaderLink, EuiHeaderLinks, EuiHeaderSection} from "@elastic/eui"
+import {EuiAvatar, EuiGlobalToastList, EuiHeader, EuiHeaderLink, EuiHeaderLinks, EuiHeaderSection} from "@elastic/eui"
 import {useCallback, useContext, useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -40,7 +40,7 @@ export default function PageHeader(): JSX.Element {
 	
 	const attemptUserLogout = useCallback(async () => {
 		if (!isAuthenticated) {
-			navRouter.push(returnTo as string || "/")
+			return
 		}
 		
 		setLogoutHandlerActive(true)
@@ -81,7 +81,7 @@ export default function PageHeader(): JSX.Element {
 			if (code === 200 && requestStatus === "SUCCESS") {
 				addToast(
 					"You have been logged out successfully",
-					`You will be redirected in ${LOGOUT_REDIRECT_TIMER_S} seconds`,
+					"",
 					"success"
 				)
 				authCtx.updateAuthData({
@@ -90,10 +90,7 @@ export default function PageHeader(): JSX.Element {
 					userRole: undefined
 				})
 				setLogoutHandlerActive(false)
-				await navRouter.prefetch(returnTo as string || '/')
-				setTimeout(() => {
-					navRouter.push(returnTo as string || '/')
-				}, LOGOUT_REDIRECT_TIMER_S * 1000)
+				navRouter.push(returnPagePath || '/')
 				return
 			}
 		}
@@ -204,6 +201,11 @@ export default function PageHeader(): JSX.Element {
 					</EuiHeaderLinks>
 				)}
 			</EuiHeaderSection>
+			<EuiGlobalToastList
+				dismissToast={dismissToast}
+				toastLifeTimeMs={5000}
+				toasts={toasts}
+			/>
 		</EuiHeader>
 	)
 }
