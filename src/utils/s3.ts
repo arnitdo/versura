@@ -10,7 +10,7 @@ const s3Client = new S3Client({
 	}
 })
 
-type PresignedURLOpts = {
+type ObjectUrlOpts = {
 	requestMethod: S3ObjectMethods
 	objectKey: string
 }
@@ -28,7 +28,7 @@ const requestCommandMap: RequestCommandMap = {
 	DELETE: DeleteObjectCommand
 }
 
-async function getPresignedURL({requestMethod, objectKey}: PresignedURLOpts): Promise<string> {
+async function getObjectUrl({requestMethod, objectKey}: ObjectUrlOpts): Promise<string> {
 	const assocMethodCommand = requestCommandMap[requestMethod]
 	
 	const objCommand = new assocMethodCommand({
@@ -40,15 +40,21 @@ async function getPresignedURL({requestMethod, objectKey}: PresignedURLOpts): Pr
 		s3Client,
 		objCommand,
 		{
-			expiresIn: requestMethod === "GET" ?
-				24 * 60 * 60	// 1day for GET (Long term access)
-				: 600			// 10min for PUT / DELETE
+			expiresIn: 600		// 10min for PUT / DELETE
 		}
 	)
+	
+	if (requestMethod === "GET") {
+		// Strip authentication for GET requests
+		const objectUrl = new URL(presignedUrl)
+		const {origin: s3Origin, pathname: s3Pathname} = objectUrl
+		const resolvedS3Url = `${s3Origin}${s3Pathname}`
+		return resolvedS3Url
+	}
 	
 	return presignedUrl
 }
 
 export {
-	getPresignedURL
+	getObjectUrl
 }

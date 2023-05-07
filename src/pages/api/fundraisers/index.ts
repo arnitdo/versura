@@ -12,10 +12,16 @@ import {
 import {db} from "@/utils/db";
 import {CreateFundraiserRequestBody, GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
 import {FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
-import {ALLOW_UNDEFINED_WITH_FN, NON_ZERO_NON_NEGATIVE, STRLEN_GT} from "@/utils/validatorUtils";
+import {
+	ALLOW_UNDEFINED_WITH_FN,
+	NON_ZERO_NON_NEGATIVE,
+	PARSE_METHOD,
+	STRING_TO_NUM_FN,
+	STRLEN_GT
+} from "@/utils/validatorUtils";
 import {CreateFundraiserResponse, GenericMedia, GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
 import {withMethodDispatcher} from "@/utils/methodDispatcher"
-import {getPresignedURL} from "@/utils/s3";
+import {getObjectUrl} from "@/utils/s3";
 
 type FundraiserRequestBodyMap = {
 	GET: any,
@@ -76,8 +82,9 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 		const {walletAddress} = req.user!
 		
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
-			`INSERT INTO "fundRaisers" VALUES
-                (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT) RETURNING "fundraiserId"`,
+			`INSERT INTO "fundRaisers"
+             VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT)
+             RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)
 		
@@ -108,7 +115,12 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 			{
 				[requireMethods.name]: requireMethods("GET"),
 				[requireQueryParamValidators.name]: requireQueryParamValidators({
-					feedPage: ALLOW_UNDEFINED_WITH_FN(NON_ZERO_NON_NEGATIVE)
+					feedPage: ALLOW_UNDEFINED_WITH_FN(
+						STRING_TO_NUM_FN(
+							NON_ZERO_NON_NEGATIVE,
+							PARSE_METHOD.PARSE_INT
+						)
+					)
 				}, true)
 			}
 		)
@@ -119,16 +131,20 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 		}
 		
 		let {feedPage} = req.query
-		feedPage = feedPage || 1
+		feedPage = feedPage || "1"
+		
+		const parsedFeedPage = Number.parseInt(feedPage)
 		
 		const FEED_PAGE_SIZE = 10 as const
 		
-		const feedPageOffset = (feedPage - 1) * 10
+		const feedPageOffset = (parsedFeedPage - 1) * 10
 		
 		const {rows: feedRows} = await dbClient.query<FundRaisers>(
-			`SELECT * FROM "fundRaisers"
-        	WHERE "fundraiserStatus" = 'OPEN'
-        	ORDER BY "fundraiserCreatedOn" DESC OFFSET $1 LIMIT $2`,
+			`SELECT *
+             FROM "fundRaisers"
+             WHERE "fundraiserStatus" = 'OPEN'
+             ORDER BY "fundraiserCreatedOn" DESC
+             OFFSET $1 LIMIT $2`,
 			[feedPageOffset, FEED_PAGE_SIZE]
 		)
 		
@@ -138,8 +154,9 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 				const fundraiserMedia: GenericMedia[] = []
 				
 				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
-					WHERE "objectKey" = ANY($1)`,
+					`SELECT "objectKey", "objectContentType"
+                     FROM "internalS3BucketObjects"
+                     WHERE "objectKey" = ANY ($1)`,
 					[fundraiserMediaObjectKeys]
 				)
 				
@@ -150,7 +167,7 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 				}
 				
 				for (const objectKey of fundraiserMediaObjectKeys) {
-					const presignedURL = await getPresignedURL({
+					const presignedURL = await getObjectUrl({
 						requestMethod: "GET",
 						objectKey: objectKey
 					})

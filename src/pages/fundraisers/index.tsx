@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserFeedData> = async 
 		endpointPath: "/api/fundraisers",
 		requestMethod: "GET",
 		queryParams: {
-			feedPage: parsedFeedPage
+			feedPage: parsedFeedPage.toString()
 		},
 		ssrContext: ctx
 	})

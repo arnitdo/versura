@@ -27,7 +27,7 @@ interface GetFundraiserRequestParams {
 }
 
 interface GetFundraiserFeedRequestParams {
-	feedPage?: number
+	feedPage?: string
 }
 
 interface PresignedURLBody {
@@ -93,11 +93,15 @@ interface FundraiserWithdrawalUpdateBody {
 }
 
 interface FundraiserWithdrawalUpdateParams {
-	fundraiserId: string,
 	withdrawalId: string
 }
 
+interface AdminGetWithdrawalsParams {
+	withdrawalPage?: string
+}
+
 export {
+	WithdrawalStatus,
 	S3ObjectMethods,
 	SignupUserRequestBody,
 	LoginUserRequestBody,
@@ -119,5 +123,6 @@ export {
 	FundraiserWithdrawalRequestParams,
 	FundraiserWithdrawalRequestBody,
 	FundraiserWithdrawalUpdateBody,
-	FundraiserWithdrawalUpdateParams
+	FundraiserWithdrawalUpdateParams,
+	AdminGetWithdrawalsParams
 }

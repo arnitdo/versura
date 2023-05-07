@@ -7,7 +7,7 @@ interface DecodedJWTCookie {
 	userRole: UserRole
 }
 
-type S3ObjectMethods = "PUT" | "GET" | "DELETE"
+type S3ObjectMethods = "GET" | "PUT" | "DELETE"
 
 type WithdrawalStatus = "OPEN" | "APPROVED" | "REJECTED"
 

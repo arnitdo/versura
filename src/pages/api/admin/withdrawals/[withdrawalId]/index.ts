@@ -12,7 +12,7 @@ import {
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams} from "@/utils/types/apiRequests";
-import {IN_ARR, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
+import {IN_ARR} from "@/utils/validatorUtils";
 import {WithdrawalStatus} from "@/utils/types/apiTypedefs";
 import {db} from "@/utils/db";
 import {FundraiserWithdrawalRequests} from "@/utils/types/queryTypedefs";
@@ -31,17 +31,16 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 			[requireAuthenticatedUser.name]: requireAuthenticatedUser(),
 			[requireAdminUser.name]: requireAdminUser(),
 			[requireQueryParams.name]: requireQueryParams(
-				"withdrawalId", "fundraiserId"
+				"withdrawalId"
 			),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient),
 				withdrawalId: async (withdrawalId) => {
-					const {fundraiserId} = req.query
 					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "fundraiserWithdrawalRequests"
-        				WHERE "requestId" = $1 AND "targetFundraiser" = $2
-        				AND "requestStatus" = 'OPEN'`,
-						[withdrawalId, fundraiserId]
+						`SELECT 1
+                         FROM "fundraiserWithdrawalRequests"
+                         WHERE "requestId" = $1
+                           AND "requestStatus" = 'OPEN'`,
+						[withdrawalId]
 					)
 					
 					if (rows.length) {
@@ -67,16 +66,23 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 	}
 	
 	try {
-		const {withdrawalId, fundraiserId} = req.query
+		const {withdrawalId} = req.query
 		const {withdrawalStatus} = req.body
 		
-		const {rows: dbRows} = await dbClient.query<Pick<FundraiserWithdrawalRequests, "walletAddress" | "withdrawalAmount" | "withdrawalToken">>(
-			`SELECT "walletAddress", "withdrawalAmount", "withdrawalToken" FROM "fundraiserWithdrawalRequests" WHERE "requestId" = $1 AND "targetFundraiser" = $2`,
-			[withdrawalId, fundraiserId]
+		const {rows: dbRows} = await dbClient.query<FundraiserWithdrawalRequests>(
+			`SELECT *
+             FROM "fundraiserWithdrawalRequests"
+             WHERE "requestId" = $1`,
+			[withdrawalId]
 		)
 		
 		const selectedRequest = dbRows[0]
-		const {walletAddress, withdrawalAmount, withdrawalToken} = selectedRequest
+		const {
+			walletAddress,
+			withdrawalAmount,
+			withdrawalToken,
+			targetFundraiser: fundraiserId
+		} = selectedRequest
 		
 		switch (withdrawalStatus) {
 			case "APPROVED": {
@@ -120,14 +126,17 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 				await web3Eth.sendSignedTransaction(signedTransaction.rawTransaction!)
 				
 				await dbClient.query(
-					`UPDATE "fundraiserWithdrawalRequests" SET "requestStatus" = 'APPROVED'
-					WHERE "requestId" = $1 AND "targetFundraiser" = $2`,
+					`UPDATE "fundraiserWithdrawalRequests"
+                     SET "requestStatus" = 'APPROVED'
+                     WHERE "requestId" = $1
+                       AND "targetFundraiser" = $2`,
 					[withdrawalId, fundraiserId]
 				)
 				
 				await dbClient.query(
-					`UPDATE "fundRaisers" SET "fundraiserWithdrawnAmount" = "fundraiserWithdrawnAmount" + $1
-					WHERE "fundraiserId" = $2`,
+					`UPDATE "fundRaisers"
+                     SET "fundraiserWithdrawnAmount" = "fundraiserWithdrawnAmount" + $1
+                     WHERE "fundraiserId" = $2`,
 					[outgoingAmountEth, fundraiserId]
 				)
 				
@@ -139,8 +148,10 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 			}
 			case "REJECTED": {
 				await dbClient.query(
-					`UPDATE "fundraiserWithdrawalRequests" SET "requestStatus" = 'REJECTED'
-					WHERE "requestId" = $1 AND "targetFundraiser" = $2`,
+					`UPDATE "fundraiserWithdrawalRequests"
+                     SET "requestStatus" = 'REJECTED'
+                     WHERE "requestId" = $1
+                       AND "targetFundraiser" = $2`,
 					[withdrawalId, fundraiserId]
 				)
 				dbClient.release()

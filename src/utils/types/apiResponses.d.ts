@@ -1,4 +1,4 @@
-import {FundraiserMilestones, FundRaisers, UserRole} from "@/utils/types/queryTypedefs";
+import {FundraiserMilestones, FundRaisers, FundraiserWithdrawalRequests, UserRole} from "@/utils/types/queryTypedefs";
 import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
 
 export type APIResponseCode =
@@ -84,6 +84,17 @@ interface CreateFundraiserMilestoneResponse extends APIResponse {
 	milestoneId: number
 }
 
+interface AdminGetWithdrawalFeedResponse extends APIResponse {
+	withdrawalFeed: (
+		Omit<FundraiserWithdrawalRequests, "targetFundraiser"> & {
+		targetFundraiser: {
+			fundraiserId: number,
+			fundraiserTitle: string
+		}
+	}
+		)[]
+}
+
 export {
 	SignupResponse,
 	LoginResponse,
@@ -97,5 +108,6 @@ export {
 	GenericMedia,
 	MediaCallbackResponse,
 	CreateFundraiserMilestoneResponse,
-	FundraiserMilestone
+	FundraiserMilestone,
+	AdminGetWithdrawalFeedResponse
 };

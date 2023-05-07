@@ -12,7 +12,7 @@ import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
 import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
-import {getPresignedURL} from "@/utils/s3";
+import {getObjectUrl} from "@/utils/s3";
 
 type FundraiserBodyDispatch = {
 	GET: any
@@ -62,8 +62,9 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		const {fundraiserMediaObjectKeys} = selectedFundraiser
 		
 		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-			`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
-			WHERE "objectKey" = ANY($1)`,
+			`SELECT "objectKey", "objectContentType"
+             FROM "internalS3BucketObjects"
+             WHERE "objectKey" = ANY ($1)`,
 			[fundraiserMediaObjectKeys]
 		)
 		
@@ -77,7 +78,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		const fundraiserMedia: GenericMedia[] = []
 		
 		for (const objectKey of fundraiserMediaObjectKeys) {
-			const presignedURL = await getPresignedURL({
+			const presignedURL = await getObjectUrl({
 				requestMethod: "GET",
 				objectKey: objectKey
 			})
@@ -98,8 +99,9 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 				const {milestoneMediaObjectKeys} = milestoneRow
 				
 				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-					`SELECT "objectKey", "objectContentType" FROM "internalS3BucketObjects"
-                    WHERE "objectKey" = ANY($1)`,
+					`SELECT "objectKey", "objectContentType"
+                     FROM "internalS3BucketObjects"
+                     WHERE "objectKey" = ANY ($1)`,
 					[milestoneMediaObjectKeys]
 				)
 				
@@ -110,7 +112,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 				
 				const milestoneMedia: GenericMedia[] = await Promise.all(
 					milestoneMediaObjectKeys.map(async (objectKey) => {
-						const presignedUrl = await getPresignedURL({
+						const presignedUrl = await getObjectUrl({
 							objectKey: objectKey,
 							requestMethod: "GET"
 						})

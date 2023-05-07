@@ -10,7 +10,7 @@ import {
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
-import {getPresignedURL} from "@/utils/s3";
+import {getObjectUrl} from "@/utils/s3";
 import {PresignedURLBody} from "@/utils/types/apiRequests";
 import {PresignedURLResponse} from "@/utils/types/apiResponses";
 import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
@@ -35,7 +35,9 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 						return true
 					}
 					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+						`SELECT 1
+                         FROM "internalS3BucketObjects"
+                         WHERE "objectKey" = $1`,
 						[objectKey]
 					)
 					
@@ -71,7 +73,7 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 	
 	try {
 		
-		const presignedUrl = await getPresignedURL({
+		const presignedUrl = await getObjectUrl({
 			requestMethod,
 			objectKey
 		})

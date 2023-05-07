@@ -1,5 +1,10 @@
 import {PoolClient} from "pg";
 
+enum PARSE_METHOD {
+	PARSE_INT,
+	PARSE_FLOAT
+}
+
 function NON_ZERO(value: number) {
 	return value != 0
 }
@@ -54,12 +59,12 @@ function STRLEN_NZ(value: string) {
 	return value.length > 0
 }
 
-function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean) {
-	return function (value: T | undefined) {
+function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => (boolean | Promise<boolean>)) {
+	return async function (value: T | undefined) {
 		if (!value) {
 			return true
 		} else {
-			return fn(value)
+			return await fn(value)
 		}
 	}
 }
@@ -67,7 +72,9 @@ function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => boolean) {
 function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient) {
 	return async function (fundraiserId: string) {
 		const {rows} = await dbClient.query(
-			`SELECT 1 FROM "fundRaisers" WHERE "fundraiserId" = $1`,
+			`SELECT 1
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
 		
@@ -91,7 +98,26 @@ function NOT_IN_ARR<T>(elemArray: T[]) {
 	}
 }
 
+function STRING_TO_NUM_FN(handlerFn: (number: number) => (boolean | Promise<boolean>), parseMethod: PARSE_METHOD = PARSE_METHOD.PARSE_INT) {
+	return async function (value: string) {
+		const parsedValueFn = [
+			Number.parseFloat,
+			Number.parseInt
+		][parseMethod]
+		const parsedValue = parsedValueFn(value)
+		if (Number.isNaN(parsedValue)) {
+			return false
+		}
+		if (!Number.isFinite(parsedValue)) {
+			return false
+		}
+		return handlerFn(parsedValue)
+	}
+}
+
 export {
+	PARSE_METHOD,
+	
 	NON_ZERO,
 	NON_NEGATIVE,
 	NON_ZERO_NON_NEGATIVE,
@@ -110,5 +136,6 @@ export {
 	IN_ARR,
 	NOT_IN_ARR,
 	
-	VALID_FUNDRAISER_ID_CHECK
+	VALID_FUNDRAISER_ID_CHECK,
+	STRING_TO_NUM_FN
 }
