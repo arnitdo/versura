@@ -18,6 +18,8 @@ import {
 } from "@elastic/eui";
 import Link from "next/link";
 import {useRouter} from "next/router";
+import Head from "next/head";
+import React from "react";
 
 type FundraiserFeedData = {
 	feedPage: number
@@ -80,6 +82,13 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 	const navRouter = useRouter()
 	
 	return (
+		<>
+			<Head>
+				<title>Explore | Versura</title>
+				<meta name="description" content="Explore Fundraisers"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 		<EuiPageTemplate>
 			{
 				feedData.length ? (
@@ -219,5 +228,6 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 				)
 			}
 		</EuiPageTemplate>
+			</>
 	)
 }

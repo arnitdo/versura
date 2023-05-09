@@ -2,6 +2,7 @@ import React, {useCallback, useContext, useEffect, useState} from "react";
 import EuiCenter from '@/components/customCenter'
 import Link from "next/link"
 import Image from 'next/image'
+import Head from 'next/head'
 import {
 	EuiButton,
 	EuiFieldPassword,
@@ -203,7 +204,17 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	}, [metamaskConnected, metamaskAddress, userPassword])
 	
 	return (
+
 		<>
+			<Head>
+				<title>Login | Versura</title>
+				<meta name="description" content="Login to Versura"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
+
+
+
 			<EuiCenter
 				height={"100vh"}
 				width={"100vw"}

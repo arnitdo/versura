@@ -3,6 +3,7 @@ import {EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiText} from "@e
 import {useEffect} from "react";
 import CustomCenter from "@/components/customCenter";
 import Link from "next/link"
+import Head from "next/head";
 
 
 export default function NotFoundPage({setShowPageHeader}: PageHeaderControlComponentProps) {
@@ -15,6 +16,13 @@ export default function NotFoundPage({setShowPageHeader}: PageHeaderControlCompo
 	}, [])
 	
 	return (
+		<>
+			<Head>
+				<title>Page Not Found</title>
+				<meta name="description" content="Page Not Found Error"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 		<EuiPageTemplate
 			panelled={true}
 			bottomBorder={"extended"}
@@ -49,5 +57,6 @@ export default function NotFoundPage({setShowPageHeader}: PageHeaderControlCompo
 				</EuiFlexGroup>
 			</CustomCenter>
 		</EuiPageTemplate>
+		</>
 	)
 }

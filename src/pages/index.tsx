@@ -11,6 +11,7 @@ import Link from "next/link";
 export default function IndexPage() {
 	return (
 		<>
+			{console.log( process.env.AWS_RDS_DB_URL )}
 			<Head>
 				<title>Versura</title>
 				<meta name="description" content="Versura, a blockchain based crowdfunding platform"/>

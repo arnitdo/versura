@@ -36,10 +36,11 @@ import {
 } from "@elastic/eui";
 import Image from "next/image";
 
-import {useCallback, useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {AuthContext} from "@/pages/_app";
 import {useToastList} from "@/utils/toastUtils";
 import Link from "next/link";
+import Head from "next/head";
 
 
 type FundraiserPageProps = GetFundraiserResponse["fundraiserData"]
@@ -432,6 +433,13 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 	})
 	
 	return (
+		<>
+			<Head>
+				<title>{fundraiserTitle}</title>
+				<meta name="description" content={fundraiserDescription}/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 		<EuiFlexGroup
 			direction={"column"}
 			alignItems={"center"}
@@ -762,5 +770,6 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				toastLifeTimeMs={5000}
 			/>
 		</EuiFlexGroup>
+			</>
 	)
 }

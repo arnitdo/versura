@@ -23,6 +23,7 @@ import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
 import {useRouter} from "next/router";
 import {SignupResponse} from "@/utils/types/apiResponses";
 import {SignupUserRequestBody} from "@/utils/types/apiRequests";
+import Head from "next/head";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -182,6 +183,12 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	
 	return (
 		<>
+			<Head>
+				<title>Sign Up | Versura</title>
+				<meta name="description" content="Sign Up to Versura"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 			<EuiCenter
 				height={"100vh"}
 				width={"100vw"}

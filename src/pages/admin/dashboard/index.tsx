@@ -19,6 +19,7 @@ import {
 import {FundRaisers, FundraiserWithdrawalRequests,} from "@/utils/types/queryTypedefs";
 import {GetServerSideProps, GetServerSidePropsContext} from "next";
 import {useState} from "react";
+import Head from "next/head";
 
 type AdminDashboardProps = {
 	fundraiserApprovalPage: number; // Paginated
@@ -174,6 +175,13 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 	// Add UI Code Here
 	
 	return (
+		<>
+			<Head>
+				<title>Admin</title>
+				<meta name="description" content="Admin Page"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 		<EuiPageBody style={{marginTop: "20px", padding: "20px"}}>
 			<EuiFlexGroup>
 				<EuiFlexItem>
@@ -388,5 +396,6 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 				</EuiPanel>
 			)}
 		</EuiPageBody>
+			</>
 	);
 }

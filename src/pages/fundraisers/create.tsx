@@ -15,17 +15,19 @@ import {
 	EuiText,
 	EuiTextArea
 } from "@elastic/eui";
+// @ts-ignore
 import VersuraIcon from "@/assets/versura-icon.png";
 import Link from "next/link"
 import Image from "next/image"
 import {EuiSelectOption} from "@elastic/eui/src/components/form/select/select";
-import {useCallback, useRef, useState} from "react";
+import React, {useCallback, useRef, useState} from "react";
 import {AddFundraiserMediaBody, AddFundraiserMediaParams, CreateFundraiserRequestBody} from "@/utils/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {APIResponse, CreateFundraiserResponse} from "@/utils/types/apiResponses";
 import {useToastList} from "@/utils/toastUtils";
 import {useRouter} from "next/router";
 import {manageMedia, useValueScale} from "@/utils/common";
+import Head from "next/head";
 
 type InvalidMap<T> = {
 	[propName in keyof Required<T>]: boolean
@@ -294,6 +296,13 @@ export default function CreateFundraiser(): JSX.Element {
 	}
 	
 	return (
+		<>
+			<Head>
+				<title>Create | Versura</title>
+				<meta name="description" content="Create a fundraiser"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
+			</Head>
 		<EuiCenter
 			height={"180vh"}
 			width={"100vw"}
@@ -523,5 +532,6 @@ export default function CreateFundraiser(): JSX.Element {
 				toasts={toasts}
 			/>
 		</EuiCenter>
+			</>
 	)
 }
