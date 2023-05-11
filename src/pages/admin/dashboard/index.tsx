@@ -16,7 +16,7 @@ import {
 	EuiTabs,
 	EuiText,
 } from "@elastic/eui";
-import {FundRaisers, FundraiserWithdrawalRequests,} from "@/utils/types/queryTypedefs";
+import {FundRaisers, FundraiserWithdrawalRequests,} from "@/types/queryTypedefs";
 import {GetServerSideProps, GetServerSidePropsContext} from "next";
 import {useState} from "react";
 import Head from "next/head";
@@ -28,7 +28,7 @@ type AdminDashboardProps = {
 	totalPendingWithdrawalCount: number; // Same as above
 	pendingFundraisers: FundRaisers[]; // Array of pending fundraiser data
 	pendingWithdrawals: FundraiserWithdrawalRequests[];
-	
+
 	// ADDITIONAL STATS DATA FOR DASHBOARD VISUALISATION
 	totalFundraiserCount: number; // Count of all fundraisers, pending, open or closed
 	totalWithdrawalAmount: number; // Total amount withdrawn (APPROVED)
@@ -166,14 +166,14 @@ export const getServerSideProps: GetServerSideProps = async (
 
 export default function AdminDashboard(props: AdminDashboardProps) {
 	console.table(props);
-	
+
 	const [selectedTabId, setSelectedTabId] = useState("tab1");
-	
+
 	const onTabClick = (tabId: string) => {
 		setSelectedTabId(tabId);
 	};
 	// Add UI Code Here
-	
+
 	return (
 		<>
 			<Head>
@@ -182,220 +182,220 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 				<meta name="viewport" content="width=device-width, initial-scale=1"/>
 				<link rel="icon" href="/favicon.ico"/>
 			</Head>
-		<EuiPageBody style={{marginTop: "20px", padding: "20px"}}>
-			<EuiFlexGroup>
-				<EuiFlexItem>
-					<EuiCard
-						style={{backgroundColor: "#5299E0"}}
-						title={
-							<h1 style={{fontWeight: "bold"}}>
-								{props.totalFundraiserCount}
-							</h1>
-						}
-						description={
-							<p style={{fontSize: "20px"}}>Total Fundraisers Count</p>
-						}
-						icon={<EuiIcon type="tableDensityExpanded" size="xxl"/>}
-					/>
-				</EuiFlexItem>
-				<EuiFlexItem>
-					<EuiCard
-						style={{backgroundColor: "#c77171"}}
-						title={
-							<h1 style={{fontWeight: "bold"}}>
-								{props.totalWithdrawalAmount}
-							</h1>
-						}
-						description={
-							<p style={{fontSize: "20px"}}>Total Withdrawals Amount</p>
-						}
-						icon={<EuiIcon type="indexEdit" size="xxl"/>}
-					/>
-				</EuiFlexItem>
-				<EuiFlexItem>
-					<EuiCard
-						style={{backgroundColor: "#D5A439"}}
-						title={
-							<h1 style={{fontWeight: "bold"}}>
-								{props.totalMilestoneCount}
-							</h1>
-						}
-						description={
-							<p style={{fontSize: "20px"}}>Total Milestones Count</p>
-						}
-						icon={<EuiIcon type="flag" size="xxl"/>}
-					/>
-				</EuiFlexItem>
-				<EuiFlexItem>
-					<EuiCard
-						style={{backgroundColor: "#857CDC"}}
-						title={
-							<h1 style={{fontWeight: "bold"}}>{props.totalUserCount}</h1>
-						}
-						description={<p style={{fontSize: "20px"}}>Total Users Count</p>}
-						icon={<EuiIcon type="user" size="xxl"/>}
-					/>
-				</EuiFlexItem>
-			</EuiFlexGroup>
-			
-			<EuiTabs
-				style={{marginTop: "20px", width: "auto", justifyContent: "center"}}
-			>
-				<EuiTab
-					onClick={() => onTabClick("tab1")}
-					isSelected={selectedTabId === "tab1"}
+			<EuiPageBody style={{marginTop: "20px", padding: "20px"}}>
+				<EuiFlexGroup>
+					<EuiFlexItem>
+						<EuiCard
+							style={{backgroundColor: "#5299E0"}}
+							title={
+								<h1 style={{fontWeight: "bold"}}>
+									{props.totalFundraiserCount}
+								</h1>
+							}
+							description={
+								<p style={{fontSize: "20px"}}>Total Fundraisers Count</p>
+							}
+							icon={<EuiIcon type="tableDensityExpanded" size="xxl"/>}
+						/>
+					</EuiFlexItem>
+					<EuiFlexItem>
+						<EuiCard
+							style={{backgroundColor: "#c77171"}}
+							title={
+								<h1 style={{fontWeight: "bold"}}>
+									{props.totalWithdrawalAmount}
+								</h1>
+							}
+							description={
+								<p style={{fontSize: "20px"}}>Total Withdrawals Amount</p>
+							}
+							icon={<EuiIcon type="indexEdit" size="xxl"/>}
+						/>
+					</EuiFlexItem>
+					<EuiFlexItem>
+						<EuiCard
+							style={{backgroundColor: "#D5A439"}}
+							title={
+								<h1 style={{fontWeight: "bold"}}>
+									{props.totalMilestoneCount}
+								</h1>
+							}
+							description={
+								<p style={{fontSize: "20px"}}>Total Milestones Count</p>
+							}
+							icon={<EuiIcon type="flag" size="xxl"/>}
+						/>
+					</EuiFlexItem>
+					<EuiFlexItem>
+						<EuiCard
+							style={{backgroundColor: "#857CDC"}}
+							title={
+								<h1 style={{fontWeight: "bold"}}>{props.totalUserCount}</h1>
+							}
+							description={<p style={{fontSize: "20px"}}>Total Users Count</p>}
+							icon={<EuiIcon type="user" size="xxl"/>}
+						/>
+					</EuiFlexItem>
+				</EuiFlexGroup>
+
+				<EuiTabs
+					style={{marginTop: "20px", width: "auto", justifyContent: "center"}}
 				>
-					Fundraisers
-				</EuiTab>
-				<EuiTab
-					onClick={() => onTabClick("tab2")}
-					isSelected={selectedTabId === "tab2"}
-				>
-					Donators{" "}
-				</EuiTab>
-			</EuiTabs>
-			
-			{selectedTabId === "tab1" && (
-				<EuiPanel
-					style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}
-				>
-					<EuiFlexGroup style={{paddingBottom: "20px"}}>
-						<EuiFlexItem>
-							<img
-								src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAjlfRoYiqHZ-jyvu-ZAfUTn0yY3CClEybXg&usqp=CAU"
-								alt="Banner Image"
-								width={260}
-								height={-1}
-								style={{
-									borderRadius: 12,
-									maxHeight: 150,
-								}}
-							/>
-						</EuiFlexItem>
-						<EuiFlexItem>
-							<EuiFlexGroup direction={"column"}>
-								<EuiFlexItem>
-									<EuiText color={"white"} style={{marginTop: "20px"}}>
-										<h3>The Fujoshi Guide to Web Development</h3>
-									</EuiText>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiText color={"white"}>
-										<EuiFlexGroup>
-											<EuiFlexItem grow={0}>
-												<EuiAvatar
-													name={"Fujoshi"}
-													color={"plain"}
-													type={"space"}
-													imageUrl={`https://raw.github.com/hashdog/node-identicon-github/master/examples/images/github.png`}
-												/>
-											</EuiFlexItem>
-											<EuiFlexItem grow={0}>
-												0xddd74f832b99a5998f5670417b3cc8e87223cc58
-											</EuiFlexItem>
-										</EuiFlexGroup>
-									</EuiText>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiFlexItem>
-						<EuiFlexItem style={{paddingLeft: "20px"}}>
-							<EuiFlexGroup style={{marginTop: "50px"}}>
-								<EuiFlexItem>
-									<EuiButton
-										fill
-										style={{backgroundColor: "green"}}
-										iconType="check"
-										iconSide="left"
-									>
-										Approve
-									</EuiButton>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiButton
-										fill
-										color="danger"
-										iconType="cross"
-										iconSide="left"
-									>
-										Reject
-									</EuiButton>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiFlexItem>
-					</EuiFlexGroup>
-				</EuiPanel>
-			)}
-			{selectedTabId === "tab2" && (
-				<EuiPanel
-					style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}
-				>
-					<EuiFlexGroup style={{paddingBottom: "20px"}}>
-						<EuiFlexItem>
-							<img
-								src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkVLSIS9IjgnfhNGIlMFSFxvdXdfpinC9HcQ&usqp=CAU"
-								alt="Banner Image"
-								width={260}
-								height={-1}
-								style={{
-									borderRadius: 12,
-									maxHeight: 150,
-								}}
-							/>
-						</EuiFlexItem>
-						<EuiFlexItem>
-							<EuiFlexGroup direction={"column"}>
-								<EuiFlexItem>
-									<EuiText color={"white"} style={{marginTop: "20px"}}>
-										<h3>The Fujoshi Guide to Web Development</h3>
-									</EuiText>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiText color={"white"}>
-										<EuiFlexGroup>
-											<EuiFlexItem grow={0}>
-												<EuiAvatar
-													name={"Fujoshi"}
-													color={"plain"}
-													type={"space"}
-													imageUrl={`https://raw.github.com/hashdog/node-identicon-github/master/examples/images/github.png`}
-												/>
-											</EuiFlexItem>
-											<EuiFlexItem grow={0}>
-												0xddd74f832b99a5998f5670417b3cc8e87223cc58
-											</EuiFlexItem>
-										</EuiFlexGroup>
-									</EuiText>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiFlexItem>
-						<EuiFlexItem style={{paddingLeft: "20px"}}>
-							<EuiFlexGroup style={{marginTop: "50px"}}>
-								<EuiFlexItem>
-									<EuiButton
-										fill
-										style={{backgroundColor: "green"}}
-										iconType="check"
-										iconSide="left"
-									>
-										Approve
-									</EuiButton>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiButton
-										fill
-										color="danger"
-										iconType="cross"
-										iconSide="left"
-									>
-										Reject
-									</EuiButton>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiFlexItem>
-					</EuiFlexGroup>
-				</EuiPanel>
-			)}
-		</EuiPageBody>
-			</>
+					<EuiTab
+						onClick={() => onTabClick("tab1")}
+						isSelected={selectedTabId === "tab1"}
+					>
+						Fundraisers
+					</EuiTab>
+					<EuiTab
+						onClick={() => onTabClick("tab2")}
+						isSelected={selectedTabId === "tab2"}
+					>
+						Donators{" "}
+					</EuiTab>
+				</EuiTabs>
+
+				{selectedTabId === "tab1" && (
+					<EuiPanel
+						style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}
+					>
+						<EuiFlexGroup style={{paddingBottom: "20px"}}>
+							<EuiFlexItem>
+								<img
+									src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAjlfRoYiqHZ-jyvu-ZAfUTn0yY3CClEybXg&usqp=CAU"
+									alt="Banner Image"
+									width={260}
+									height={-1}
+									style={{
+										borderRadius: 12,
+										maxHeight: 150,
+									}}
+								/>
+							</EuiFlexItem>
+							<EuiFlexItem>
+								<EuiFlexGroup direction={"column"}>
+									<EuiFlexItem>
+										<EuiText color={"white"} style={{marginTop: "20px"}}>
+											<h3>The Fujoshi Guide to Web Development</h3>
+										</EuiText>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiText color={"white"}>
+											<EuiFlexGroup>
+												<EuiFlexItem grow={0}>
+													<EuiAvatar
+														name={"Fujoshi"}
+														color={"plain"}
+														type={"space"}
+														imageUrl={`https://raw.github.com/hashdog/node-identicon-github/master/examples/images/github.png`}
+													/>
+												</EuiFlexItem>
+												<EuiFlexItem grow={0}>
+													0xddd74f832b99a5998f5670417b3cc8e87223cc58
+												</EuiFlexItem>
+											</EuiFlexGroup>
+										</EuiText>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiFlexItem>
+							<EuiFlexItem style={{paddingLeft: "20px"}}>
+								<EuiFlexGroup style={{marginTop: "50px"}}>
+									<EuiFlexItem>
+										<EuiButton
+											fill
+											style={{backgroundColor: "green"}}
+											iconType="check"
+											iconSide="left"
+										>
+											Approve
+										</EuiButton>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiButton
+											fill
+											color="danger"
+											iconType="cross"
+											iconSide="left"
+										>
+											Reject
+										</EuiButton>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiFlexItem>
+						</EuiFlexGroup>
+					</EuiPanel>
+				)}
+				{selectedTabId === "tab2" && (
+					<EuiPanel
+						style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}
+					>
+						<EuiFlexGroup style={{paddingBottom: "20px"}}>
+							<EuiFlexItem>
+								<img
+									src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkVLSIS9IjgnfhNGIlMFSFxvdXdfpinC9HcQ&usqp=CAU"
+									alt="Banner Image"
+									width={260}
+									height={-1}
+									style={{
+										borderRadius: 12,
+										maxHeight: 150,
+									}}
+								/>
+							</EuiFlexItem>
+							<EuiFlexItem>
+								<EuiFlexGroup direction={"column"}>
+									<EuiFlexItem>
+										<EuiText color={"white"} style={{marginTop: "20px"}}>
+											<h3>The Fujoshi Guide to Web Development</h3>
+										</EuiText>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiText color={"white"}>
+											<EuiFlexGroup>
+												<EuiFlexItem grow={0}>
+													<EuiAvatar
+														name={"Fujoshi"}
+														color={"plain"}
+														type={"space"}
+														imageUrl={`https://raw.github.com/hashdog/node-identicon-github/master/examples/images/github.png`}
+													/>
+												</EuiFlexItem>
+												<EuiFlexItem grow={0}>
+													0xddd74f832b99a5998f5670417b3cc8e87223cc58
+												</EuiFlexItem>
+											</EuiFlexGroup>
+										</EuiText>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiFlexItem>
+							<EuiFlexItem style={{paddingLeft: "20px"}}>
+								<EuiFlexGroup style={{marginTop: "50px"}}>
+									<EuiFlexItem>
+										<EuiButton
+											fill
+											style={{backgroundColor: "green"}}
+											iconType="check"
+											iconSide="left"
+										>
+											Approve
+										</EuiButton>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiButton
+											fill
+											color="danger"
+											iconType="cross"
+											iconSide="left"
+										>
+											Reject
+										</EuiButton>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiFlexItem>
+						</EuiFlexGroup>
+					</EuiPanel>
+				)}
+			</EuiPageBody>
+		</>
 	);
 }

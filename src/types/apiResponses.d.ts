@@ -1,5 +1,5 @@
-import {FundraiserMilestones, FundRaisers, FundraiserWithdrawalRequests, UserRole} from "@/utils/types/queryTypedefs";
-import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
+import {FundraiserMilestones, FundRaisers, FundraiserWithdrawalRequests, UserRole} from "@/types/queryTypedefs";
+import {DecodedJWTCookie} from "@/types/apiTypedefs";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 500
@@ -55,20 +55,26 @@ type FundraiserMilestone = Omit<FundraiserMilestones, "milestoneMediaObjectKeys"
 	milestoneMedia: GenericMedia[]
 }
 
+interface FundraiserDonation {
+	donorAddress: string,
+	donatedAmount: number
+}
+
 interface GetFundraiserResponse extends APIResponse {
 	fundraiserData: Omit<
 		FundRaisers,
 		"fundraiserMediaObjectKeys"
 	> & {
 		fundraiserMedia: GenericMedia[],
-		fundraiserMilestones: FundraiserMilestone[]
+		fundraiserMilestones: FundraiserMilestone[],
+		fundraiserDonations: FundraiserDonation[]
 	}
 }
 
 interface GetFundraiserFeedResponse extends APIResponse {
 	feedData: Omit<
 		GetFundraiserResponse["fundraiserData"],
-		"fundraiserMilestones"
+		"fundraiserMilestones" | "fundraiserDonations"
 	>[]
 }
 

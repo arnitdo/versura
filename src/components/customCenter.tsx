@@ -11,7 +11,7 @@ interface EuiCenterProps {
 function EuiCenter({children, height, width, growChildren}: EuiCenterProps): JSX.Element {
 	const resolvedHeight = height || 'inherit';
 	const resolvedWidth = width || 'inherit';
-	
+
 	return (
 		<EuiFlexGroup
 			justifyContent={"center"}

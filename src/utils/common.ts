@@ -1,7 +1,7 @@
 import {ValidatorMapType} from "@/utils/customMiddleware";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {MediaCallbackResponse, PresignedURLResponse} from "@/utils/types/apiResponses";
-import {MediaCallbackBody, PresignedURLBody} from "@/utils/types/apiRequests";
+import {MediaCallbackResponse, PresignedURLResponse} from "@/types/apiResponses";
+import {MediaCallbackBody, PresignedURLBody} from "@/types/apiRequests";
 
 const LINK_TEXT_COLOR_OVERRIDE = "#DFE5EF" as const
 
@@ -53,11 +53,11 @@ async function requireBasicObjectValidation<T>(objToValidate: T, validationMap: 
 			return validationResult
 		})
 	)
-	
+
 	const reducedValidationResult = validationResultAcc.reduce((prev, next) => {
 		return prev && next
 	}, true)
-	
+
 	return [
 		reducedValidationResult,
 		validationResultMap
@@ -67,7 +67,7 @@ async function requireBasicObjectValidation<T>(objToValidate: T, validationMap: 
 async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 	const {mediaFiles, mediaMethod, objectKeyGenFn, stepCompletionCallbacks} = args
 	const mediaManagementStatuses: boolean[] = [false, false, false]
-	
+
 	let presignedUrls: string[] = []
 	// Get presigned URLs for each media
 	{
@@ -116,16 +116,16 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 		let mediaStatuses = await Promise.all(
 			presignedUrls.map(async (presignedUrl, mediaIdx) => {
 				const fileToPut = mediaFiles[mediaIdx]
-				
+
 				const fetchOpts: RequestInit = {}
-				
+
 				if (mediaMethod === "PUT") {
 					fetchOpts.body = fileToPut
 					fetchOpts.headers = {
 						"Content-Type": fileToPut.type
 					}
 				}
-				
+
 				try {
 					await fetch(
 						presignedUrl,
@@ -187,7 +187,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 			mediaManagementStatuses[2] = true
 		}
 	}
-	
+
 	return mediaManagementStatuses
 }
 
@@ -213,7 +213,7 @@ function useValueScale<T>(args: UseValueScaleArgs<T>): T {
 function calculateServiceFeeWeiForAmount(tokenAmount: number, chainToken: string) {
 	// @ts-ignore
 	const gasAmountWei = gasAmountMap[chainToken]
-	
+
 	return (
 		gasAmountWei +
 		(tokenAmount * 2) * 1e14

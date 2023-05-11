@@ -1,8 +1,8 @@
 import type {NextApiRequest, NextApiResponse} from "next";
-import type {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
+import type {DecodedJWTCookie} from "@/types/apiTypedefs";
 import {verify} from "jsonwebtoken";
 import {db} from "@/utils/db";
-import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
+import {APIResponse, APIResponseCode} from "@/types/apiResponses";
 
 // @ts-ignore
 export interface CustomApiRequest<BodyType = any, QueryType = any> extends NextApiRequest {
@@ -53,16 +53,16 @@ function requireMethods(...acceptedMethods: ValidRequestMethods[]): MiddlewareFn
 			return
 		}
 		// We don't need context of previous middleware evaluated here
-		
+
 		nextMiddleware(true)
-		
+
 	}
 }
 
 function requireValidBody(): MiddlewareFn {
 	return async function (req: CustomApiRequest, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
-		
+
 		const acceptedRequestMethods: ValidRequestMethods[] = ["POST", "PUT", "PATCH"]
 		if (!acceptedRequestMethods.includes(req.method as ValidRequestMethods || "GET")) {
 			if (!middlewareCallStack.includes(requireMethods.name)) {
@@ -71,7 +71,7 @@ function requireValidBody(): MiddlewareFn {
 				throw new Error(`requireMethod was called with mismatching methods and body`)
 			}
 		}
-		
+
 		if (req.body === null) {
 			res.status(400).json({
 				requestStatus: "ERR_BODY_REQUIRED"
@@ -80,7 +80,7 @@ function requireValidBody(): MiddlewareFn {
 			return
 		}
 		// Body will only exist on "POST", "PUT", "PATCH" methods
-		
+
 		nextMiddleware(true)
 	}
 }
@@ -101,7 +101,7 @@ function requireBodyParams<T>(...bodyParams: (keyof T)[]): MiddlewareFn<T> {
 			}
 			return true
 		})
-		
+
 		if (missingBodyParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_BODY_PARAMS",
@@ -110,7 +110,7 @@ function requireBodyParams<T>(...bodyParams: (keyof T)[]): MiddlewareFn<T> {
 			nextMiddleware(false)
 			return
 		}
-		
+
 		nextMiddleware(true)
 	}
 }
@@ -125,7 +125,7 @@ function requireQueryParams<T, P>(...queryParams: (keyof P)[]): MiddlewareFn<T, 
 			}
 			return true
 		})
-		
+
 		if (missingQueryParams.length > 0) {
 			res.status(400).json({
 				requestStatus: "ERR_MISSING_QUERY_PARAMS",
@@ -134,7 +134,7 @@ function requireQueryParams<T, P>(...queryParams: (keyof P)[]): MiddlewareFn<T, 
 			nextMiddleware(false)
 			return
 		}
-		
+
 		nextMiddleware(true)
 	}
 }
@@ -150,16 +150,16 @@ function requireAuthenticatedUser(): MiddlewareFn {
 			nextMiddleware(false)
 			return
 		}
-		
+
 		const dbClient = await db.connect()
-		
+
 		try {
 			const decodedCookie: DecodedJWTCookie = verify(
 				authCookie,
 				process.env.JWT_SECRET!
 			) as DecodedJWTCookie
 			const {walletAddress, userRole} = decodedCookie
-			
+
 			const {rows: currentUserRows} = await dbClient.query(
 				`SELECT 1
                  FROM "authUsers"
@@ -167,7 +167,7 @@ function requireAuthenticatedUser(): MiddlewareFn {
                    AND "userRole" = $2`,
 				[walletAddress, userRole]
 			)
-			
+
 			if (currentUserRows.length == 0) {
 				// Silently fail
 				// Having a signed token, but with invalid user means that the JWT_SECRET is compromised
@@ -179,15 +179,15 @@ function requireAuthenticatedUser(): MiddlewareFn {
 				dbClient.release()
 				return
 			}
-			
+
 			// Having 1 row means that the current user exists in our database
 			// We can go ahead and assume that the user is authenticated
-			
+
 			req.user = decodedCookie
-			
+
 			nextMiddleware(true)
 			dbClient.release()
-			
+
 		} catch (err: unknown) {
 			// Corrupted or invalid token
 			res.status(403).json({
@@ -208,14 +208,14 @@ function requireAdminUser(): MiddlewareFn {
 				"requireAdminUser was called without verifying authentication status"
 			)
 		}
-		
+
 		const currentUser = req.user!
 		const {userRole} = currentUser
 		if (userRole == "ADMIN") {
 			nextMiddleware(true)
 			return
 		}
-		
+
 		res.status(403).json({
 			requestStatus: "ERR_ADMIN_REQUIRED"
 		})
@@ -297,7 +297,7 @@ async function requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: C
 	// true & successfulMiddleware => true
 	// true & failedMiddleware => false
 	// false & true | false & false => false
-	
+
 	for (const middlewareName in middlewaresToCall) {
 		if (!middlewareExecutionStatus) {
 			break
@@ -306,12 +306,12 @@ async function requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: C
 		const nextFn: NextMiddleware = (middlewareStatus: boolean) => {
 			middlewareExecutionStatus &&= middlewareStatus
 		}
-		
+
 		const middlewareOptions: MiddlewareOptions = {
 			middlewareCallStack: middlewareStack,
 			nextMiddleware: nextFn,
 		}
-		
+
 		try {
 			await middlewareFnToExecute(
 				req,
@@ -328,31 +328,31 @@ async function requireMiddlewareChecks<T, P>(req: CustomApiRequest<T, P>, res: C
 			return false
 		}
 	}
-	
+
 	return middlewareExecutionStatus
 }
 
 async function adaptedMiddleware<BodyT, ParamT>(adapterArgs: MiddlewareAdapterArgs<BodyT, ParamT>): Promise<boolean> {
 	const {req, res, emulatedMiddlewareStack, middlewareToEmulate} = adapterArgs
-	
+
 	const emulatedMiddlewareStatus = {
 		middlewareStatus: false
 	}
 	const emulatedNextFn: NextMiddleware = (middlewareStatus) => {
 		emulatedMiddlewareStatus.middlewareStatus = middlewareStatus
 	}
-	
+
 	const emulatedMiddlewareCallArgs: MiddlewareOptions = {
 		middlewareCallStack: emulatedMiddlewareStack || [],
 		nextMiddleware: emulatedNextFn
 	}
-	
+
 	await middlewareToEmulate(
 		req,
 		res,
 		emulatedMiddlewareCallArgs
 	)
-	
+
 	return emulatedMiddlewareStatus.middlewareStatus
 }
 
@@ -365,8 +365,8 @@ export {
 	requireAdminUser,
 	requireBodyValidators,
 	requireQueryParamValidators,
-	
+
 	requireMiddlewareChecks,
-	
+
 	adaptedMiddleware
 }

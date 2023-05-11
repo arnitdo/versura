@@ -1,4 +1,4 @@
-import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
+import {PageHeaderControlComponentProps} from "@/types/componentTypedefs";
 import {EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiText} from "@elastic/eui";
 import {useEffect} from "react";
 import CustomCenter from "@/components/customCenter";
@@ -9,12 +9,12 @@ import Link from "next/link"
 export default function NotFoundPage({setShowPageHeader}: PageHeaderControlComponentProps) {
 	useEffect(() => {
 		setShowPageHeader(false)
-		
+
 		return () => {
 			setShowPageHeader(true)
 		}
 	}, [])
-	
+
 	return (
 		<EuiPageTemplate
 			panelled={true}

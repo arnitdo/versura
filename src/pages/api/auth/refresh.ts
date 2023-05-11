@@ -1,7 +1,7 @@
 import {CustomApiRequest, CustomApiResponse} from "@/utils/customMiddleware";
 import {verify} from "jsonwebtoken";
-import {AuthRefreshResponse} from "@/utils/types/apiResponses";
-import {DecodedJWTCookie} from "@/utils/types/apiTypedefs";
+import {AuthRefreshResponse} from "@/types/apiResponses";
+import {DecodedJWTCookie} from "@/types/apiTypedefs";
 
 export default async function authRefresh(req: CustomApiRequest, res: CustomApiResponse) {
 	try {
@@ -13,12 +13,12 @@ export default async function authRefresh(req: CustomApiRequest, res: CustomApiR
 			})
 			return
 		}
-		
+
 		const decodedCookie = verify(
 			authCookie,
 			process.env.JWT_SECRET!,
 		) as DecodedJWTCookie
-		
+
 		res.status(200).json<AuthRefreshResponse>({
 			requestStatus: "SUCCESS",
 			authStatus: "AUTH_ACTIVE",

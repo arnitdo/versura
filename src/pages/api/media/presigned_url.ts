@@ -11,13 +11,13 @@ import {
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
 import {getObjectUrl} from "@/utils/s3";
-import {PresignedURLBody} from "@/utils/types/apiRequests";
-import {PresignedURLResponse} from "@/utils/types/apiResponses";
-import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
+import {PresignedURLBody} from "@/types/apiRequests";
+import {PresignedURLResponse} from "@/types/apiResponses";
+import {S3ObjectMethods} from "@/types/apiTypedefs";
 
 export default async function presignedUrlEndpoint(req: CustomApiRequest<PresignedURLBody>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
-	
+
 	let middlewareExecStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -40,24 +40,24 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
                          WHERE "objectKey" = $1`,
 						[objectKey]
 					)
-					
+
 					if (rows.length > 0) {
 						return true
 					}
-					
+
 					return false
 				}
 			})
 		}
 	)
-	
+
 	if (!middlewareExecStatus) {
 		dbClient.release()
 		return
 	}
-	
+
 	const {requestMethod, objectKey} = req.body
-	
+
 	if (requestMethod !== "GET") {
 		// Require authentication for PUT or DELETE S3 Calls
 		const authCheck = await adaptedMiddleware({
@@ -70,14 +70,14 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 			return
 		}
 	}
-	
+
 	try {
-		
+
 		const presignedUrl = await getObjectUrl({
 			requestMethod,
 			objectKey
 		})
-		
+
 		dbClient.release()
 		res.status(200).json<PresignedURLResponse>({
 			requestStatus: "SUCCESS",

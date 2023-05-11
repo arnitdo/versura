@@ -11,18 +11,18 @@ import {
 	requireQueryParamValidators,
 	requireValidBody
 } from "@/utils/customMiddleware";
-import {FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams} from "@/utils/types/apiRequests";
+import {FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams} from "@/types/apiRequests";
 import {IN_ARR} from "@/utils/validatorUtils";
-import {WithdrawalStatus} from "@/utils/types/apiTypedefs";
+import {WithdrawalStatus} from "@/types/apiTypedefs";
 import {db} from "@/utils/db";
-import {FundraiserWithdrawalRequests} from "@/utils/types/queryTypedefs";
+import {FundraiserWithdrawalRequests} from "@/types/queryTypedefs";
 import {versuraAccount, versuraAddress, web3Client, web3Eth} from "@/utils/web3Provider";
 import {calculateServiceFeeWeiForAmount, gasAmountMap} from "@/utils/common";
 
 
 export default async function updateWithdrawalStatus(req: CustomApiRequest<FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
-	
+
 	const middlewareStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -42,11 +42,11 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
                            AND "requestStatus" = 'OPEN'`,
 						[withdrawalId]
 					)
-					
+
 					if (rows.length) {
 						return true
 					}
-					
+
 					return false
 				}
 			}),
@@ -59,23 +59,23 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 			})
 		}
 	)
-	
+
 	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
-	
+
 	try {
 		const {withdrawalId} = req.query
 		const {withdrawalStatus} = req.body
-		
+
 		const {rows: dbRows} = await dbClient.query<FundraiserWithdrawalRequests>(
 			`SELECT *
              FROM "fundraiserWithdrawalRequests"
              WHERE "requestId" = $1`,
 			[withdrawalId]
 		)
-		
+
 		const selectedRequest = dbRows[0]
 		const {
 			walletAddress,
@@ -83,7 +83,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 			withdrawalToken,
 			targetFundraiser: fundraiserId
 		} = selectedRequest
-		
+
 		switch (withdrawalStatus) {
 			case "APPROVED": {
 				const currentWalletBalance = await web3Eth.getBalance(
@@ -91,20 +91,20 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 				)
 				const parsedBalanceWei = Number.parseInt(currentWalletBalance)
 				const parsedBalanceEth = parsedBalanceWei * 1e-18
-				
+
 				const calculatedServiceFeeWei = calculateServiceFeeWeiForAmount(
 					withdrawalAmount,
 					withdrawalToken
 				)
-				
+
 				const calculatedServiceFeeEth = calculatedServiceFeeWei * 1e-18
-				
+
 				const outgoingAmountEth = withdrawalAmount
 				const outgoingAmountWei = outgoingAmountEth * 1e18
-				
+
 				// @ts-ignore
 				const gasFee = gasAmountMap[withdrawalToken]
-				
+
 				if (parsedBalanceEth <= outgoingAmountEth) {
 					dbClient.release()
 					console.error(
@@ -115,16 +115,16 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 					})
 					return
 				}
-				
+
 				const signedTransaction = await versuraAccount.signTransaction({
 					from: versuraAddress,
 					to: walletAddress,
 					value: outgoingAmountWei,
 					gas: web3Client.utils.fromWei(gasFee.toString(), "gwei")
 				})
-				
+
 				await web3Eth.sendSignedTransaction(signedTransaction.rawTransaction!)
-				
+
 				await dbClient.query(
 					`UPDATE "fundraiserWithdrawalRequests"
                      SET "requestStatus" = 'APPROVED'
@@ -132,14 +132,14 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
                        AND "targetFundraiser" = $2`,
 					[withdrawalId, fundraiserId]
 				)
-				
+
 				await dbClient.query(
 					`UPDATE "fundRaisers"
                      SET "fundraiserWithdrawnAmount" = "fundraiserWithdrawnAmount" + $1
                      WHERE "fundraiserId" = $2`,
 					[outgoingAmountEth, fundraiserId]
 				)
-				
+
 				dbClient.release()
 				res.status(200).json({
 					requestStatus: "SUCCESS"

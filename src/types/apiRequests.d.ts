@@ -1,4 +1,4 @@
-import {S3ObjectMethods, WithdrawalStatus} from "@/utils/types/apiTypedefs";
+import {S3ObjectMethods, WithdrawalStatus} from "@/types/apiTypedefs";
 
 interface SignupUserRequestBody {
 	walletAddress: string,

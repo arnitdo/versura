@@ -15,7 +15,7 @@ import {
 	AddFundraiserMediaParams,
 	DeleteFundraiserMediaBody,
 	DeleteFundraiserMediaParams
-} from "@/utils/types/apiRequests";
+} from "@/types/apiRequests";
 import {withMethodDispatcher} from "@/utils/methodDispatcher";
 import {db} from "@/utils/db";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
@@ -32,7 +32,7 @@ type FundraiserMediaQueryMap = {
 
 async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
-	
+
 	const middlewareStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -67,19 +67,19 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 			})
 		}
 	)
-	
+
 	if (!middlewareStatus) return
-	
+
 	const {objectKey} = req.body
 	const {fundraiserId} = req.query
-	
+
 	await dbClient.query(
 		`UPDATE "fundRaisers" SET
 		"fundraiserMediaObjectKeys" = ARRAY_APPEND("fundraiserMediaObjectKeys", $1)
 		WHERE "fundraiserId" = $2`,
 		[objectKey, fundraiserId]
 	)
-	
+
 	dbClient.release()
 	res.status(200).json({
 		requestStatus: "SUCCESS"
@@ -88,7 +88,7 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 
 async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMediaBody, DeleteFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
-	
+
 	const middlewareStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -123,22 +123,22 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 			})
 		}
 	)
-	
+
 	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
-	
+
 	const {objectKey} = req.body
 	const {fundraiserId} = req.query
-	
+
 	await dbClient.query(
 		`UPDATE "fundRaisers" SET
 		"fundraiserMediaObjectKeys" = ARRAY_REMOVE("fundraiserMediaObjectKeys", $1)
 		WHERE "fundraiserId" = $2`,
 		[objectKey, fundraiserId]
 	)
-	
+
 	dbClient.release()
 	res.status(200).json({
 		requestStatus: "SUCCESS"

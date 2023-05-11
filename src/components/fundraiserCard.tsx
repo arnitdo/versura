@@ -1,4 +1,4 @@
-import {GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText} from "@elastic/eui";
 
 import PlaceholderImage from "@/assets/placeholder-image.png"
@@ -8,7 +8,7 @@ import Link from "next/link";
 
 type FundraiserCardProps = Omit<
 	GetFundraiserResponse["fundraiserData"],
-	"fundraiserMilestones"
+	"fundraiserMilestones" | "fundraiserDonations"
 >
 
 function FundraiserCard(props: FundraiserCardProps) {
@@ -20,11 +20,11 @@ function FundraiserCard(props: FundraiserCardProps) {
 		fundraiserRaisedAmount, fundraiserCreatedOn,
 		fundraiserMedia, fundraiserMilestoneCount
 	} = props
-	
+
 	const progressStatusColors = ["danger", "orange", "yellow", "green", "success"]
-	
+
 	const fundraiserCompletionPercentage = (fundraiserRaisedAmount * 100) / fundraiserTarget
-	
+
 	const selectedColor = useValueScale({
 		minScale: 0,
 		maxScale: 4,
@@ -33,11 +33,11 @@ function FundraiserCard(props: FundraiserCardProps) {
 		currValue: fundraiserCompletionPercentage,
 		scaledValues: progressStatusColors
 	})
-	
+
 	const fundraiserPercentageInt = Number.parseInt(
 		fundraiserCompletionPercentage.toString()
 	)
-	
+
 	let selectedFundraiserImage: GenericMedia | null = null;
 	for (const media of fundraiserMedia) {
 		const {mediaContentType} = media
@@ -46,7 +46,7 @@ function FundraiserCard(props: FundraiserCardProps) {
 			break
 		}
 	}
-	
+
 	return (
 		<EuiFlexGroup
 			direction={"row"}

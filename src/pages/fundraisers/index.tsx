@@ -1,6 +1,6 @@
 import {GetServerSideProps} from "next";
-import {GetFundraiserFeedResponse} from "@/utils/types/apiResponses";
-import {GetFundraiserFeedRequestParams} from "@/utils/types/apiRequests";
+import {GetFundraiserFeedResponse} from "@/types/apiResponses";
+import {GetFundraiserFeedRequestParams} from "@/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
 
 import {FundraiserCard} from "@/components/fundraiserCard"
@@ -78,9 +78,9 @@ export const getServerSideProps: GetServerSideProps<FundraiserFeedData> = async 
 
 export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 	const {feedData, feedPage} = props
-	
+
 	const navRouter = useRouter()
-	
+
 	return (
 		<>
 			<Head>
@@ -89,145 +89,145 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 				<meta name="viewport" content="width=device-width, initial-scale=1"/>
 				<link rel="icon" href="/favicon.ico"/>
 			</Head>
-		<EuiPageTemplate>
-			{
-				feedData.length ? (
-					<EuiFlexGroup
-						direction={"column"}
-						alignItems={"center"}
-					>
-						<EuiSpacer/>
-						{
-							feedData.map((fundraiserData, fundraiserIdx) => {
-								return (
-									<EuiFlexItem
-										key={fundraiserData.fundraiserId}
-									>
-										<EuiPanel
-											color={"plain"}
-											style={{
-												width: "90vw"
-											}}
-										>
-											<FundraiserCard
-												{...fundraiserData}
-											/>
-										</EuiPanel>
-									</EuiFlexItem>
-								)
-							})
-						}
-					</EuiFlexGroup>
-				) : (
-					<EuiEmptyPrompt
-						color={"plain"}
-						title={
-							<EuiText>
-								<h2>No fundraisers to display</h2>
-							</EuiText>
-						}
-						body={
-							<EuiText>
-								<h4>Create your own fundraiser to add to the list!</h4>
-							</EuiText>
-						}
-						actions={
-							<EuiFlexGroup
-								direction={"row"}
-							>
-								<EuiFlexItem>
-									<Link
-										href={"/fundraisers/create"}
-									>
-										<EuiButton
-											color={"primary"}
-											fill={true}
-											fullWidth
-										>
-											Create Fundraiser
-										</EuiButton>
-									</Link>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<Link
-										href={
-											feedPage > 1 ?
-												`${navRouter.pathname}?feedPage=${feedPage - 1}`
-												: `/`
-										}
-									>
-										<EuiButton
-											color={"ghost"}
-											fullWidth
-										>
-											{
-												feedPage > 1 ?
-													`Take me back`
-													: `Take me home`
-											}
-										</EuiButton>
-									</Link>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						}
-					/>
-				)
-			}
-			{
-				feedData.length ? (
-					<>
-						<EuiSpacer/>
-						<EuiHorizontalRule/>
-						<EuiPageTemplate.Section
-							color={"subdued"}
+			<EuiPageTemplate>
+				{
+					feedData.length ? (
+						<EuiFlexGroup
+							direction={"column"}
+							alignItems={"center"}
 						>
-							<EuiFlexGroup justifyContent="spaceBetween">
-								<EuiFlexItem grow={0}>
-									<Link
-										href={`/fundraisers?feedPage=${feedPage - 1}`}
-									>
-										<EuiButton
-											color={"ghost"}
-											disabled={
-												feedPage === 1
-											}
+							<EuiSpacer/>
+							{
+								feedData.map((fundraiserData, fundraiserIdx) => {
+									return (
+										<EuiFlexItem
+											key={fundraiserData.fundraiserId}
 										>
-											<EuiText>
-												<h5>
-													<EuiIcon type={"arrowLeft"}/> Previous
-												</h5>
-											</EuiText>
-										</EuiButton>
-									</Link>
-								</EuiFlexItem>
-								<EuiFlexItem
-									grow={0}
+											<EuiPanel
+												color={"plain"}
+												style={{
+													width: "90vw"
+												}}
+											>
+												<FundraiserCard
+													{...fundraiserData}
+												/>
+											</EuiPanel>
+										</EuiFlexItem>
+									)
+								})
+							}
+						</EuiFlexGroup>
+					) : (
+						<EuiEmptyPrompt
+							color={"plain"}
+							title={
+								<EuiText>
+									<h2>No fundraisers to display</h2>
+								</EuiText>
+							}
+							body={
+								<EuiText>
+									<h4>Create your own fundraiser to add to the list!</h4>
+								</EuiText>
+							}
+							actions={
+								<EuiFlexGroup
+									direction={"row"}
 								>
-									<Link
-										href={`/fundraisers?feedPage=${feedPage + 1}`}
-									>
-										<EuiButton
-											color={"ghost"}
-											disabled={
-												feedData.length === 0
+									<EuiFlexItem>
+										<Link
+											href={"/fundraisers/create"}
+										>
+											<EuiButton
+												color={"primary"}
+												fill={true}
+												fullWidth
+											>
+												Create Fundraiser
+											</EuiButton>
+										</Link>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<Link
+											href={
+												feedPage > 1 ?
+													`${navRouter.pathname}?feedPage=${feedPage - 1}`
+													: `/`
 											}
 										>
-											<EuiText>
-												<h5>
-													Next <EuiIcon type={"arrowRight"}/>
-												</h5>
-											</EuiText>
-										</EuiButton>
-									</Link>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiPageTemplate.Section>
-					</>
-				) : (
-					null
-				)
-			}
-		</EuiPageTemplate>
-			</>
+											<EuiButton
+												color={"ghost"}
+												fullWidth
+											>
+												{
+													feedPage > 1 ?
+														`Take me back`
+														: `Take me home`
+												}
+											</EuiButton>
+										</Link>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							}
+						/>
+					)
+				}
+				{
+					feedData.length ? (
+						<>
+							<EuiSpacer/>
+							<EuiHorizontalRule/>
+							<EuiPageTemplate.Section
+								color={"subdued"}
+							>
+								<EuiFlexGroup justifyContent="spaceBetween">
+									<EuiFlexItem grow={0}>
+										<Link
+											href={`/fundraisers?feedPage=${feedPage - 1}`}
+										>
+											<EuiButton
+												color={"ghost"}
+												disabled={
+													feedPage === 1
+												}
+											>
+												<EuiText>
+													<h5>
+														<EuiIcon type={"arrowLeft"}/> Previous
+													</h5>
+												</EuiText>
+											</EuiButton>
+										</Link>
+									</EuiFlexItem>
+									<EuiFlexItem
+										grow={0}
+									>
+										<Link
+											href={`/fundraisers?feedPage=${feedPage + 1}`}
+										>
+											<EuiButton
+												color={"ghost"}
+												disabled={
+													feedData.length === 0
+												}
+											>
+												<EuiText>
+													<h5>
+														Next <EuiIcon type={"arrowRight"}/>
+													</h5>
+												</EuiText>
+											</EuiButton>
+										</Link>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiPageTemplate.Section>
+						</>
+					) : (
+						null
+					)
+				}
+			</EuiPageTemplate>
+		</>
 	)
 }

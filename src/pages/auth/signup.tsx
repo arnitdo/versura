@@ -19,10 +19,10 @@ import MetamaskFoxIcon from "@/assets/metamask-fox.svg"
 
 import {useToastList} from "@/utils/toastUtils";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
+import {PageHeaderControlComponentProps} from "@/types/componentTypedefs";
 import {useRouter} from "next/router";
-import {SignupResponse} from "@/utils/types/apiResponses";
-import {SignupUserRequestBody} from "@/utils/types/apiRequests";
+import {SignupResponse} from "@/types/apiResponses";
+import {SignupUserRequestBody} from "@/types/apiRequests";
 import Head from "next/head";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
@@ -39,36 +39,36 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 	useEffect(() => {
 		props.setShowPageHeader(false)
-		
+
 		return () => {
 			props.setShowPageHeader(true)
 		}
 	}, [])
-	
+
 	const navRouter = useRouter()
 	const {query} = navRouter
 	const {returnTo} = query
-	
+
 	const SIGNUP_SUCCESS_REDIR_TIMEOUT_S = 5
-	
+
 	const [
 		[metamaskConnected, metamaskAddress],
 		setMetamaskInfo
 	] = useState<[boolean, string]>([false, ""])
-	
+
 	const [userPassword, setUserPassword] = useState<string>("");
 	const [confirmPassword, setConfirmPassword] = useState<string>("");
-	
+
 	const [passwordMismatch, setPasswordMismatch] = useState<boolean>(false);
-	
+
 	const [signupHandlerActive, setSignupHandlerActive] = useState(false);
-	
+
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
 			return `signup-page-${toastCount}`
 		}
 	})
-	
+
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
 		if (!window.ethereum) {
@@ -88,13 +88,13 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		
+
 		try {
 			// @ts-ignore
 			const ethAccounts: string[] = await window.ethereum.request({method: "eth_requestAccounts"})
-			
+
 			const selectedAccount = ethAccounts[0]
-			
+
 			setMetamaskInfo([true, selectedAccount])
 		} catch (err: unknown) {
 			addToast(
@@ -105,7 +105,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 	}, [])
-	
+
 	const attemptUserSignup = useCallback(async () => {
 		if (!metamaskConnected) {
 			addToast(
@@ -115,7 +115,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		
+
 		if (userPassword !== confirmPassword) {
 			setPasswordMismatch(true)
 			addToast(
@@ -125,9 +125,9 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		
+
 		setSignupHandlerActive(true)
-		
+
 		const signupAPIResponse = await makeAPIRequest<SignupResponse, SignupUserRequestBody>({
 			endpointPath: `/api/auth/signup`,
 			requestMethod: "POST",
@@ -136,7 +136,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 				userPass: userPassword
 			}
 		})
-		
+
 		const {isSuccess, isError, code, data, error} = signupAPIResponse
 		if (isError && error) {
 			addToast(
@@ -147,7 +147,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			setSignupHandlerActive(false)
 			return
 		}
-		
+
 		if (isSuccess && data) {
 			const {requestStatus} = data
 			if (code === 400) {
@@ -180,7 +180,7 @@ function SignupPage(props: PageHeaderControlComponentProps): JSX.Element {
 			}
 		}
 	}, [metamaskConnected, metamaskAddress, userPassword, confirmPassword])
-	
+
 	return (
 		<>
 			<Head>

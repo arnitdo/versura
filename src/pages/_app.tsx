@@ -5,10 +5,10 @@ import type {AppProps} from 'next/app'
 
 import '@elastic/eui/dist/eui_theme_dark.css'
 import PageHeader from "@/components/pageHeader";
-import {AuthContextType, AuthData} from "@/utils/types/componentTypedefs";
+import {AuthContextType, AuthData} from "@/types/componentTypedefs";
 import {useRouter} from "next/router";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {AuthRefreshResponse} from "@/utils/types/apiResponses";
+import {AuthRefreshResponse} from "@/types/apiResponses";
 
 
 const AuthContext = createContext<AuthContextType>({
@@ -28,18 +28,18 @@ export default function App({Component, pageProps}: AppProps) {
 		metamaskAddress: undefined,
 		userRole: undefined
 	})
-	
+
 	const authContextValue: AuthContextType = {
 		...authData,
 		updateAuthData: (autD) => {
 			setAuthData(autD)
 		}
 	}
-	
+
 	const [showPageHeader, setShowPageHeader] = useState<boolean>(true);
-	
+
 	const navRouter = useRouter()
-	
+
 	useEffect(() => {
 		makeAPIRequest<AuthRefreshResponse>({
 			endpointPath: "/api/auth/refresh",
@@ -76,7 +76,7 @@ export default function App({Component, pageProps}: AppProps) {
 			console.error(err)
 		})
 	}, [navRouter.pathname, navRouter.query])
-	
+
 	return (
 		<>
 			<EuiProvider colorMode={"dark"}>

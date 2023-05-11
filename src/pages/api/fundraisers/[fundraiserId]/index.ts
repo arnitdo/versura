@@ -8,10 +8,10 @@ import {
 	requireQueryParamValidators
 } from "@/utils/customMiddleware";
 import {db} from "@/utils/db";
-import {GetFundraiserRequestParams} from "@/utils/types/apiRequests";
+import {GetFundraiserRequestParams} from "@/types/apiRequests";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
-import {FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/utils/types/queryTypedefs";
-import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/utils/types/apiResponses";
+import {FundraiserDonations, FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/types/queryTypedefs";
+import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {getObjectUrl} from "@/utils/s3";
 
 type FundraiserBodyDispatch = {
@@ -24,7 +24,7 @@ type FundraiserQueryDispatch = {
 
 async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestParams>, res: CustomApiResponse): Promise<void> {
 	const dbClient = await db.connect()
-	
+
 	const middlewareStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -38,16 +38,19 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			})
 		}
 	)
-	
+
 	if (!middlewareStatus) {
 		dbClient.release()
 		return
 	}
-	
+
 	try {
 		const {fundraiserId} = req.query
 		const dbResponse = await db.query<FundRaisers>(
-			`SELECT * FROM "fundRaisers" WHERE "fundraiserId" = $1 AND "fundraiserStatus" = 'OPEN'`,
+			`SELECT *
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1
+               AND "fundraiserStatus" = 'OPEN'`,
 			[fundraiserId]
 		)
 		const {rows: dbRows} = dbResponse
@@ -57,26 +60,26 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 			})
 			return
 		}
-		
+
 		const selectedFundraiser = dbRows[0]
 		const {fundraiserMediaObjectKeys} = selectedFundraiser
-		
+
 		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 			`SELECT "objectKey", "objectContentType"
              FROM "internalS3BucketObjects"
              WHERE "objectKey" = ANY ($1)`,
 			[fundraiserMediaObjectKeys]
 		)
-		
+
 		const objectKeyContentMap: { [objKey: string]: string } = {}
-		
+
 		for (const objectContentTypeRow of objectContentTypeRows) {
 			const {objectKey, objectContentType} = objectContentTypeRow
 			objectKeyContentMap[objectKey] = objectContentType
 		}
-		
+
 		const fundraiserMedia: GenericMedia[] = []
-		
+
 		for (const objectKey of fundraiserMediaObjectKeys) {
 			const presignedURL = await getObjectUrl({
 				requestMethod: "GET",
@@ -88,35 +91,37 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 				mediaContentType: mappedContentType
 			})
 		}
-		
+
 		const {rows: dbMilestoneRows} = await dbClient.query<FundraiserMilestones>(
-			`SELECT * FROM "fundraiserMilestones" WHERE "milestoneFundraiserId" = $1`,
+			`SELECT *
+             FROM "fundraiserMilestones"
+             WHERE "milestoneFundraiserId" = $1`,
 			[fundraiserId]
 		)
-		
+
 		const fundraiserResponseMilestones: FundraiserMilestone[] = await Promise.all(
 			dbMilestoneRows.map(async (milestoneRow) => {
 				const {milestoneMediaObjectKeys} = milestoneRow
-				
+
 				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 					`SELECT "objectKey", "objectContentType"
                      FROM "internalS3BucketObjects"
                      WHERE "objectKey" = ANY ($1)`,
 					[milestoneMediaObjectKeys]
 				)
-				
+
 				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
 					const {objectKey, objectContentType} = mediaObjectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
 				}
-				
+
 				const milestoneMedia: GenericMedia[] = await Promise.all(
 					milestoneMediaObjectKeys.map(async (objectKey) => {
 						const presignedUrl = await getObjectUrl({
 							objectKey: objectKey,
 							requestMethod: "GET"
 						})
-						
+
 						const mappedContentType = objectKeyContentMap[objectKey]
 						return {
 							mediaURL: presignedUrl,
@@ -124,28 +129,37 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 						}
 					})
 				)
-				
+
 				const resolvedMilestoneData = {
 					...milestoneRow,
 					milestoneMedia: milestoneMedia
 				}
-				
+
 				// @ts-ignore
 				delete resolvedMilestoneData["milestoneMediaObjectKeys"]
-				
+
 				return resolvedMilestoneData
 			})
 		)
-		
+
+		const {rows: fundraiserDonationRows} = await dbClient.query<Pick<FundraiserDonations, "donorAddress" | "donatedAmount">>(
+			`SELECT "donorAddress", SUM("donatedAmount") as "donatedAmount"
+             FROM "fundraiserDonations"
+             WHERE "donatedFundraiser" = $1
+             GROUP BY "donorAddress"`,
+			[fundraiserId]
+		)
+
 		const fundraiserData = {
 			...selectedFundraiser,
 			fundraiserMedia: fundraiserMedia,
-			fundraiserMilestones: fundraiserResponseMilestones
+			fundraiserMilestones: fundraiserResponseMilestones,
+			fundraiserDonations: fundraiserDonationRows
 		}
-		
+
 		// @ts-ignore
 		delete fundraiserData["fundraiserMediaObjectKeys"]
-		
+
 		dbClient.release()
 		res.status(200).json<GetFundraiserResponse>({
 			requestStatus: "SUCCESS",

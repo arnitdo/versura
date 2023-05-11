@@ -1,6 +1,6 @@
 import {DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client} from "@aws-sdk/client-s3"
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner"
-import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
+import {S3ObjectMethods} from "@/types/apiTypedefs";
 
 const s3Client = new S3Client({
 	region: "ap-south-1",
@@ -30,12 +30,12 @@ const requestCommandMap: RequestCommandMap = {
 
 async function getObjectUrl({requestMethod, objectKey}: ObjectUrlOpts): Promise<string> {
 	const assocMethodCommand = requestCommandMap[requestMethod]
-	
+
 	const objCommand = new assocMethodCommand({
 		Bucket: process.env.AWS_S3_BUCKET!,
 		Key: objectKey
 	})
-	
+
 	const presignedUrl = await getSignedUrl(
 		s3Client,
 		objCommand,
@@ -43,7 +43,7 @@ async function getObjectUrl({requestMethod, objectKey}: ObjectUrlOpts): Promise<
 			expiresIn: 600		// 10min for PUT / DELETE
 		}
 	)
-	
+
 	if (requestMethod === "GET") {
 		// Strip authentication for GET requests
 		const objectUrl = new URL(presignedUrl)
@@ -51,7 +51,7 @@ async function getObjectUrl({requestMethod, objectKey}: ObjectUrlOpts): Promise<
 		const resolvedS3Url = `${s3Origin}${s3Pathname}`
 		return resolvedS3Url
 	}
-	
+
 	return presignedUrl
 }
 

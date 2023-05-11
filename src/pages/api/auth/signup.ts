@@ -8,8 +8,8 @@ import {
 	requireValidBody
 } from "@/utils/customMiddleware"
 import {db} from "@/utils/db";
-import {SignupResponse} from "@/utils/types/apiResponses";
-import {SignupUserRequestBody} from "@/utils/types/apiRequests";
+import {SignupResponse} from "@/types/apiResponses";
+import {SignupUserRequestBody} from "@/types/apiRequests";
 
 export default async function signupUser(req: CustomApiRequest<SignupUserRequestBody>, res: CustomApiResponse) {
 	const middlewarePassed = await requireMiddlewareChecks(
@@ -24,7 +24,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 	if (!middlewarePassed) {
 		return
 	}
-	
+
 	const {walletAddress, userPass} = req.body
 	const dbClient = await db.connect();
 	try {
@@ -32,7 +32,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 			`SELECT 1 FROM "authUsers" WHERE "walletAddress" = $1`,
 			[walletAddress]
 		)
-		
+
 		if (rows.length > 0) {
 			res.status(400).json<SignupResponse>({
 				requestStatus: "ERR_INVALID_BODY_PARAMS",
@@ -41,7 +41,7 @@ export default async function signupUser(req: CustomApiRequest<SignupUserRequest
 			dbClient.release()
 			return
 		}
-		
+
 		const hashedPassword = await hash(userPass, 10)
 		await dbClient.query("BEGIN")
 		await dbClient.query(

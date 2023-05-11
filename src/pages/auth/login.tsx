@@ -23,9 +23,9 @@ import {useToastList} from "@/utils/toastUtils";
 import {AuthContext} from "@/pages/_app"
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {useRouter} from "next/router";
-import {AuthContextType, PageHeaderControlComponentProps} from "@/utils/types/componentTypedefs";
-import {LoginResponse} from "@/utils/types/apiResponses";
-import {LoginUserRequestBody} from "@/utils/types/apiRequests";
+import {AuthContextType, PageHeaderControlComponentProps} from "@/types/componentTypedefs";
+import {LoginResponse} from "@/types/apiResponses";
+import {LoginUserRequestBody} from "@/types/apiRequests";
 
 function MetamaskFoxIconWrapped(): JSX.Element {
 	return (
@@ -40,37 +40,37 @@ function MetamaskFoxIconWrapped(): JSX.Element {
 
 function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 	const authCtx = useContext<AuthContextType>(AuthContext)
-	
+
 	useEffect(() => {
 		props.setShowPageHeader(false)
-		
+
 		return () => {
 			props.setShowPageHeader(true)
 		}
 	}, [])
-	
+
 	const LOGIN_SUCCESS_REDIR_TIMEOUT_S = 5
-	
+
 	const [
 		[metamaskConnected, metamaskAddress],
 		setMetamaskInfo
 	] = useState<[boolean, string]>([false, ""])
-	
+
 	const [userPassword, setUserPassword] = useState<string>("")
 	const [passwordInvalid, setPasswordInvalid] = useState<boolean>(false);
-	
+
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
 			return `login-page-${toastCount}`
 		}
 	})
-	
+
 	const [loginHandlerActive, setLoginHandlerActive] = useState<boolean>(false);
-	
+
 	const navRouter = useRouter()
 	const {query} = navRouter
 	const {returnTo} = query
-	
+
 	const authenticateWithMetamask = useCallback(async () => {
 		// @ts-ignore
 		if (!window.ethereum) {
@@ -90,11 +90,11 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		
+
 		try {
 			// @ts-ignore
 			const ethAccounts: string[] = await window.ethereum.request({method: "eth_requestAccounts"})
-			
+
 			// @ts-ignore
 			await window.ethereum.request({
 				method: "wallet_switchEthereumChain",
@@ -102,11 +102,11 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 					chainId: process.env.NEXT_PUBLIC_EVM_CHAIN // Sepolia Testnet
 				}]
 			})
-			
+
 			const selectedAccount = ethAccounts[0]
-			
+
 			setMetamaskInfo([true, selectedAccount])
-			
+
 		} catch (err: unknown) {
 			addToast(
 				"Please authenticate with MetaMask",
@@ -116,7 +116,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			return
 		}
 	}, [])
-	
+
 	const attemptUserLogin = useCallback(async () => {
 		if (!metamaskConnected) {
 			addToast(
@@ -134,7 +134,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			)
 			return
 		}
-		
+
 		setLoginHandlerActive(true)
 		const loginAPIResponse = await makeAPIRequest<LoginResponse, LoginUserRequestBody>({
 			endpointPath: `/api/auth/login`,
@@ -144,7 +144,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 				userPass: userPassword
 			}
 		})
-		
+
 		const {isSuccess, isError, code, data, error} = loginAPIResponse
 		if (isError && error) {
 			addToast(
@@ -155,7 +155,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			setLoginHandlerActive(false)
 			return
 		}
-		
+
 		if (isSuccess && data) {
 			const {requestStatus} = data
 			if (code === 400) {
@@ -202,7 +202,7 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 			}
 		}
 	}, [metamaskConnected, metamaskAddress, userPassword])
-	
+
 	return (
 
 		<>
@@ -212,7 +212,6 @@ function LoginPage(props: PageHeaderControlComponentProps): JSX.Element {
 				<meta name="viewport" content="width=device-width, initial-scale=1"/>
 				<link rel="icon" href="/favicon.ico"/>
 			</Head>
-
 
 
 			<EuiCenter

@@ -1,5 +1,5 @@
 import {AuthContext} from "@/pages/_app";
-import {AuthContextType} from "@/utils/types/componentTypedefs";
+import {AuthContextType} from "@/types/componentTypedefs";
 import {EuiAvatar, EuiGlobalToastList, EuiHeader, EuiHeaderLink, EuiHeaderLinks, EuiHeaderSection} from "@elastic/eui"
 import {useCallback, useContext, useState} from "react";
 import Link from "next/link";
@@ -9,19 +9,19 @@ import VersuraIcon from "@/assets/versura-icon.png"
 import {useRouter} from "next/router"
 import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {LogoutResponse} from "@/utils/types/apiResponses";
-import {LogoutUserRequestBody} from "@/utils/types/apiRequests";
+import {LogoutResponse} from "@/types/apiResponses";
+import {LogoutUserRequestBody} from "@/types/apiRequests";
 import {useToastList} from "@/utils/toastUtils";
 
 export default function PageHeader(): JSX.Element {
 	const LOGOUT_REDIRECT_TIMER_S = 5 as const
-	
+
 	const authCtx = useContext<AuthContextType>(AuthContext)
 	const {isAuthenticated, metamaskAddress} = authCtx
 	const navRouter = useRouter()
 	const {pathname, query} = navRouter
 	const {returnTo} = query
-	
+
 	let returnPagePath = pathname
 	for (const queryElement in query) {
 		returnPagePath = returnPagePath.replace(
@@ -29,26 +29,26 @@ export default function PageHeader(): JSX.Element {
 			query[queryElement]! as string
 		)
 	}
-	
+
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
 			return `global-${toastType}-toast-${toastCount}`
 		}
 	})
-	
+
 	const [logoutHandlerActive, setLogoutHandlerActive] = useState<boolean>(false)
-	
+
 	const attemptUserLogout = useCallback(async () => {
 		if (!isAuthenticated) {
 			return
 		}
-		
+
 		setLogoutHandlerActive(true)
 		const {isSuccess, isError, code, data, error} = await makeAPIRequest<LogoutResponse, LogoutUserRequestBody>({
 			endpointPath: `/api/auth/logout`,
 			requestMethod: "POST"
 		})
-		
+
 		if (isError && error) {
 			addToast(
 				"An error occurred when processing your request",
@@ -57,7 +57,7 @@ export default function PageHeader(): JSX.Element {
 			)
 			return
 		}
-		
+
 		if (isSuccess && data) {
 			const {requestStatus} = data
 			if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR") {
@@ -95,7 +95,7 @@ export default function PageHeader(): JSX.Element {
 			}
 		}
 	}, [navRouter, authCtx])
-	
+
 	return (
 		<EuiHeader
 			style={{

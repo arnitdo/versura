@@ -8,14 +8,14 @@ import {
 	requireMiddlewareChecks,
 	requireValidBody
 } from "@/utils/customMiddleware";
-import {MediaCallbackBody} from "@/utils/types/apiRequests";
+import {MediaCallbackBody} from "@/types/apiRequests";
 import {NON_NEGATIVE} from "@/utils/validatorUtils";
-import {S3ObjectMethods} from "@/utils/types/apiTypedefs";
+import {S3ObjectMethods} from "@/types/apiTypedefs";
 import {db} from "@/utils/db";
 
 export default async function mediaCallback(req: CustomApiRequest<MediaCallbackBody>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
-	
+
 	const middlewareExecStatus = await requireMiddlewareChecks(
 		req,
 		res,
@@ -36,11 +36,11 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
 						[objectKey]
 					)
-					
+
 					if (rows.length > 0) {
 						return true
 					}
-					
+
 					return false
 				},
 				objectSizeBytes: NON_NEGATIVE,
@@ -54,10 +54,10 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 		dbClient.release()
 		return
 	}
-	
+
 	try {
 		const {requestMethod, objectKey, objectSizeBytes, objectContentType} = req.body
-		
+
 		switch (requestMethod) {
 			case "DELETE":
 				await dbClient.query(
@@ -82,12 +82,12 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 				)
 				break;
 		}
-		
+
 		dbClient.release()
 		res.status(200).json({
 			requestStatus: "SUCCESS"
 		})
-		
+
 	} catch (err: unknown) {
 		console.error(err)
 		dbClient.release()

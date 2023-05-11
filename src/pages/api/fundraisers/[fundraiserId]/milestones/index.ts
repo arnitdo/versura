@@ -10,11 +10,11 @@ import {
 	requireQueryParamValidators,
 	requireValidBody
 } from "@/utils/customMiddleware";
-import {AddFundraiserMilestoneBody, AddFundraiserMilestoneParams} from "@/utils/types/apiRequests";
+import {AddFundraiserMilestoneBody, AddFundraiserMilestoneParams} from "@/types/apiRequests";
 import {STRLEN_GT, VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 import {db} from "@/utils/db";
-import {FundraiserMilestones, FundRaisers} from "@/utils/types/queryTypedefs";
-import {CreateFundraiserMilestoneResponse} from "@/utils/types/apiResponses";
+import {FundraiserMilestones, FundRaisers} from "@/types/queryTypedefs";
+import {CreateFundraiserMilestoneResponse} from "@/types/apiResponses";
 
 export default async function createMilestone(req: CustomApiRequest<AddFundraiserMilestoneBody, AddFundraiserMilestoneParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
@@ -78,5 +78,5 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 			requestStatus: "ERR_INTERNAL_ERROR"
 		})
 	}
-	
+
 }

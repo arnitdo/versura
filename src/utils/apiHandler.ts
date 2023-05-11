@@ -1,5 +1,5 @@
 import {ValidRequestMethods} from "@/utils/customMiddleware";
-import {APIResponse, APIResponseCode} from "@/utils/types/apiResponses";
+import {APIResponse, APIResponseCode} from "@/types/apiResponses";
 import {GetServerSidePropsContext} from "next";
 
 export type APIRequestParams<Body, Params> = {
@@ -13,7 +13,7 @@ export type APIRequestParams<Body, Params> = {
 export type APIRequestResponse<T> = {
 	isSuccess: boolean,
 	isError: boolean,
-	
+
 	code: APIResponseCode,
 	data?: T,
 	error?: unknown
@@ -27,9 +27,9 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 			"Content-Type": "application/json"
 		}
 	}
-	
+
 	const bodyMethods: ValidRequestMethods[] = ["POST", "PUT", "PATCH"]
-	
+
 	try {
 		let resolvedQueryString = ``;
 		if (bodyMethods.includes(requestMethod)) {
@@ -54,10 +54,10 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 			}
 			resolvedQueryString = `?${queryParamsObj.toString()}`
 		}
-		
-		
+
+
 		let resolvedUrl: string = `${endpointPath}${resolvedQueryString}`
-		
+
 		if (ssrContext) {
 			const {
 				req: {
@@ -77,14 +77,14 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 				)
 			}
 		}
-		
+
 		const reqResponse = await fetch(
 			resolvedUrl,
 			requestOptions
 		)
 		const responseCode = reqResponse.status
 		const responseJSON = await reqResponse.json() as ResponseT
-		
+
 		return {
 			isSuccess: true,
 			isError: false,

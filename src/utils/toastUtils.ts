@@ -16,7 +16,7 @@ type ToastListHookArgs = {
 function useToastList(toastListArgs: ToastListHookArgs): ToastUtils {
 	const [toasts, setToasts] = useState<Toast[]>([])
 	const internalToastCountRef = useRef<number>(0)
-	
+
 	const addToast = useCallback((toastTitle: string, toastText: ReactChild, toastType?: ToastType) => {
 		const generatedToastId = toastListArgs.toastIdFactoryFn(internalToastCountRef.current, toastType)
 		internalToastCountRef.current += 1
@@ -32,7 +32,7 @@ function useToastList(toastListArgs: ToastListHookArgs): ToastUtils {
 			]
 		})
 	}, [setToasts])
-	
+
 	const dismissToast = useCallback((dismissedToast: Toast) => {
 		setToasts((oldToasts) => {
 			return oldToasts.filter((currentToast) => {
@@ -40,7 +40,7 @@ function useToastList(toastListArgs: ToastListHookArgs): ToastUtils {
 			})
 		})
 	}, [setToasts])
-	
+
 	return {toasts, addToast, dismissToast}
 }
 

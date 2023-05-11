@@ -77,11 +77,11 @@ function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient) {
              WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
-		
+
 		if (rows.length) {
 			return true
 		}
-		
+
 		return false
 	}
 }
@@ -117,25 +117,25 @@ function STRING_TO_NUM_FN(handlerFn: (number: number) => (boolean | Promise<bool
 
 export {
 	PARSE_METHOD,
-	
+
 	NON_ZERO,
 	NON_NEGATIVE,
 	NON_ZERO_NON_NEGATIVE,
 	NON_ZERO_NON_POSITIVE,
-	
+
 	PASSTHROUGH,
 	ALLOW_UNDEFINED_WITH_FN,
-	
+
 	STRLEN_LT,
 	STRLEN_GT,
 	STRLEN_EQ,
 	STRLEN_LT_EQ,
 	STRLEN_GT_EQ,
 	STRLEN_NZ,
-	
+
 	IN_ARR,
 	NOT_IN_ARR,
-	
+
 	VALID_FUNDRAISER_ID_CHECK,
 	STRING_TO_NUM_FN
 }
