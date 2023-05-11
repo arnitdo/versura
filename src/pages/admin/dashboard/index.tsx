@@ -16,36 +16,31 @@ import {
 	EuiTabs,
 	EuiText,
 } from "@elastic/eui";
-import {FundRaisers, FundraiserWithdrawalRequests,} from "@/types/queryTypedefs";
 import {GetServerSideProps, GetServerSidePropsContext} from "next";
 import {useState} from "react";
 import Head from "next/head";
+import {
+	AdminDashboardData,
+	AdminGetDashboardResponse,
+	AdminGetFundraisersResponse,
+	AdminGetWithdrawalResponse
+} from "@/types/apiResponses";
+import {makeAPIRequest} from "@/utils/apiHandler";
+import {AdminGetFundraisersParams, AdminGetWithdrawalsParams} from "@/types/apiRequests";
+import {NON_ZERO_NON_NEGATIVE, STRING_TO_NUM_FN} from "@/utils/validatorUtils";
 
 type AdminDashboardProps = {
-	fundraiserApprovalPage: number; // Paginated
-	withdrawalApprovalPage: number; // Paginated
-	totalPendingFundraiserCount: number; // NON-Paginated, total number of pending fundraisers
-	totalPendingWithdrawalCount: number; // Same as above
-	pendingFundraisers: FundRaisers[]; // Array of pending fundraiser data
-	pendingWithdrawals: FundraiserWithdrawalRequests[];
+	fundraiserPage: number; // Paginated
+	withdrawalPage: number; // Paginated
+	pendingFundraisers: AdminGetFundraisersResponse["pendingFundraisers"]; // Array of pending fundraiser data
+	pendingWithdrawals: AdminGetWithdrawalResponse["pendingWithdrawals"]
+	dashboardData: AdminDashboardData
+}
 
-	// ADDITIONAL STATS DATA FOR DASHBOARD VISUALISATION
-	totalFundraiserCount: number; // Count of all fundraisers, pending, open or closed
-	totalWithdrawalAmount: number; // Total amount withdrawn (APPROVED)
-	totalContributedAmount: number; // Total amount contributed by users
-	totalUniqueContributors: number; // No of unique contributors
-	totalSuccessfulCampaigns: number; // Count of campaigns where amount collected exceeded target,
-	totalUserCount: number; // Number of users signed up
-	totalMilestoneCount: number; // of milestones,
-	reachedMilestoneCount: number; // No of milestones reached,
-	totalUpdateCount: number; // Number of updates posted by founders
-};
 
 const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
-	fundraiserApprovalPage: 1,
-	withdrawalApprovalPage: 1,
-	totalPendingFundraiserCount: 4,
-	totalPendingWithdrawalCount: 3,
+	fundraiserPage: 1,
+	withdrawalPage: 1,
 	pendingFundraisers: [
 		{
 			fundraiserId: 2,
@@ -60,9 +55,11 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 			fundraiserContributorCount: 0,
 			fundraiserMilestoneCount: 0,
 			fundraiserCreatedOn: "2023-04-08 08:39:40.341301 +00:00",
-			fundraiserMediaObjectKeys: [
-				"fundraisers/2/media/1",
-				"fundraisers/2/media/2",
+			fundraiserMedia: [
+				{
+					mediaContentType: "image/png",
+					mediaURL: ""
+				}
 			],
 			fundraiserStatus: "IN_QUEUE",
 			fundraiserWithdrawnAmount: 0,
@@ -80,7 +77,12 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 			fundraiserContributorCount: 0,
 			fundraiserMilestoneCount: 0,
 			fundraiserCreatedOn: "2023-04-09 10:56:48.144048 +00:00",
-			fundraiserMediaObjectKeys: ["fundraisers/3/media/1"],
+			fundraiserMedia: [
+				{
+					mediaContentType: "image/png",
+					mediaURL: ""
+				}
+			],
 			fundraiserStatus: "IN_QUEUE",
 			fundraiserWithdrawnAmount: 0,
 		},
@@ -97,7 +99,12 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 			fundraiserContributorCount: 0,
 			fundraiserMilestoneCount: 0,
 			fundraiserCreatedOn: "2023-04-09 11:56:07.097310 +00:00",
-			fundraiserMediaObjectKeys: ["fundraisers/6/media/1"],
+			fundraiserMedia: [
+				{
+					mediaContentType: "image/png",
+					mediaURL: ""
+				}
+			],
 			fundraiserStatus: "IN_QUEUE",
 			fundraiserWithdrawnAmount: 0,
 		},
@@ -114,7 +121,12 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 			fundraiserContributorCount: 0,
 			fundraiserMilestoneCount: 0,
 			fundraiserCreatedOn: "2023-04-09 11:49:26.512112 +00:00",
-			fundraiserMediaObjectKeys: ["fundraisers/5/media/1"],
+			fundraiserMedia: [
+				{
+					mediaContentType: "image/png",
+					mediaURL: ""
+				}
+			],
 			fundraiserStatus: "IN_QUEUE",
 			fundraiserWithdrawnAmount: 0,
 		},
@@ -123,49 +135,169 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 		{
 			requestId: 12,
 			walletAddress: "0x33ead98324df1c2d3d6aee4533ad36a5fa2e9502",
-			targetFundraiser: 1,
+			targetFundraiser: {
+				fundraiserId: 1,
+				fundraiserTitle: "SAMPLE FUNDRAISER 1"
+			},
 			withdrawalAmount: 0.5,
 			withdrawalToken: "ETH",
-			requestStatus: "OPEN",
+			withdrawalStatus: "OPEN",
 		},
 		{
 			requestId: 13,
 			walletAddress: "0x33ead98324df1c2d3d6aee4533ad36a5fa2e9502",
-			targetFundraiser: 1,
+			targetFundraiser: {
+				fundraiserId: 2,
+				fundraiserTitle: "SAMPLE FUNDRAISER 2"
+			},
 			withdrawalAmount: 0.2,
 			withdrawalToken: "ETH",
-			requestStatus: "OPEN",
+			withdrawalStatus: "OPEN",
 		},
 		{
 			requestId: 14,
 			walletAddress: "0x33ead98324df1c2d3d6aee4533ad36a5fa2e9502",
-			targetFundraiser: 1,
+			targetFundraiser: {
+				fundraiserId: 3,
+				fundraiserTitle: "SAMPLE FUNDRAISER 3"
+			},
 			withdrawalAmount: 0.4,
 			withdrawalToken: "ETH",
-			requestStatus: "OPEN",
+			withdrawalStatus: "OPEN",
 		},
 	],
-	totalFundraiserCount: 7,
-	totalWithdrawalAmount: 4,
-	totalMilestoneCount: 1,
-	totalSuccessfulCampaigns: 0,
-	reachedMilestoneCount: 0,
-	totalContributedAmount: 6.4,
-	totalUniqueContributors: 3,
-	totalUpdateCount: 0,
-	totalUserCount: 9,
+	dashboardData: {
+		totalPendingFundraiserCount: 4,
+		totalPendingWithdrawalCount: 3,
+		totalFundraiserCount: 7,
+		totalWithdrawalAmount: 4,
+		totalMilestoneCount: 1,
+		totalSuccessfulCampaigns: 0,
+		reachedMilestoneCount: 0,
+		totalDonatedAmount: 6.4,
+		totalUniqueDonors: 3,
+		totalUpdateCount: 0,
+		totalUserCount: 9,
+	}
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	ctx: GetServerSidePropsContext
-) => {
+export const getServerSideProps: GetServerSideProps<
+	AdminDashboardProps
+	// @ts-ignore
+> = async (ctx: GetServerSidePropsContext<AdminGetFundraisersParams & AdminGetWithdrawalsParams>) => {
+
+	const withdrawalPage = ctx.query.withdrawalPage as string || "1"
+	const fundraiserPage = ctx.query.fundraiserPage as string || "1"
+
+	const validWithdrawalPage = await STRING_TO_NUM_FN(
+		NON_ZERO_NON_NEGATIVE
+	)(withdrawalPage)
+	const validFundraiserPage = await STRING_TO_NUM_FN(
+		NON_ZERO_NON_NEGATIVE
+	)(fundraiserPage)
+
+	if (!validWithdrawalPage || !validFundraiserPage) {
+		console.log(withdrawalPage, fundraiserPage)
+		return {
+			redirect: {
+				destination: "/404"
+			}
+		}
+	}
+
+	const requestStatuses: boolean[] = []
+	const requestErrors: any[] = []
+
+	const dashboardResponse = await makeAPIRequest<AdminGetDashboardResponse>({
+		endpointPath: `/api/admin/dashboard`,
+		requestMethod: "GET",
+		// @ts-ignore
+		ssrContext: ctx
+	})
+
+	const {
+		isSuccess: isDashboardSuccess,
+		isError: isDashboardError,
+		error: dashboardError,
+		data: dashboardResponseData,
+		code: dashboardResponseCode
+	} = dashboardResponse
+
+	requestStatuses.push(isDashboardSuccess)
+	requestErrors.push(dashboardError)
+
+	const withdrawalResponse = await makeAPIRequest<AdminGetWithdrawalResponse, {}, AdminGetWithdrawalsParams>({
+		endpointPath: `/api/admin/withdrawals`,
+		requestMethod: "GET",
+		queryParams: {
+			withdrawalPage: withdrawalPage
+		},
+		// @ts-ignore
+		ssrContext: ctx
+	})
+
+	const {
+		isSuccess: isWithdrawalSuccess,
+		isError: isWithdrawalError,
+		code: withdrawalResponseCode,
+		error: withdrawalError,
+		data: withdrawalResponseData
+	} = withdrawalResponse
+
+	requestStatuses.push(isWithdrawalSuccess)
+	requestErrors.push(withdrawalError)
+
+	const fundraiserResponse = await makeAPIRequest<AdminGetFundraisersResponse, {}, AdminGetFundraisersParams>({
+		endpointPath: `/api/admin/fundraisers`,
+		requestMethod: "GET",
+		queryParams: {
+			fundraiserPage: fundraiserPage
+		},
+		// @ts-ignore
+		ssrContext: ctx
+	})
+
+	const {
+		isSuccess: isFundraiserSuccess,
+		isError: isFundraiserError,
+		code: fundraiserResponseCode,
+		error: fundraiserError,
+		data: fundraiserResponseData
+	} = fundraiserResponse
+
+	requestStatuses.push(isFundraiserSuccess)
+	requestErrors.push(fundraiserError)
+
+	const adminRequestStatusAcc = requestStatuses.reduce((prev, curr) => {
+		return prev && curr
+	}, true)
+
+	if (!adminRequestStatusAcc) {
+		requestErrors.forEach((err) => {
+			err && console.error(err)
+		})
+		return {
+			redirect: {
+				destination: "/500"
+			}
+		}
+	}
+
 	return {
-		props: SAMPLE_DASHBOARD_DATA,
-	};
+		props: {
+			...SAMPLE_DASHBOARD_DATA,
+			fundraiserPage: fundraiserPage,
+			withdrawalPage: withdrawalPage
+		}
+	}
 };
 
 export default function AdminDashboard(props: AdminDashboardProps) {
 	console.table(props);
+
+	const {
+		dashboardData, fundraiserPage, withdrawalPage, pendingWithdrawals, pendingFundraisers
+	} = props
 
 	const [selectedTabId, setSelectedTabId] = useState("tab1");
 
@@ -189,7 +321,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 							style={{backgroundColor: "#5299E0"}}
 							title={
 								<h1 style={{fontWeight: "bold"}}>
-									{props.totalFundraiserCount}
+									{dashboardData.totalFundraiserCount}
 								</h1>
 							}
 							description={
@@ -203,7 +335,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 							style={{backgroundColor: "#c77171"}}
 							title={
 								<h1 style={{fontWeight: "bold"}}>
-									{props.totalWithdrawalAmount}
+									{dashboardData.totalWithdrawalAmount}
 								</h1>
 							}
 							description={
@@ -217,7 +349,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 							style={{backgroundColor: "#D5A439"}}
 							title={
 								<h1 style={{fontWeight: "bold"}}>
-									{props.totalMilestoneCount}
+									{dashboardData.totalMilestoneCount}
 								</h1>
 							}
 							description={
@@ -230,7 +362,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 						<EuiCard
 							style={{backgroundColor: "#857CDC"}}
 							title={
-								<h1 style={{fontWeight: "bold"}}>{props.totalUserCount}</h1>
+								<h1 style={{fontWeight: "bold"}}>{dashboardData.totalUserCount}</h1>
 							}
 							description={<p style={{fontSize: "20px"}}>Total Users Count</p>}
 							icon={<EuiIcon type="user" size="xxl"/>}
@@ -240,6 +372,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 
 				<EuiTabs
 					style={{marginTop: "20px", width: "auto", justifyContent: "center"}}
+					expand={true}
 				>
 					<EuiTab
 						onClick={() => onTabClick("tab1")}
@@ -251,7 +384,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 						onClick={() => onTabClick("tab2")}
 						isSelected={selectedTabId === "tab2"}
 					>
-						Donators{" "}
+						Donators
 					</EuiTab>
 				</EuiTabs>
 

@@ -27,6 +27,7 @@ import {
 	EuiFormRow,
 	EuiGlobalToastList,
 	EuiHorizontalRule,
+	EuiLink,
 	EuiLoadingSpinner,
 	EuiMarkdownFormat,
 	EuiPanel,
@@ -155,7 +156,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		fundraiserToken, fundraiserMilestoneCount, fundraiserContributorCount,
 		fundraiserCreator, fundraiserDescription, fundraiserTitle,
 		fundraiserMilestones, fundraiserRaisedAmount, fundraiserMinDonationAmount,
-		fundraiserWithdrawnAmount
+		fundraiserWithdrawnAmount, fundraiserStatus, fundraiserDonations
 	} = props
 
 	const parsedFundraiserCreationDate = new Date(fundraiserCreatedOn)
@@ -502,13 +503,26 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 											/>
 										</EuiFlexItem>
 										<EuiFlexItem>
-											<EuiText>
-												{
-													fundraiserCreator.slice(0, 12) +
-													"..." +
-													fundraiserCreator.slice(-12)
-												}
-											</EuiText>
+											<EuiLink
+												style={{
+													textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+												}}
+											>
+												<Link
+													href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
+													target={"_blank"}
+												>
+													<EuiText
+														color={LINK_TEXT_COLOR_OVERRIDE}
+													>
+														{
+															fundraiserCreator.slice(0, 12) +
+															"..." +
+															fundraiserCreator.slice(-12)
+														}
+													</EuiText>
+												</Link>
+											</EuiLink>
 										</EuiFlexItem>
 										<EuiHorizontalRule margin={"none"}/>
 										<EuiFlexItem>
@@ -589,175 +603,183 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 								</EuiPanel>
 							</EuiFlexItem>
 							{
-								authCtx.metamaskAddress === fundraiserCreator ? (
-									<EuiFlexItem>
-										<EuiPanel>
-											<EuiFlexGroup
-												direction={"column"}
-												alignItems={"center"}
-											>
+								fundraiserStatus === "OPEN" ? (
+									<>
+										{
+											authCtx.metamaskAddress === fundraiserCreator ? (
 												<EuiFlexItem>
-													<EuiText>
-														<h1>Request Withdrawal</h1>
-													</EuiText>
-												</EuiFlexItem>
-												<EuiFlexItem>
-													<EuiForm fullWidth>
-														<EuiFormRow
-															label={"Amount to withdraw"}
-															fullWidth
+													<EuiPanel>
+														<EuiFlexGroup
+															direction={"column"}
+															alignItems={"center"}
 														>
-															<EuiFieldText
-																fullWidth
-																defaultValue={maxWithdrawableAmount}
-																append={fundraiserToken}
-																isInvalid={withdrawalInvalid}
-																onChange={(e) => {
-																	const withdrawalAmtString = e.target.value
-																	const parsedAmount = Number.parseFloat(withdrawalAmtString)
-																	if (Number.isNaN(parsedAmount)) {
-																		setWithdrawalInvalid(true)
-																		return
-																	}
-																	if (parsedAmount > maxWithdrawableAmount) {
-																		setWithdrawalInvalid(true)
-																		return;
-																	}
-																	if (parsedAmount <= 0) {
-																		setWithdrawalInvalid(true)
-																		return
-																	}
-																	setWithdrawalAmount(parsedAmount)
-																	setWithdrawalInvalid(false)
-																}}
-															/>
-														</EuiFormRow>
-														<EuiFormRow fullWidth>
-															<EuiButton
-																color={"primary"}
-																fullWidth
-																fill
-																disabled={withdrawalInvalid || withdrawalRequestActive || maxWithdrawableAmount == 0}
-																onClick={createWithdrawalRequest}
-															>
-																{
-																	withdrawalRequestActive ? (
-																		<EuiLoadingSpinner/>
-																	) : (
-																		`Create Request`
-																	)
-																}
-															</EuiButton>
-														</EuiFormRow>
-													</EuiForm>
+															<EuiFlexItem>
+																<EuiText>
+																	<h1>Request Withdrawal</h1>
+																</EuiText>
+															</EuiFlexItem>
+															<EuiFlexItem>
+																<EuiForm fullWidth>
+																	<EuiFormRow
+																		label={"Amount to withdraw"}
+																		fullWidth
+																	>
+																		<EuiFieldText
+																			fullWidth
+																			defaultValue={maxWithdrawableAmount}
+																			append={fundraiserToken}
+																			isInvalid={withdrawalInvalid}
+																			onChange={(e) => {
+																				const withdrawalAmtString = e.target.value
+																				const parsedAmount = Number.parseFloat(withdrawalAmtString)
+																				if (Number.isNaN(parsedAmount)) {
+																					setWithdrawalInvalid(true)
+																					return
+																				}
+																				if (parsedAmount > maxWithdrawableAmount) {
+																					setWithdrawalInvalid(true)
+																					return;
+																				}
+																				if (parsedAmount <= 0) {
+																					setWithdrawalInvalid(true)
+																					return
+																				}
+																				setWithdrawalAmount(parsedAmount)
+																				setWithdrawalInvalid(false)
+																			}}
+																		/>
+																	</EuiFormRow>
+																	<EuiFormRow fullWidth>
+																		<EuiButton
+																			color={"primary"}
+																			fullWidth
+																			fill
+																			disabled={withdrawalInvalid || withdrawalRequestActive || maxWithdrawableAmount == 0}
+																			onClick={createWithdrawalRequest}
+																		>
+																			{
+																				withdrawalRequestActive ? (
+																					<EuiLoadingSpinner/>
+																				) : (
+																					`Create Request`
+																				)
+																			}
+																		</EuiButton>
+																	</EuiFormRow>
+																</EuiForm>
+															</EuiFlexItem>
+														</EuiFlexGroup>
+													</EuiPanel>
 												</EuiFlexItem>
-											</EuiFlexGroup>
-										</EuiPanel>
-									</EuiFlexItem>
+											) : (
+												<EuiFlexItem>
+													<EuiPanel>
+														<EuiFlexGroup
+															direction={"column"}
+															alignItems={"center"}
+														>
+															<EuiFlexItem>
+																<EuiText>
+																	<h1>Fund this Campaign</h1>
+																</EuiText>
+															</EuiFlexItem>
+															<EuiHorizontalRule margin={"none"}/>
+															<EuiFlexItem>
+																<EuiForm fullWidth>
+																	<EuiFormRow
+																		label={"Base Amount"}
+																		helpText={"This amount will directly go to the fundraiser creator"}
+																	>
+																		<EuiFieldText
+																			placeholder={`${fundraiserMinDonationAmount}`}
+																			defaultValue={fundraiserMinDonationAmount}
+																			append={fundraiserToken}
+																			onChange={(e) => {
+																				const parsedDonationAmount = Number.parseFloat(e.target.value)
+																				if (Number.isNaN(parsedDonationAmount)) {
+																					setDonationInvalid(true)
+																					return
+																				}
+																				if (parsedDonationAmount < fundraiserMinDonationAmount) {
+																					setDonationInvalid(true)
+																					return
+																				}
+																				setDonationAmount(parsedDonationAmount)
+																				setDonationInvalid(false)
+																			}}
+																			isInvalid={donationInvalid}
+																		/>
+																	</EuiFormRow>
+																	<EuiFormRow
+																		label={"Service Fees"}
+																		helpText={"This service fee is levied by Versura"}
+																	>
+																		<EuiFieldText
+																			readOnly
+																			value={calculatedServiceFeeEth.toFixed(8)}
+																			append={fundraiserToken}
+																		/>
+																	</EuiFormRow>
+																	<EuiFormRow
+																		label={"Final Transaction Amount"}
+																		fullWidth
+																		helpText={"Final Amount Payable"}
+																	>
+																		<EuiFieldText
+																			value={finalAmountEth.toFixed(8)}
+																			readOnly
+																			append={fundraiserToken}
+																			fullWidth
+																		/>
+																	</EuiFormRow>
+																	<EuiFormRow>
+																		<EuiCheckbox
+																			id={checkboxId}
+																			checked={conditionsAccepted}
+																			onChange={(e) => {
+																				setConditionsAccepted(e.target.checked)
+																			}}
+																			label={"I accept the Terms and Conditions"}
+																		/>
+																	</EuiFormRow>
+																	<EuiFormRow
+																		fullWidth
+																	>
+																		{authCtx.isAuthenticated ? (
+																			<EuiButton
+																				color={"primary"}
+																				fill
+																				fullWidth
+																				onClick={sendFundraiserDonation}
+																				disabled={(!donationInvalid && !conditionsAccepted) || donationRequestActive}
+																			>
+																				{donationRequestActive ? (
+																					<EuiLoadingSpinner/>
+																				) : (
+																					`Send ${fundraiserToken}`
+																				)}
+																			</EuiButton>
+																		) : (
+																			<EuiButton
+																				color={"primary"}
+																				fill
+																				disabled
+																				fullWidth
+																			>
+																				Log in to donate funds
+																			</EuiButton>
+																		)}
+																	</EuiFormRow>
+																</EuiForm>
+															</EuiFlexItem>
+														</EuiFlexGroup>
+													</EuiPanel>
+												</EuiFlexItem>
+											)
+										}
+									</>
 								) : (
-									<EuiFlexItem>
-										<EuiPanel>
-											<EuiFlexGroup
-												direction={"column"}
-												alignItems={"center"}
-											>
-												<EuiFlexItem>
-													<EuiText>
-														<h1>Fund this Campaign</h1>
-													</EuiText>
-												</EuiFlexItem>
-												<EuiHorizontalRule margin={"none"}/>
-												<EuiFlexItem>
-													<EuiForm fullWidth>
-														<EuiFormRow
-															label={"Base Amount"}
-															helpText={"This amount will directly go to the fundraiser creator"}
-														>
-															<EuiFieldText
-																placeholder={`${fundraiserMinDonationAmount}`}
-																defaultValue={fundraiserMinDonationAmount}
-																append={fundraiserToken}
-																onChange={(e) => {
-																	const parsedDonationAmount = Number.parseFloat(e.target.value)
-																	if (Number.isNaN(parsedDonationAmount)) {
-																		setDonationInvalid(true)
-																		return
-																	}
-																	if (parsedDonationAmount < fundraiserMinDonationAmount) {
-																		setDonationInvalid(true)
-																		return
-																	}
-																	setDonationAmount(parsedDonationAmount)
-																	setDonationInvalid(false)
-																}}
-																isInvalid={donationInvalid}
-															/>
-														</EuiFormRow>
-														<EuiFormRow
-															label={"Service Fees"}
-															helpText={"This service fee is levied by Versura"}
-														>
-															<EuiFieldText
-																readOnly
-																value={calculatedServiceFeeEth.toFixed(8)}
-																append={fundraiserToken}
-															/>
-														</EuiFormRow>
-														<EuiFormRow
-															label={"Final Transaction Amount"}
-															fullWidth
-															helpText={"Final Amount Payable"}
-														>
-															<EuiFieldText
-																value={finalAmountEth.toFixed(8)}
-																readOnly
-																append={fundraiserToken}
-																fullWidth
-															/>
-														</EuiFormRow>
-														<EuiFormRow>
-															<EuiCheckbox
-																id={checkboxId}
-																checked={conditionsAccepted}
-																onChange={(e) => {
-																	setConditionsAccepted(e.target.checked)
-																}}
-																label={"I accept the Terms and Conditions"}
-															/>
-														</EuiFormRow>
-														<EuiFormRow
-															fullWidth
-														>
-															{authCtx.isAuthenticated ? (
-																<EuiButton
-																	color={"primary"}
-																	fill
-																	fullWidth
-																	onClick={sendFundraiserDonation}
-																	disabled={(!donationInvalid && !conditionsAccepted) || donationRequestActive}
-																>
-																	{donationRequestActive ? (
-																		<EuiLoadingSpinner/>
-																	) : (
-																		`Send ${fundraiserToken}`
-																	)}
-																</EuiButton>
-															) : (
-																<EuiButton
-																	color={"primary"}
-																	fill
-																	disabled
-																	fullWidth
-																>
-																	Log in to donate funds
-																</EuiButton>
-															)}
-														</EuiFormRow>
-													</EuiForm>
-												</EuiFlexItem>
-											</EuiFlexGroup>
-										</EuiPanel>
-									</EuiFlexItem>
+									null
 								)
 							}
 						</EuiFlexGroup>

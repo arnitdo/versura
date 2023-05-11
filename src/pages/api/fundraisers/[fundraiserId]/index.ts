@@ -1,7 +1,7 @@
-import {withMethodDispatcher} from "@/utils/methodDispatcher";
 import {
 	CustomApiRequest,
 	CustomApiResponse,
+	optionalAuthenticatedUser,
 	requireMethods,
 	requireMiddlewareChecks,
 	requireQueryParams,
@@ -14,15 +14,15 @@ import {FundraiserDonations, FundraiserMilestones, FundRaisers, S3BucketObjects}
 import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {getObjectUrl} from "@/utils/s3";
 
-type FundraiserBodyDispatch = {
+/*type FundraiserBodyDispatch = {
 	GET: any
 }
 
 type FundraiserQueryDispatch = {
 	GET: GetFundraiserRequestParams
-}
+}*/
 
-async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestParams>, res: CustomApiResponse): Promise<void> {
+export default async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestParams>, res: CustomApiResponse): Promise<void> {
 	const dbClient = await db.connect()
 
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -30,6 +30,7 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		res,
 		{
 			[requireMethods.name]: requireMethods("GET"),
+			[optionalAuthenticatedUser.name]: optionalAuthenticatedUser(),
 			[requireQueryParams.name]: requireQueryParams(
 				"fundraiserId"
 			),
@@ -46,14 +47,17 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 
 	try {
 		const {fundraiserId} = req.query
-		const dbResponse = await db.query<FundRaisers>(
+
+		const adminUserAccess = req.user?.userRole === "ADMIN"
+
+		const {rows: dbRows} = await db.query<FundRaisers>(
 			`SELECT *
              FROM "fundRaisers"
              WHERE "fundraiserId" = $1
-               AND "fundraiserStatus" = 'OPEN'`,
+               AND ("fundraiserStatus" = 'OPEN'
+                 ${adminUserAccess ? `OR "fundraiserStatus" = 'IN_QUEUE')` : `)`}`,
 			[fundraiserId]
 		)
-		const {rows: dbRows} = dbResponse
 		if (dbRows.length === 0) {
 			res.status(404).json({
 				requestStatus: "ERR_NOT_FOUND",
@@ -173,7 +177,3 @@ async function getFundraiser(req: CustomApiRequest<any, GetFundraiserRequestPara
 		})
 	}
 }
-
-export default withMethodDispatcher<FundraiserBodyDispatch, FundraiserQueryDispatch>({
-	GET: getFundraiser
-})

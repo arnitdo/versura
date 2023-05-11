@@ -92,29 +92,40 @@ function FundraiserCard(props: FundraiserCardProps) {
 						</EuiLink>
 					</EuiFlexItem>
 					<EuiFlexItem>
-						<EuiText
-							color={LINK_TEXT_COLOR_OVERRIDE}
-						>
-							<EuiFlexGroup>
-								<EuiFlexItem
-									grow={0}
+						<EuiFlexGroup>
+							<EuiFlexItem
+								grow={0}
+							>
+								<EuiAvatar
+									name={fundraiserCreator}
+									color={"plain"}
+									type={"space"}
+									imageUrl={
+										`//gravatar.com/avatar/${fundraiserCreator.slice(2)}?d=retro&f=y`
+									}
+								/>
+							</EuiFlexItem>
+							<EuiFlexItem
+								grow={0}
+							>
+								<EuiLink
+									style={{
+										textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+									}}
 								>
-									<EuiAvatar
-										name={fundraiserCreator}
-										color={"plain"}
-										type={"space"}
-										imageUrl={
-											`//gravatar.com/avatar/${fundraiserCreator.slice(2)}?d=retro&f=y`
-										}
-									/>
-								</EuiFlexItem>
-								<EuiFlexItem
-									grow={0}
-								>
-									{fundraiserCreator}
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiText>
+									<Link
+										href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
+										target={"_blank"}
+									>
+										<EuiText
+											color={LINK_TEXT_COLOR_OVERRIDE}
+										>
+											{fundraiserCreator}
+										</EuiText>
+									</Link>
+								</EuiLink>
+							</EuiFlexItem>
+						</EuiFlexGroup>
 					</EuiFlexItem>
 				</EuiFlexGroup>
 			</EuiFlexItem>

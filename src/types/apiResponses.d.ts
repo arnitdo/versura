@@ -1,8 +1,9 @@
 import {FundraiserMilestones, FundRaisers, FundraiserWithdrawalRequests, UserRole} from "@/types/queryTypedefs";
 import {DecodedJWTCookie} from "@/types/apiTypedefs";
+import {AdminDashboardData} from "@/pages/api/admin/dashboard";
 
 export type APIResponseCode =
-	0 | 200 | 400 | 403 | 404 | 500
+	0 | 200 | 400 | 403 | 404 | 405 | 500
 type APIResponseRequestStatus =
 // 2xx
 	"SUCCESS" |
@@ -17,6 +18,7 @@ type APIResponseRequestStatus =
 	"ERR_MISSING_QUERY_PARAMS" |
 	"ERR_AUTH_REQUIRED" |
 	"ERR_ADMIN_REQUIRED" |
+	"ERR_UNAUTHORIZED" |
 	"ERR_NOT_FOUND"
 
 interface APIResponse {
@@ -90,8 +92,8 @@ interface CreateFundraiserMilestoneResponse extends APIResponse {
 	milestoneId: number
 }
 
-interface AdminGetWithdrawalFeedResponse extends APIResponse {
-	withdrawalFeed: (
+interface AdminGetWithdrawalResponse extends APIResponse {
+	pendingWithdrawals: (
 		Omit<FundraiserWithdrawalRequests, "targetFundraiser"> & {
 		targetFundraiser: {
 			fundraiserId: number,
@@ -99,6 +101,17 @@ interface AdminGetWithdrawalFeedResponse extends APIResponse {
 		}
 	}
 		)[]
+}
+
+interface AdminGetFundraisersResponse extends APIResponse {
+	pendingFundraisers: Omit<
+		GetFundraiserResponse["fundraiserData"],
+		"fundraiserMilestones" | "fundraiserDonations"
+	>[]
+}
+
+interface AdminGetDashboardResponse extends APIResponse {
+	dashboardData: AdminDashboardData
 }
 
 export {
@@ -115,5 +128,8 @@ export {
 	MediaCallbackResponse,
 	CreateFundraiserMilestoneResponse,
 	FundraiserMilestone,
-	AdminGetWithdrawalFeedResponse
+	AdminGetFundraisersResponse,
+	AdminGetWithdrawalResponse,
+	AdminGetDashboardResponse,
+	AdminDashboardData
 };

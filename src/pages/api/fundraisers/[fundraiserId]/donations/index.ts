@@ -69,13 +69,32 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 		const {walletAddress} = req.user!
 		const {donatedAmount, transactionHash} = req.body
 
+		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserStatus">>(
+			`SELECT "fundraiserStatus"
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+
+		const {fundraiserStatus: currentFundraiserStatus} = currentFundraiserRows[0]
+		if (currentFundraiserStatus !== "OPEN") {
+			res.status(403).json({
+				requestStatus: "ERR_UNAUTHORIZED"
+			})
+			dbClient.release()
+			return
+		}
+
 		await dbClient.query(
-			`INSERT INTO "fundraiserDonations" VALUES ($1, $2, $3, $4, NOW())`,
+			`INSERT INTO "fundraiserDonations"
+             VALUES ($1, $2, $3, $4, NOW())`,
 			[fundraiserId, walletAddress, donatedAmount, transactionHash]
 		)
 
 		const {rows: donorRows} = await dbClient.query<{ contributorCount: number }>(
-			`SELECT COUNT(DISTINCT "donorAddress") AS "contributorCount" FROM "fundraiserDonations" WHERE "donatedFundraiser" = $1`,
+			`SELECT COUNT(DISTINCT "donorAddress") AS "contributorCount"
+             FROM "fundraiserDonations"
+             WHERE "donatedFundraiser" = $1`,
 			[fundraiserId]
 		)
 
@@ -95,9 +114,11 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 
 		await dbClient.query(
 			`UPDATE "fundraiserMilestones"
-			SET "milestoneStatus" = TRUE, "milestoneReachedOn" = NOW()
-			WHERE "milestoneFundraiserId" = $1 AND "milestoneStatus" = FALSE
-			AND "milestoneAmount" <= $2`,
+             SET "milestoneStatus"    = TRUE,
+                 "milestoneReachedOn" = NOW()
+             WHERE "milestoneFundraiserId" = $1
+               AND "milestoneStatus" = FALSE
+               AND "milestoneAmount" <= $2`,
 			[fundraiserId, fundraiserRaisedAmount]
 		)
 

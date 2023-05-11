@@ -10,27 +10,22 @@ import {
 	requireQueryParamValidators,
 	requireValidBody
 } from "@/utils/customMiddleware";
-import {
-	AddFundraiserMediaBody,
-	AddFundraiserMediaParams,
-	DeleteFundraiserMediaBody,
-	DeleteFundraiserMediaParams
-} from "@/types/apiRequests";
-import {withMethodDispatcher} from "@/utils/methodDispatcher";
+import {AddFundraiserMediaBody, AddFundraiserMediaParams} from "@/types/apiRequests";
+import {FundRaisers} from "@/types/queryTypedefs"
 import {db} from "@/utils/db";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
 
-type FundraiserMediaBodyMap = {
-	POST: AddFundraiserMediaBody,
-	DELETE: DeleteFundraiserMediaBody
-}
+// type FundraiserMediaBodyMap = {
+// 	POST: AddFundraiserMediaBody,
+// 	DELETE: DeleteFundraiserMediaBody
+// }
+//
+// type FundraiserMediaQueryMap = {
+// 	POST: AddFundraiserMediaParams,
+// 	DELETE: DeleteFundraiserMediaParams
+// }
 
-type FundraiserMediaQueryMap = {
-	POST: AddFundraiserMediaParams,
-	DELETE: DeleteFundraiserMediaParams
-}
-
-async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse) {
+export default async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, AddFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -48,12 +43,16 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 			[requireBodyValidators.name]: requireBodyValidators({
 				objectKey: async (objectKey) => {
 					const {rows: objectRows} = await dbClient.query(
-						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+						`SELECT 1
+                         FROM "internalS3BucketObjects"
+                         WHERE "objectKey" = $1`,
 						[objectKey]
 					)
 					if (objectRows.length == 1) {
 						const {rows: fundraiserMediaRows} = await dbClient.query(
-							`SELECT 1 FROM "fundRaisers" WHERE $1 = ANY("fundraiserMediaObjectKeys")`,
+							`SELECT 1
+                             FROM "fundRaisers"
+                             WHERE $1 = ANY ("fundraiserMediaObjectKeys")`,
 							[objectKey]
 						)
 						if (fundraiserMediaRows.length > 0) {
@@ -70,22 +69,49 @@ async function addFundraiserMedia(req: CustomApiRequest<AddFundraiserMediaBody, 
 
 	if (!middlewareStatus) return
 
-	const {objectKey} = req.body
-	const {fundraiserId} = req.query
+	try {
+		const {objectKey} = req.body
+		const {fundraiserId} = req.query
+		const {walletAddress} = req.user!
 
-	await dbClient.query(
-		`UPDATE "fundRaisers" SET
-		"fundraiserMediaObjectKeys" = ARRAY_APPEND("fundraiserMediaObjectKeys", $1)
-		WHERE "fundraiserId" = $2`,
-		[objectKey, fundraiserId]
-	)
+		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
+			`SELECT "fundraiserCreator"
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
 
-	dbClient.release()
-	res.status(200).json({
-		requestStatus: "SUCCESS"
-	})
+		const currentFundraiser = currentFundraiserRows[0]
+		const {fundraiserCreator} = currentFundraiser
+
+		if (walletAddress !== fundraiserCreator) {
+			res.status(403).json({
+				requestStatus: "ERR_UNAUTHORIZED"
+			})
+			dbClient.release()
+			return
+		}
+
+		await dbClient.query(
+			`UPDATE "fundRaisers"
+             SET "fundraiserMediaObjectKeys" = ARRAY_APPEND("fundraiserMediaObjectKeys", $1)
+             WHERE "fundraiserId" = $2`,
+			[objectKey, fundraiserId]
+		)
+
+		dbClient.release()
+		res.status(200).json({
+			requestStatus: "SUCCESS"
+		})
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({
+			requestStatus: "ERR_INTERNAL_ERROR"
+		})
+	}
 }
 
+/*
 async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMediaBody, DeleteFundraiserMediaParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 
@@ -104,12 +130,16 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 			[requireBodyValidators.name]: requireBodyValidators({
 				objectKey: async (objectKey) => {
 					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+						`SELECT 1
+                         FROM "internalS3BucketObjects"
+                         WHERE "objectKey" = $1`,
 						[objectKey]
 					)
 					if (rows.length == 1) {
 						const {rows: fundraiserMediaRows} = await dbClient.query(
-							`SELECT 1 FROM "fundRaisers" WHERE $1 = ANY("fundraiserMediaObjectKeys")`,
+							`SELECT 1
+                             FROM "fundRaisers"
+                             WHERE $1 = ANY ("fundraiserMediaObjectKeys")`,
 							[objectKey]
 						)
 						if (fundraiserMediaRows.length > 0) {
@@ -129,23 +159,26 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 		return
 	}
 
-	const {objectKey} = req.body
-	const {fundraiserId} = req.query
+	try {
+		const {objectKey} = req.body
+		const {fundraiserId} = req.query
 
-	await dbClient.query(
-		`UPDATE "fundRaisers" SET
-		"fundraiserMediaObjectKeys" = ARRAY_REMOVE("fundraiserMediaObjectKeys", $1)
-		WHERE "fundraiserId" = $2`,
-		[objectKey, fundraiserId]
-	)
+		await dbClient.query(
+			`UPDATE "fundRaisers"
+             SET "fundraiserMediaObjectKeys" = ARRAY_REMOVE("fundraiserMediaObjectKeys", $1)
+             WHERE "fundraiserId" = $2`,
+			[objectKey, fundraiserId]
+		)
 
-	dbClient.release()
-	res.status(200).json({
-		requestStatus: "SUCCESS"
-	})
+		dbClient.release()
+		res.status(200).json({
+			requestStatus: "SUCCESS"
+		})
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({
+			requestStatus: "ERR_INTERNAL_ERROR"
+		})
+	}
 }
-
-export default withMethodDispatcher<FundraiserMediaBodyMap, FundraiserMediaQueryMap>({
-	POST: addFundraiserMedia,
-	DELETE: deleteFundraiserMedia
-})
+*/

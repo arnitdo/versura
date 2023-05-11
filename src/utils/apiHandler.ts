@@ -62,7 +62,7 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 			const {
 				req: {
 					headers: {
-						host: hostName
+						host: hostName,
 					}
 				}
 			} = ssrContext
@@ -75,6 +75,12 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 				throw new Error(
 					"Could not distinguish process environment" + process.env.NODE_ENV
 				)
+			}
+
+			const authCookie = ssrContext.req.cookies["versura-auth-token"]
+			if (authCookie) {
+				// @ts-ignore
+				requestOptions.headers!["Cookie"] = `versura-auth-token=${authCookie}`
 			}
 		}
 

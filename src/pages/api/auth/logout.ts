@@ -22,12 +22,19 @@ export default async function logoutUser(req: CustomApiRequest<LogoutUserRequest
 		return
 	}
 
-	res.setHeader(
-		"Set-Cookie",
-		`versura-auth-token=""; HttpOnly; Path=/; Max-Age=0; SameSite=Strict`
-	)
+	try {
+		res.setHeader(
+			"Set-Cookie",
+			`versura-auth-token=""; HttpOnly; Path=/; Max-Age=0; SameSite=Strict`
+		)
 
-	res.status(200).json({
-		requestStatus: "SUCCESS"
-	})
+		res.status(200).json({
+			requestStatus: "SUCCESS"
+		})
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({
+			requestStatus: "ERR_INTERNAL_ERROR"
+		})
+	}
 }

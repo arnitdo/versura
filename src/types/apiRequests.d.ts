@@ -100,6 +100,10 @@ interface AdminGetWithdrawalsParams {
 	withdrawalPage?: string
 }
 
+interface AdminGetFundraisersParams {
+	fundraiserPage?: string
+}
+
 export {
 	WithdrawalStatus,
 	S3ObjectMethods,
@@ -124,5 +128,6 @@ export {
 	FundraiserWithdrawalRequestBody,
 	FundraiserWithdrawalUpdateBody,
 	FundraiserWithdrawalUpdateParams,
-	AdminGetWithdrawalsParams
+	AdminGetWithdrawalsParams,
+	AdminGetFundraisersParams
 }

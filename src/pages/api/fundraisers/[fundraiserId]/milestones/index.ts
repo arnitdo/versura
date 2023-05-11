@@ -59,6 +59,27 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 	try {
 		const {milestoneTitle, milestoneAmount} = req.body
 		const {fundraiserId} = req.query
+
+		const {walletAddress} = req.user!
+
+		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
+			`SELECT "fundraiserCreator"
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+
+		const currentFundraiser = currentFundraiserRows[0]
+		const {fundraiserCreator} = currentFundraiser
+
+		if (walletAddress !== fundraiserCreator) {
+			res.status(403).json({
+				requestStatus: "ERR_UNAUTHORIZED"
+			})
+			dbClient.release()
+			return
+		}
+
 		const {rows: createdMilestoneRows} = await dbClient.query<Pick<FundraiserMilestones, "milestoneId">>(
 			`INSERT INTO "fundraiserMilestones"
              VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT, DEFAULT)

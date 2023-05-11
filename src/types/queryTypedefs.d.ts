@@ -57,5 +57,5 @@ export type FundraiserWithdrawalRequests = {
 	targetFundraiser: number,
 	withdrawalAmount: number,
 	withdrawalToken: string,
-	requestStatus: WithdrawalStatus,
+	withdrawalStatus: WithdrawalStatus,
 }

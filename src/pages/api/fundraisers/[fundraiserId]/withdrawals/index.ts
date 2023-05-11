@@ -49,8 +49,10 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 					const {fundraiserRaisedAmount} = selectedFundraiser
 
 					const {rows: withdrawalRows} = await dbClient.query<{ accumulatedSum: number }>(
-						`SELECT SUM("withdrawalAmount") AS "accumulatedSum" FROM "fundraiserWithdrawalRequests"
-						WHERE "requestStatus" IN ('OPEN', 'APPROVED') AND "targetFundraiser" = $1`,
+						`SELECT SUM("withdrawalAmount") AS "accumulatedSum"
+                         FROM "fundraiserWithdrawalRequests"
+                         WHERE "requestStatus" IN ('OPEN', 'APPROVED')
+                           AND "targetFundraiser" = $1`,
 						[fundraiserId]
 					)
 
@@ -77,6 +79,25 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 		const {fundraiserId} = req.query
 		const {withdrawalAmount} = req.body
 
+		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
+			`SELECT "fundraiserCreator"
+             FROM "fundRaisers"
+             WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+
+		const currentFundraiser = currentFundraiserRows[0]
+		const {fundraiserCreator} = currentFundraiser
+
+		if (walletAddress !== fundraiserCreator) {
+			res.status(403).json({
+				requestStatus: "ERR_UNAUTHORIZED"
+			})
+			dbClient.release()
+			return
+		}
+
+
 		const {rows: fundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserToken">>(
 			`SELECT "fundraiserToken"
              FROM "fundRaisers"
@@ -88,7 +109,8 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 		const {fundraiserToken} = selectedFundraiser
 
 		await dbClient.query(
-			`INSERT INTO "fundraiserWithdrawalRequests" VALUES (DEFAULT, $1, $2, $3, $4, DEFAULT)`,
+			`INSERT INTO "fundraiserWithdrawalRequests"
+             VALUES (DEFAULT, $1, $2, $3, $4, DEFAULT)`,
 			[walletAddress, fundraiserId, withdrawalAmount, fundraiserToken]
 		)
 

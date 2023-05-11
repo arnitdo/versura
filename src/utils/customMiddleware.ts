@@ -46,7 +46,7 @@ function requireMethods(...acceptedMethods: ValidRequestMethods[]): MiddlewareFn
 		const reqMethod = req.method as ValidRequestMethods || "GET"
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
 		if (!acceptedMethods.includes(reqMethod)) {
-			res.status(400).json({
+			res.status(405).json({
 				requestStatus: "ERR_INVALID_METHOD"
 			})
 			nextMiddleware(false)
@@ -223,6 +223,64 @@ function requireAdminUser(): MiddlewareFn {
 	}
 }
 
+function optionalAuthenticatedUser(): MiddlewareFn {
+	return async function (req: CustomApiRequest, res: CustomApiResponse, middlewareOptions: MiddlewareOptions): Promise<void> {
+		const authCookie = req.cookies["versura-auth-token"];
+		const {nextMiddleware} = middlewareOptions
+		if (authCookie == null || authCookie == '') {
+			nextMiddleware(true)
+			return
+		}
+
+		const dbClient = await db.connect()
+
+		try {
+			const decodedCookie: DecodedJWTCookie = verify(
+				authCookie,
+				process.env.JWT_SECRET!
+			) as DecodedJWTCookie
+			const {walletAddress, userRole} = decodedCookie
+
+			const {rows: currentUserRows} = await dbClient.query(
+				`SELECT 1
+                 FROM "authUsers"
+                 WHERE "walletAddress" = $1
+                   AND "userRole" = $2`,
+				[walletAddress, userRole]
+			)
+
+			if (currentUserRows.length == 0) {
+				// Silently fail
+				// Having a signed token, but with invalid user means that the JWT_SECRET is compromised
+				// We should never reach this point
+				res.status(403).json({
+					requestStatus: "ERR_AUTH_REQUIRED"
+				})
+				nextMiddleware(false)
+				dbClient.release()
+				return
+			}
+
+			// Having 1 row means that the current user exists in our database
+			// We can go ahead and assume that the user is authenticated
+
+			req.user = decodedCookie
+
+			nextMiddleware(true)
+			dbClient.release()
+
+		} catch (err: unknown) {
+			// Corrupted or invalid token
+			res.status(403).json({
+				requestStatus: "ERR_AUTH_REQUIRED"
+			})
+			nextMiddleware(false)
+			dbClient.release()
+			return
+		}
+	}
+}
+
 function requireBodyValidators<T, P>(validatorsToRun: ValidatorMapType<T>, skipBodyParamRequirement: boolean = false): MiddlewareFn<T, P> {
 	return async function (req: CustomApiRequest<T, P>, res: CustomApiResponse, middlewareOptions: MiddlewareOptions) {
 		const {middlewareCallStack, nextMiddleware} = middlewareOptions
@@ -362,6 +420,7 @@ export {
 	requireBodyParams,
 	requireQueryParams,
 	requireAuthenticatedUser,
+	optionalAuthenticatedUser,
 	requireAdminUser,
 	requireBodyValidators,
 	requireQueryParamValidators,
