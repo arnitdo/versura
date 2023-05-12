@@ -65,7 +65,7 @@ export default async function getDashboardData(req: CustomApiRequest, res: Custo
 		const {totalFundraiserCount} = fundraiserRows[0]
 
 		const {rows: totalWithdrawalRows} = await dbClient.query<Pick<AdminDashboardData, "totalWithdrawalAmount">>(
-			`SELECT SUM("withdrawalAmount")
+			`SELECT SUM("withdrawalAmount") AS "totalWithdrawalAmount"
              FROM "fundraiserWithdrawalRequests"
              WHERE "requestStatus" = 'APPROVED'`
 		)
@@ -87,7 +87,7 @@ export default async function getDashboardData(req: CustomApiRequest, res: Custo
 		const {totalUniqueDonors} = totalDonorsRows[0]
 
 		const {rows: successfulCampaignRows} = await dbClient.query<Pick<AdminDashboardData, "totalSuccessfulCampaigns">>(
-			`SELECT COUNT(*)
+			`SELECT COUNT(*) AS "totalSuccessfulCampaigns"
              FROM "fundRaisers"
              WHERE "fundraiserRaisedAmount" > "fundraiserTarget"`
 		)
@@ -127,17 +127,17 @@ export default async function getDashboardData(req: CustomApiRequest, res: Custo
 		res.status(200).json<AdminGetDashboardResponse>({
 			requestStatus: "SUCCESS",
 			dashboardData: {
-				totalPendingFundraiserCount,
-				totalPendingWithdrawalCount,
-				totalFundraiserCount,
-				totalWithdrawalAmount,
-				totalDonatedAmount,
-				totalUniqueDonors,
-				totalSuccessfulCampaigns,
-				totalUserCount,
-				totalMilestoneCount,
-				reachedMilestoneCount,
-				totalUpdateCount
+				"totalPendingFundraiserCount": totalPendingFundraiserCount,
+				"totalPendingWithdrawalCount": totalPendingWithdrawalCount,
+				"totalFundraiserCount": totalFundraiserCount,
+				"totalWithdrawalAmount": totalWithdrawalAmount,
+				"totalDonatedAmount": totalDonatedAmount,
+				"totalUniqueDonors": totalUniqueDonors,
+				"totalSuccessfulCampaigns": totalSuccessfulCampaigns,
+				"totalUserCount": totalUserCount,
+				"totalMilestoneCount": totalMilestoneCount,
+				"reachedMilestoneCount": reachedMilestoneCount,
+				"totalUpdateCount": totalUpdateCount
 			}
 		})
 	} catch (err) {
