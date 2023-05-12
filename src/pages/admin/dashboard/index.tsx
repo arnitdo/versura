@@ -181,11 +181,9 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 	}
 };
 
-// @ts-ignore
 export const getServerSideProps: GetServerSideProps<
 	AdminDashboardProps
-	// @ts-ignore
-> = async (ctx: GetServerSidePropsContext<AdminGetFundraisersParams & AdminGetWithdrawalsParams>) => {
+> = async (ctx: GetServerSidePropsContext) => {
 
 	const withdrawalPage = ctx.query.withdrawalPage as string || "1"
 	const fundraiserPage = ctx.query.fundraiserPage as string || "1"
@@ -198,10 +196,10 @@ export const getServerSideProps: GetServerSideProps<
 	)(fundraiserPage)
 
 	if (!validWithdrawalPage || !validFundraiserPage) {
-		console.log(withdrawalPage, fundraiserPage)
 		return {
 			redirect: {
-				destination: "/404"
+				destination: "/404",
+				permanent: false
 			}
 		}
 	}
@@ -282,21 +280,47 @@ export const getServerSideProps: GetServerSideProps<
 		})
 		return {
 			redirect: {
-				destination: "/500"
+				destination: "/500",
+				permanent: false
 			}
 		}
 	}
 
 	const requestDataAcc = [dashboardResponseData!, fundraiserResponseData!, withdrawalResponseData!]
 
+	const dataRequestsUnauthorized = requestDataAcc.map((responseData) => {
+		const {requestStatus} = responseData
+		return requestStatus === "ERR_AUTH_REQUIRED" || requestStatus === "ERR_ADMIN_REQUIRED"
+	})
+
+	const anyRequestUnauthorized = dataRequestsUnauthorized.reduce((prev, curr) => {
+		return prev || curr
+	}, false)
+
+	if (anyRequestUnauthorized) {
+		return {
+			redirect: {
+				destination: "/404",
+				permanent: false
+			}
+		}
+	}
+
 	const dataRequestsSuccess = requestDataAcc.map((responseData) => {
 		const {requestStatus} = responseData
 		return requestStatus === "SUCCESS"
 	})
 
-	if (!dataRequestsSuccess) {
+	const allRequestsSuccessful = dataRequestsSuccess.reduce((prev, curr) => {
+		return prev && curr
+	}, true)
+
+	if (!allRequestsSuccessful) {
 		return {
-			redirect: "/500"
+			redirect: {
+				destination: "/500",
+				permanent: false
+			}
 		}
 	}
 

@@ -59,7 +59,9 @@ type FundraiserMilestone = Omit<FundraiserMilestones, "milestoneMediaObjectKeys"
 
 interface FundraiserDonation {
 	donorAddress: string,
-	donatedAmount: number
+	donatedAmount: number,
+	donationTimestamp: string,
+	transactionHash: string
 }
 
 interface GetFundraiserResponse extends APIResponse {

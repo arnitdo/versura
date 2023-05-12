@@ -90,7 +90,7 @@ export default function PageHeader(): JSX.Element {
 					userRole: undefined
 				})
 				setLogoutHandlerActive(false)
-				navRouter.push(returnPagePath || '/')
+				navRouter.reload()
 				return
 			}
 		}

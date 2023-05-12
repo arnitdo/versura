@@ -159,6 +159,9 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		fundraiserWithdrawnAmount, fundraiserStatus, fundraiserDonations
 	} = props
 
+	// @Manav39 : Fundraiser Donations Data
+	console.log(fundraiserDonations)
+
 	const parsedFundraiserCreationDate = new Date(fundraiserCreatedOn)
 
 	const relativeFundraiserDate = parsedFundraiserCreationDate.toDateString()
