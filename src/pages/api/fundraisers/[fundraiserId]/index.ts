@@ -146,11 +146,11 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			})
 		)
 
-		const {rows: fundraiserDonationRows} = await dbClient.query<Pick<FundraiserDonations, "donorAddress" | "donatedAmount">>(
-			`SELECT "donorAddress", SUM("donatedAmount") as "donatedAmount"
+		const {rows: fundraiserDonationRows} = await dbClient.query<FundraiserDonations>(
+			`SELECT "donorAddress", "donatedAmount", "donationTimestamp", "transactionHash"
              FROM "fundraiserDonations"
              WHERE "donatedFundraiser" = $1
-             GROUP BY "donorAddress"`,
+             ORDER BY "donatedAmount" DESC`,
 			[fundraiserId]
 		)
 
