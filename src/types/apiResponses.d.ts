@@ -1,4 +1,11 @@
-import {FundraiserMilestones, FundRaisers, FundraiserWithdrawalRequests, UserRole} from "@/types/queryTypedefs";
+import {
+	FundraiserDonations,
+	FundraiserMilestones,
+	FundRaisers,
+	FundraiserUpdates,
+	FundraiserWithdrawalRequests,
+	UserRole
+} from "@/types/queryTypedefs";
 import {DecodedJWTCookie} from "@/types/apiTypedefs";
 import {AdminDashboardData} from "@/pages/api/admin/dashboard";
 
@@ -57,12 +64,15 @@ type FundraiserMilestone = Omit<FundraiserMilestones, "milestoneMediaObjectKeys"
 	milestoneMedia: GenericMedia[]
 }
 
-interface FundraiserDonation {
-	donorAddress: string,
-	donatedAmount: number,
-	donationTimestamp: string,
-	transactionHash: string
-}
+type FundraiserDonation = Pick<
+	FundraiserDonations,
+	"donatedAmount" | "donationTimestamp" | "donorAddress" | "transactionHash"
+>
+
+type FundraiserUpdate = Pick<
+	FundraiserUpdates,
+	"updateTitle" | "updateDescription" | "updatePostedOn"
+>
 
 interface GetFundraiserResponse extends APIResponse {
 	fundraiserData: Omit<
@@ -71,6 +81,7 @@ interface GetFundraiserResponse extends APIResponse {
 	> & {
 		fundraiserMedia: GenericMedia[],
 		fundraiserMilestones: FundraiserMilestone[],
+		fundraiserUpdates: FundraiserUpdate[],
 		fundraiserDonations: FundraiserDonation[]
 	}
 }
@@ -78,7 +89,7 @@ interface GetFundraiserResponse extends APIResponse {
 interface GetFundraiserFeedResponse extends APIResponse {
 	feedData: Omit<
 		GetFundraiserResponse["fundraiserData"],
-		"fundraiserMilestones" | "fundraiserDonations"
+		"fundraiserMilestones" | "fundraiserDonations" | "fundraiserUpdates"
 	>[]
 }
 
@@ -92,6 +103,10 @@ interface MediaCallbackResponse extends APIResponse {
 
 interface CreateFundraiserMilestoneResponse extends APIResponse {
 	milestoneId: number
+}
+
+interface CreateFundraiserUpdateResponse extends APIResponse {
+	updateId: number
 }
 
 interface AdminGetWithdrawalResponse extends APIResponse {
@@ -108,7 +123,7 @@ interface AdminGetWithdrawalResponse extends APIResponse {
 interface AdminGetFundraisersResponse extends APIResponse {
 	pendingFundraisers: Omit<
 		GetFundraiserResponse["fundraiserData"],
-		"fundraiserMilestones" | "fundraiserDonations"
+		"fundraiserMilestones" | "fundraiserDonations" | "fundraiserUpdates"
 	>[]
 }
 
@@ -129,6 +144,7 @@ export {
 	GenericMedia,
 	MediaCallbackResponse,
 	CreateFundraiserMilestoneResponse,
+	CreateFundraiserUpdateResponse,
 	FundraiserMilestone,
 	AdminGetFundraisersResponse,
 	AdminGetWithdrawalResponse,

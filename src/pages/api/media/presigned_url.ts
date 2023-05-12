@@ -31,9 +31,6 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 				},
 				objectKey: async (objectKey: string) => {
 					// Check if object key exists if GET or DELETE media
-					if (req.body.requestMethod === "PUT") {
-						return true
-					}
 					const {rows} = await dbClient.query(
 						`SELECT 1
                          FROM "internalS3BucketObjects"
@@ -42,6 +39,9 @@ export default async function presignedUrlEndpoint(req: CustomApiRequest<Presign
 					)
 
 					if (rows.length > 0) {
+						if (req.body.requestMethod === "PUT") {
+							return false
+						}
 						return true
 					}
 

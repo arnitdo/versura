@@ -39,19 +39,26 @@ export default async function updateFundraiserStatus(req: CustomApiRequest<Admin
 
 	if (!middlewareStatus) return
 
-	const dbClient = await db.connect()
+	try {
+		const dbClient = await db.connect()
 
-	const {fundraiserId} = req.query
-	const {fundraiserStatus} = req.body
+		const {fundraiserId} = req.query
+		const {fundraiserStatus} = req.body
 
-	await dbClient.query(
-		`UPDATE "fundRaisers"
-         SET "fundraiserStatus" = $1
-         WHERE "fundraiserId" = $2`,
-		[fundraiserStatus, fundraiserId]
-	)
+		await dbClient.query(
+			`UPDATE "fundRaisers"
+             SET "fundraiserStatus" = $1
+             WHERE "fundraiserId" = $2`,
+			[fundraiserStatus, fundraiserId]
+		)
 
-	res.status(200).json({
-		requestStatus: "SUCCESS"
-	})
+		res.status(200).json({
+			requestStatus: "SUCCESS"
+		})
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({
+			requestStatus: "ERR_INTERNAL_ERROR"
+		})
+	}
 }

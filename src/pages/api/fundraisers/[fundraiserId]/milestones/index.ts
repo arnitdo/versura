@@ -60,7 +60,7 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 		const {milestoneTitle, milestoneAmount} = req.body
 		const {fundraiserId} = req.query
 
-		const {walletAddress} = req.user!
+		const {walletAddress, userRole} = req.user!
 
 		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
 			`SELECT "fundraiserCreator"
@@ -72,7 +72,7 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 		const currentFundraiser = currentFundraiserRows[0]
 		const {fundraiserCreator} = currentFundraiser
 
-		if (walletAddress !== fundraiserCreator) {
+		if (userRole === "CLIENT" && walletAddress !== fundraiserCreator) {
 			res.status(403).json({
 				requestStatus: "ERR_UNAUTHORIZED"
 			})
@@ -86,6 +86,14 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
              RETURNING "milestoneId"`,
 			[fundraiserId, milestoneTitle, milestoneAmount]
 		)
+
+		await dbClient.query(
+			`UPDATE "fundRaisers"
+             SET "fundraiserMilestoneCount" = "fundraiserMilestoneCount" + 1
+             WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+
 		const createdMilestoneRow = createdMilestoneRows[0]
 		const {milestoneId} = createdMilestoneRow
 		res.status(200).json<CreateFundraiserMilestoneResponse>({

@@ -75,7 +75,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 	}
 
 	try {
-		const {walletAddress} = req.user!
+		const {walletAddress, userRole} = req.user!
 		const {fundraiserId} = req.query
 		const {withdrawalAmount} = req.body
 
@@ -89,7 +89,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 		const currentFundraiser = currentFundraiserRows[0]
 		const {fundraiserCreator} = currentFundraiser
 
-		if (walletAddress !== fundraiserCreator) {
+		if (userRole === "CLIENT" && walletAddress !== fundraiserCreator) {
 			res.status(403).json({
 				requestStatus: "ERR_UNAUTHORIZED"
 			})

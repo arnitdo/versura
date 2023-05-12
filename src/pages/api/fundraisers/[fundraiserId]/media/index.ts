@@ -72,7 +72,7 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 	try {
 		const {objectKey} = req.body
 		const {fundraiserId} = req.query
-		const {walletAddress} = req.user!
+		const {walletAddress, userRole} = req.user!
 
 		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
 			`SELECT "fundraiserCreator"
@@ -84,7 +84,7 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 		const currentFundraiser = currentFundraiserRows[0]
 		const {fundraiserCreator} = currentFundraiser
 
-		if (walletAddress !== fundraiserCreator) {
+		if (userRole === "CLIENT" && walletAddress !== fundraiserCreator) {
 			res.status(403).json({
 				requestStatus: "ERR_UNAUTHORIZED"
 			})

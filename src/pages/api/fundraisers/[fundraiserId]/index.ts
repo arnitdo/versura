@@ -10,7 +10,13 @@ import {
 import {db} from "@/utils/db";
 import {GetFundraiserRequestParams} from "@/types/apiRequests";
 import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
-import {FundraiserDonations, FundraiserMilestones, FundRaisers, S3BucketObjects} from "@/types/queryTypedefs";
+import {
+	FundraiserDonations,
+	FundraiserMilestones,
+	FundRaisers,
+	FundraiserUpdates,
+	S3BucketObjects
+} from "@/types/queryTypedefs";
 import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {getObjectUrl} from "@/utils/s3";
 
@@ -146,6 +152,53 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			})
 		)
 
+		const {rows: fundraiserUpdateRows} = await dbClient.query<FundraiserUpdates>(
+			`SELECT *
+             FROM "fundraiserUpdates"
+             WHERE "updateFundraiserId" = $1`,
+			[fundraiserId]
+		)
+
+		const mappedUpdateRows = await Promise.all(
+			fundraiserUpdateRows.map(async (updateRow) => {
+				const {updateMediaObjectKeys} = updateRow
+
+				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
+					`SELECT "objectKey", "objectContentType"
+                     FROM "internalS3BucketObjects"
+                     WHERE "objectKey" = ANY ($1)`,
+					[updateMediaObjectKeys]
+				)
+
+				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
+					const {objectKey, objectContentType} = mediaObjectContentTypeRow
+					objectKeyContentMap[objectKey] = objectContentType
+				}
+
+				const updateMedia: GenericMedia[] = await Promise.all(
+					updateMediaObjectKeys.map(async (objectKey) => {
+						const objectUrl = await getObjectUrl({
+							objectKey: objectKey,
+							requestMethod: "GET"
+						})
+
+						return {
+							mediaURL: objectUrl,
+							mediaContentType: objectKeyContentMap[objectKey]
+						}
+					})
+				)
+
+				// @ts-ignore
+				delete updateRow["updateMediaObjectKeys"]
+
+				// @ts-ignore
+				updateRow["updateMedia"] = updateMedia
+
+				return updateRow
+			})
+		)
+
 		const {rows: fundraiserDonationRows} = await dbClient.query<FundraiserDonations>(
 			`SELECT "donorAddress", "donatedAmount", "donationTimestamp", "transactionHash"
              FROM "fundraiserDonations"
@@ -159,7 +212,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			...selectedFundraiser,
 			fundraiserMedia: fundraiserMedia,
 			fundraiserMilestones: fundraiserResponseMilestones,
-			fundraiserDonations: fundraiserDonationRows
+			fundraiserDonations: fundraiserDonationRows,
+			fundraiserUpdates: mappedUpdateRows
 		}
 
 		// @ts-ignore

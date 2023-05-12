@@ -34,6 +34,8 @@ CREATE TABLE "fundRaisers"
     "fundraiserMediaObjectKeys"   TEXT[]           DEFAULT '{}'::text[],
     "fundraiserStatus"            TEXT             DEFAULT 'IN_QUEUE',
 
+    "fundraiserUpdateCount"       INTEGER NOT NULL DEFAULT 0,
+
     CONSTRAINT "fk_fundRaisers_fundraiserCreator_authUsers_walletAddress"
         FOREIGN KEY ("fundraiserCreator")
             REFERENCES "authUsers" ("walletAddress"),

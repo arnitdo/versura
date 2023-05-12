@@ -83,7 +83,8 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
 			`INSERT INTO "fundRaisers"
-             VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT)
+             VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT,
+                     DEFAULT)
              RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)

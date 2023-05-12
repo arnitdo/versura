@@ -51,6 +51,15 @@ export type FundraiserMilestones = {
 	milestoneReachedOn: string,
 }
 
+export type FundraiserUpdates = {
+	updateId: number,
+	updateFundraiserId: number,
+	updateTitle: string,
+	updateDescription: string,
+	updatePostedOn: string,
+	updateMediaObjectKeys: string[]
+}
+
 export type FundraiserWithdrawalRequests = {
 	requestId: number,
 	walletAddress: string,

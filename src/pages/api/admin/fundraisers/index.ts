@@ -34,60 +34,66 @@ export default async function getPendingFundraisers(req: CustomApiRequest<{}, Ad
 
 	if (!middlewareStatus) return
 
-	const dbClient = await db.connect()
+	try {
+		const dbClient = await db.connect()
 
-	const fundraiserPage = req.query.fundraiserPage || "1"
-	const parsedFundraiserPage = Number.parseInt(fundraiserPage)
-	const fundraiserPageOffset = (parsedFundraiserPage - 1) * 10
+		const fundraiserPage = req.query.fundraiserPage || "1"
+		const parsedFundraiserPage = Number.parseInt(fundraiserPage)
+		const fundraiserPageOffset = (parsedFundraiserPage - 1) * 10
 
-	const {rows} = await dbClient.query<FundRaisers>(
-		`SELECT *
-         FROM "fundRaisers"
-         WHERE "fundraiserStatus" = 'IN_QUEUE'
-         OFFSET $1 LIMIT 10`,
-		[fundraiserPageOffset]
-	)
+		const {rows} = await dbClient.query<FundRaisers>(
+			`SELECT *
+             FROM "fundRaisers"
+             WHERE "fundraiserStatus" = 'IN_QUEUE'
+             OFFSET $1 LIMIT 10`,
+			[fundraiserPageOffset]
+		)
 
-	const fundraisersWithMedia = await Promise.all(
-		rows.map(async (fundraiserRow) => {
-			const {fundraiserMediaObjectKeys} = fundraiserRow
-			const fundraiserMedia = await Promise.all(
-				fundraiserMediaObjectKeys.map(async (objectKey) => {
-					const {rows: mediaRows} = await dbClient.query<Pick<S3BucketObjects, "objectContentType">>(
-						`SELECT "objectContentType"
-                         FROM "internalS3BucketObjects"
-                         WHERE "objectKey" = $1`,
-						[objectKey]
-					)
+		const fundraisersWithMedia = await Promise.all(
+			rows.map(async (fundraiserRow) => {
+				const {fundraiserMediaObjectKeys} = fundraiserRow
+				const fundraiserMedia = await Promise.all(
+					fundraiserMediaObjectKeys.map(async (objectKey) => {
+						const {rows: mediaRows} = await dbClient.query<Pick<S3BucketObjects, "objectContentType">>(
+							`SELECT "objectContentType"
+                             FROM "internalS3BucketObjects"
+                             WHERE "objectKey" = $1`,
+							[objectKey]
+						)
 
-					const selectedRow = mediaRows[0]
-					const {objectContentType: mediaContentType} = selectedRow
-					const mediaURL = await getObjectUrl({
-						objectKey: objectKey,
-						requestMethod: "GET"
+						const selectedRow = mediaRows[0]
+						const {objectContentType: mediaContentType} = selectedRow
+						const mediaURL = await getObjectUrl({
+							objectKey: objectKey,
+							requestMethod: "GET"
+						})
+
+						return {
+							mediaURL,
+							mediaContentType
+						}
 					})
+				)
 
-					return {
-						mediaURL,
-						mediaContentType
-					}
-				})
-			)
+				// @ts-ignore
+				delete fundraiserRow["fundraiserMediaObjectKeys"]
 
-			// @ts-ignore
-			delete fundraiserRow["fundraiserMediaObjectKeys"]
+				return {
+					...fundraiserRow,
+					fundraiserMedia
+				}
+			})
+		)
 
-			return {
-				...fundraiserRow,
-				fundraiserMedia
-			}
+
+		res.status(200).json<AdminGetFundraisersResponse>({
+			requestStatus: "SUCCESS",
+			pendingFundraisers: fundraisersWithMedia
 		})
-	)
-
-
-	res.status(200).json<AdminGetFundraisersResponse>({
-		requestStatus: "SUCCESS",
-		pendingFundraisers: fundraisersWithMedia
-	})
-
+	} catch (err) {
+		console.error(err)
+		res.status(500).json({
+			requestStatus: "ERR_INTERNAL_ERROR"
+		})
+	}
 }
