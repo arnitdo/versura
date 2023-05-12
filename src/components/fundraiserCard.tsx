@@ -8,7 +8,7 @@ import Link from "next/link";
 
 type FundraiserCardProps = Omit<
 	GetFundraiserResponse["fundraiserData"],
-	"fundraiserMilestones" | "fundraiserDonations"
+	"fundraiserMilestones" | "fundraiserDonations" | "fundraiserUpdates"
 >
 
 function FundraiserCard(props: FundraiserCardProps) {
