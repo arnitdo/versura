@@ -16,8 +16,8 @@ import {
 	EuiTabs,
 	EuiText,
 } from "@elastic/eui";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { useState } from "react";
+import {GetServerSideProps, GetServerSidePropsContext} from "next";
+import {useState} from "react";
 import Head from "next/head";
 import {
 	AdminDashboardData,
@@ -25,9 +25,9 @@ import {
 	AdminGetFundraisersResponse,
 	AdminGetWithdrawalResponse,
 } from "@/types/apiResponses";
-import { makeAPIRequest } from "@/utils/apiHandler";
-import { AdminGetFundraisersParams, AdminGetWithdrawalsParams } from "@/types/apiRequests";
-import { NON_ZERO_NON_NEGATIVE, STRING_TO_NUM_FN } from "@/utils/validatorUtils";
+import {makeAPIRequest} from "@/utils/apiHandler";
+import {AdminGetFundraisersParams, AdminGetWithdrawalsParams} from "@/types/apiRequests";
+import {NON_ZERO_NON_NEGATIVE, STRING_TO_NUM_FN} from "@/utils/validatorUtils";
 
 type AdminDashboardProps = {
 	fundraiserPage: number; // Paginated
@@ -195,6 +195,7 @@ export const getServerSideProps: GetServerSideProps<
 		return {
 			redirect: {
 				destination: "/404",
+				permanent: false
 			},
 		};
 	}
@@ -276,6 +277,7 @@ export const getServerSideProps: GetServerSideProps<
 		return {
 			redirect: {
 				destination: "/500",
+				permanent: false
 			},
 		};
 	}
@@ -283,19 +285,22 @@ export const getServerSideProps: GetServerSideProps<
 	const requestDataAcc = [dashboardResponseData!, fundraiserResponseData!, withdrawalResponseData!];
 
 	const dataRequestsSuccess = requestDataAcc.map((responseData) => {
-		const { requestStatus } = responseData;
+		const {requestStatus} = responseData;
 		return requestStatus === "SUCCESS";
 	});
 
 	if (!dataRequestsSuccess) {
 		return {
-			redirect: "/500",
+			redirect: {
+				destination: "/500",
+				permanent: false
+			}
 		};
 	}
 
-	const { pendingFundraisers } = fundraiserResponseData!;
-	const { pendingWithdrawals } = withdrawalResponseData!;
-	const { dashboardData } = dashboardResponseData!;
+	const {pendingFundraisers} = fundraiserResponseData!;
+	const {pendingWithdrawals} = withdrawalResponseData!;
+	const {dashboardData} = dashboardResponseData!;
 
 	return {
 		props: {
@@ -311,7 +316,7 @@ export const getServerSideProps: GetServerSideProps<
 export default function AdminDashboard(props: AdminDashboardProps) {
 	//console.table(props);
 
-	const { dashboardData, fundraiserPage, withdrawalPage, pendingWithdrawals, pendingFundraisers } = props;
+	const {dashboardData, fundraiserPage, withdrawalPage, pendingWithdrawals, pendingFundraisers} = props;
 	console.log(props);
 	const [selectedTabId, setSelectedTabId] = useState("tab1");
 
@@ -324,98 +329,98 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 		<>
 			<Head>
 				<title>Admin</title>
-				<meta name="description" content="Admin Page" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<link rel="icon" href="/favicon.ico" />
+				<meta name="description" content="Admin Page"/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
 			</Head>
-			<EuiPageBody style={{ marginTop: "20px", padding: "20px" }}>
+			<EuiPageBody style={{marginTop: "20px", padding: "20px"}}>
 				<EuiFlexGroup>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#5299E0" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalFundraiserCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Fundraisers Count</p>}
-							icon={<EuiIcon type="tableDensityExpanded" size="xxl" />}
+							style={{backgroundColor: "#5299E0"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalFundraiserCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Fundraisers Count</p>}
+							icon={<EuiIcon type="tableDensityExpanded" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#c77171" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalWithdrawalAmount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Withdrawals Amount</p>}
-							icon={<EuiIcon type="indexEdit" size="xxl" />}
+							style={{backgroundColor: "#c77171"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalWithdrawalAmount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Withdrawals Amount</p>}
+							icon={<EuiIcon type="indexEdit" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#D5A439" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalDonatedAmount} ETH</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Donated Amount</p>}
-							icon={<EuiIcon type="flag" size="xxl" />}
+							style={{backgroundColor: "#D5A439"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalDonatedAmount} ETH</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Donated Amount</p>}
+							icon={<EuiIcon type="flag" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#857CDC" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalUserCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Users Count</p>}
-							icon={<EuiIcon type="users" size="xxl" />}
+							style={{backgroundColor: "#857CDC"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalUserCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Users Count</p>}
+							icon={<EuiIcon type="users" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#5299E0" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalSuccessfulCampaigns}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Successful Campaigns</p>}
-							icon={<EuiIcon type="checkInCircleFilled" size="xxl" />}
+							style={{backgroundColor: "#5299E0"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalSuccessfulCampaigns}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Successful Campaigns</p>}
+							icon={<EuiIcon type="checkInCircleFilled" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 				</EuiFlexGroup>
-				<br />
+				<br/>
 				<EuiFlexGroup>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#6b8e23" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalPendingFundraiserCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Pending Fundraisers Count</p>}
-							icon={<EuiIcon type="clock" size="xxl" />}
+							style={{backgroundColor: "#6b8e23"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalPendingFundraiserCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Pending Fundraisers Count</p>}
+							icon={<EuiIcon type="clock" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#4b0082" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalPendingWithdrawalCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Pending Withdrawal Count</p>}
-							icon={<EuiIcon type="percent" size="xxl" />}
+							style={{backgroundColor: "#4b0082"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalPendingWithdrawalCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Pending Withdrawal Count</p>}
+							icon={<EuiIcon type="percent" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#008080" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.reachedMilestoneCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Reached Milestones Count</p>}
-							icon={<EuiIcon type="flag" size="xxl" />}
+							style={{backgroundColor: "#008080"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.reachedMilestoneCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Reached Milestones Count</p>}
+							icon={<EuiIcon type="flag" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#556b2f" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalUniqueDonors}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Unique Donors</p>}
-							icon={<EuiIcon type="user" size="xxl" />}
+							style={{backgroundColor: "#556b2f"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalUniqueDonors}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Unique Donors</p>}
+							icon={<EuiIcon type="user" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 					<EuiFlexItem>
 						<EuiCard
-							style={{ backgroundColor: "#a52a2a" }}
-							title={<h1 style={{ fontWeight: "bold" }}>{dashboardData.totalUpdateCount}</h1>}
-							description={<p style={{ fontSize: "20px" }}>Total Update Count</p>}
-							icon={<EuiIcon type="pencil" size="xxl" />}
+							style={{backgroundColor: "#a52a2a"}}
+							title={<h1 style={{fontWeight: "bold"}}>{dashboardData.totalUpdateCount}</h1>}
+							description={<p style={{fontSize: "20px"}}>Total Update Count</p>}
+							icon={<EuiIcon type="pencil" size="xxl"/>}
 						/>
 					</EuiFlexItem>
 				</EuiFlexGroup>
 
-				<EuiTabs style={{ marginTop: "20px", width: "auto", justifyContent: "center" }} expand={true}>
+				<EuiTabs style={{marginTop: "20px", width: "auto", justifyContent: "center"}} expand={true}>
 					<EuiTab onClick={() => onTabClick("tab1")} isSelected={selectedTabId === "tab1"}>
 						Fundraisers
 					</EuiTab>
@@ -425,8 +430,8 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 				</EuiTabs>
 
 				{selectedTabId === "tab1" && (
-					<EuiPanel style={{ width: "80%", marginLeft: "auto", marginRight: "auto" }}>
-						<EuiFlexGroup style={{ paddingBottom: "20px" }}>
+					<EuiPanel style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}>
+						<EuiFlexGroup style={{paddingBottom: "20px"}}>
 							<EuiFlexItem>
 								<img
 									src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAjlfRoYiqHZ-jyvu-ZAfUTn0yY3CClEybXg&usqp=CAU"
@@ -442,7 +447,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 							<EuiFlexItem>
 								<EuiFlexGroup direction={"column"}>
 									<EuiFlexItem>
-										<EuiText color={"white"} style={{ marginTop: "20px" }}>
+										<EuiText color={"white"} style={{marginTop: "20px"}}>
 											<h3>The Fujoshi Guide to Web Development</h3>
 										</EuiText>
 									</EuiFlexItem>
@@ -465,12 +470,12 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 									</EuiFlexItem>
 								</EuiFlexGroup>
 							</EuiFlexItem>
-							<EuiFlexItem style={{ paddingLeft: "20px" }}>
-								<EuiFlexGroup style={{ marginTop: "50px" }}>
+							<EuiFlexItem style={{paddingLeft: "20px"}}>
+								<EuiFlexGroup style={{marginTop: "50px"}}>
 									<EuiFlexItem>
 										<EuiButton
 											fill
-											style={{ backgroundColor: "green" }}
+											style={{backgroundColor: "green"}}
 											iconType="check"
 											iconSide="left"
 										>
@@ -488,8 +493,8 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 					</EuiPanel>
 				)}
 				{selectedTabId === "tab2" && (
-					<EuiPanel style={{ width: "80%", marginLeft: "auto", marginRight: "auto" }}>
-						<EuiFlexGroup style={{ paddingBottom: "20px" }}>
+					<EuiPanel style={{width: "80%", marginLeft: "auto", marginRight: "auto"}}>
+						<EuiFlexGroup style={{paddingBottom: "20px"}}>
 							<EuiFlexItem>
 								<img
 									src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkVLSIS9IjgnfhNGIlMFSFxvdXdfpinC9HcQ&usqp=CAU"
@@ -505,7 +510,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 							<EuiFlexItem>
 								<EuiFlexGroup direction={"column"}>
 									<EuiFlexItem>
-										<EuiText color={"white"} style={{ marginTop: "20px" }}>
+										<EuiText color={"white"} style={{marginTop: "20px"}}>
 											<h3>The Fujoshi Guide to Web Development</h3>
 										</EuiText>
 									</EuiFlexItem>
@@ -528,12 +533,12 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 									</EuiFlexItem>
 								</EuiFlexGroup>
 							</EuiFlexItem>
-							<EuiFlexItem style={{ paddingLeft: "20px" }}>
-								<EuiFlexGroup style={{ marginTop: "50px" }}>
+							<EuiFlexItem style={{paddingLeft: "20px"}}>
+								<EuiFlexGroup style={{marginTop: "50px"}}>
 									<EuiFlexItem>
 										<EuiButton
 											fill
-											style={{ backgroundColor: "green" }}
+											style={{backgroundColor: "green"}}
 											iconType="check"
 											iconSide="left"
 										>
