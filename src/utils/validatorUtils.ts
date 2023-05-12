@@ -1,4 +1,4 @@
-import {PoolClient} from "pg";
+import {db} from "@/utils/db";
 
 enum PARSE_METHOD {
 	PARSE_INT,
@@ -69,21 +69,21 @@ function ALLOW_UNDEFINED_WITH_FN<T>(fn: (value: T) => (boolean | Promise<boolean
 	}
 }
 
-function VALID_FUNDRAISER_ID_CHECK(dbClient: PoolClient) {
-	return async function (fundraiserId: string) {
-		const {rows} = await dbClient.query(
-			`SELECT 1
-             FROM "fundRaisers"
-             WHERE "fundraiserId" = $1`,
-			[fundraiserId]
-		)
+async function VALID_FUNDRAISER_ID_CHECK(fundraiserId: string) {
+	const dbClient = await db.connect()
+	const {rows} = await dbClient.query(
+		`SELECT 1
+         FROM "fundRaisers"
+         WHERE "fundraiserId" = $1`,
+		[fundraiserId]
+	)
 
-		if (rows.length) {
-			return true
-		}
-
-		return false
+	dbClient.release()
+	if (rows.length) {
+		return true
 	}
+
+	return false
 }
 
 function IN_ARR<T>(elemArray: T[]) {

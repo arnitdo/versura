@@ -35,7 +35,7 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 				"fundraiserId"
 			),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			})
 		}
 	)

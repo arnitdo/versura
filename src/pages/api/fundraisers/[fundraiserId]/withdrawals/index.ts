@@ -28,7 +28,7 @@ export default async function addWithdrawalRequest(req: CustomApiRequest<Fundrai
 				"fundraiserId"
 			),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			}),
 			[requireValidBody.name]: requireValidBody(),
 			[requireBodyParams.name]: requireBodyParams(

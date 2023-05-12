@@ -104,6 +104,14 @@ interface AdminGetFundraisersParams {
 	fundraiserPage?: string
 }
 
+interface AdminUpdateFundraiserParams {
+	fundraiserId: string
+}
+
+interface AdminUpdateFundraiserBody {
+	fundraiserStatus: "OPEN" | "CLOSED"
+}
+
 export {
 	WithdrawalStatus,
 	S3ObjectMethods,
@@ -129,5 +137,7 @@ export {
 	FundraiserWithdrawalUpdateBody,
 	FundraiserWithdrawalUpdateParams,
 	AdminGetWithdrawalsParams,
-	AdminGetFundraisersParams
+	AdminGetFundraisersParams,
+	AdminUpdateFundraiserParams,
+	AdminUpdateFundraiserBody
 }

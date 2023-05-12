@@ -37,7 +37,7 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			}),
 			[requireBodyParams.name]: requireBodyParams("objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({
@@ -124,7 +124,7 @@ async function deleteFundraiserMedia(req: CustomApiRequest<DeleteFundraiserMedia
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			}),
 			[requireBodyParams.name]: requireBodyParams("objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({

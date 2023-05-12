@@ -27,7 +27,7 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 			[requireValidBody.name]: requireValidBody(),
 			[requireQueryParams.name]: requireQueryParams("fundraiserId"),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			}),
 			[requireBodyParams.name]: requireBodyParams(
 				"milestoneTitle", "milestoneAmount"

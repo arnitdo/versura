@@ -9,7 +9,7 @@ import {
 	requireValidBody
 } from "@/utils/customMiddleware";
 import {MediaCallbackBody} from "@/types/apiRequests";
-import {NON_NEGATIVE} from "@/utils/validatorUtils";
+import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
 import {S3ObjectMethods} from "@/types/apiTypedefs";
 import {db} from "@/utils/db";
 
@@ -33,7 +33,9 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 						return true
 					}
 					const {rows} = await dbClient.query(
-						`SELECT 1 FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+						`SELECT 1
+                         FROM "internalS3BucketObjects"
+                         WHERE "objectKey" = $1`,
 						[objectKey]
 					)
 
@@ -43,7 +45,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 
 					return false
 				},
-				objectSizeBytes: NON_NEGATIVE,
+				objectSizeBytes: NON_ZERO_NON_NEGATIVE,
 				objectContentType: (contentType: string) => {
 					return contentType.startsWith("image") || contentType.startsWith("video")
 				}
@@ -61,23 +63,28 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 		switch (requestMethod) {
 			case "DELETE":
 				await dbClient.query(
-					`DELETE FROM "internalS3BucketObjects" WHERE "objectKey" = $1`,
+					`DELETE
+                     FROM "internalS3BucketObjects"
+                     WHERE "objectKey" = $1`,
 					[objectKey]
 				)
 				await dbClient.query(
-					`UPDATE "internalS3Buckets" SET "bucketObjectCount" = "bucketObjectCount" - 1
-					WHERE "bucketName" = $1`,
+					`UPDATE "internalS3Buckets"
+                     SET "bucketObjectCount" = "bucketObjectCount" - 1
+                     WHERE "bucketName" = $1`,
 					[process.env.AWS_S3_BUCKET!]
 				)
 				break;
 			case "PUT":
 				await dbClient.query(
-					`INSERT INTO "internalS3BucketObjects" VALUES ($1, $2, $3, $4)`,
+					`INSERT INTO "internalS3BucketObjects"
+                     VALUES ($1, $2, $3, $4)`,
 					[process.env.AWS_S3_BUCKET!, objectKey, objectSizeBytes, objectContentType]
 				)
 				await dbClient.query(
-					`UPDATE "internalS3Buckets" SET "bucketObjectCount" = "bucketObjectCount" + 1
-					WHERE "bucketName" = $1`,
+					`UPDATE "internalS3Buckets"
+                     SET "bucketObjectCount" = "bucketObjectCount" + 1
+                     WHERE "bucketName" = $1`,
 					[process.env.AWS_S3_BUCKET!]
 				)
 				break;

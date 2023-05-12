@@ -29,7 +29,7 @@ export default async function donateToFundraiser(req: CustomApiRequest<Fundraise
 				"fundraiserId"
 			),
 			[requireQueryParamValidators.name]: requireQueryParamValidators({
-				fundraiserId: VALID_FUNDRAISER_ID_CHECK(dbClient)
+				fundraiserId: VALID_FUNDRAISER_ID_CHECK
 			}),
 			[requireBodyParams.name]: requireBodyParams(
 				"donatedAmount"
