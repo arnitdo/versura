@@ -181,6 +181,7 @@ const SAMPLE_DASHBOARD_DATA: AdminDashboardProps = {
 	}
 };
 
+// @ts-ignore
 export const getServerSideProps: GetServerSideProps<
 	AdminDashboardProps
 	// @ts-ignore
@@ -204,6 +205,9 @@ export const getServerSideProps: GetServerSideProps<
 			}
 		}
 	}
+
+	const parsedFundraiserPage = Number.parseInt(fundraiserPage)
+	const parsedWithdrawalPage = Number.parseInt(withdrawalPage)
 
 	const requestStatuses: boolean[] = []
 	const requestErrors: any[] = []
@@ -283,11 +287,30 @@ export const getServerSideProps: GetServerSideProps<
 		}
 	}
 
+	const requestDataAcc = [dashboardResponseData!, fundraiserResponseData!, withdrawalResponseData!]
+
+	const dataRequestsSuccess = requestDataAcc.map((responseData) => {
+		const {requestStatus} = responseData
+		return requestStatus === "SUCCESS"
+	})
+
+	if (!dataRequestsSuccess) {
+		return {
+			redirect: "/500"
+		}
+	}
+
+	const {pendingFundraisers} = fundraiserResponseData!
+	const {pendingWithdrawals} = withdrawalResponseData!
+	const {dashboardData} = dashboardResponseData!
+
 	return {
 		props: {
-			...SAMPLE_DASHBOARD_DATA,
-			fundraiserPage: fundraiserPage,
-			withdrawalPage: withdrawalPage
+			dashboardData,
+			pendingWithdrawals,
+			pendingFundraisers,
+			fundraiserPage: parsedFundraiserPage,
+			withdrawalPage: parsedWithdrawalPage
 		}
 	}
 };
