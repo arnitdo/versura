@@ -150,7 +150,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			`SELECT "donorAddress", "donatedAmount", "donationTimestamp", "transactionHash"
              FROM "fundraiserDonations"
              WHERE "donatedFundraiser" = $1
-             ORDER BY "donatedAmount" DESC`,
+             ORDER BY "donatedAmount" DESC
+             LIMIT 10`,
 			[fundraiserId]
 		)
 
