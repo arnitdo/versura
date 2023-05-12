@@ -146,6 +146,8 @@ export {
 	CreateFundraiserMilestoneResponse,
 	CreateFundraiserUpdateResponse,
 	FundraiserMilestone,
+	FundraiserDonation,
+	FundraiserUpdate,
 	AdminGetFundraisersResponse,
 	AdminGetWithdrawalResponse,
 	AdminGetDashboardResponse,
