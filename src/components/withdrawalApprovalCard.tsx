@@ -88,7 +88,9 @@ export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): 
 					"success"
 				)
 			}
-			navRouter.reload()
+			setTimeout(() => {
+				navRouter.reload()
+			}, 5000)
 			return
 		}
 	}, [addToast, navRouter, requestId])
