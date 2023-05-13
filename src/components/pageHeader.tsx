@@ -17,7 +17,7 @@ export default function PageHeader(): JSX.Element {
 	const LOGOUT_REDIRECT_TIMER_S = 5 as const
 
 	const authCtx = useContext<AuthContextType>(AuthContext)
-	const {isAuthenticated, metamaskAddress} = authCtx
+	const {isAuthenticated, metamaskAddress, userRole} = authCtx
 	const navRouter = useRouter()
 	const {pathname, query} = navRouter
 	const {returnTo} = query
@@ -159,6 +159,20 @@ export default function PageHeader(): JSX.Element {
 						<EuiHeaderLinks
 							popoverBreakpoints={"none"}
 						>
+							{
+								userRole === "ADMIN" ? (
+									<EuiHeaderLink>
+										<Link
+											href={`/admin/dashboard`}
+											style={{
+												color: LINK_TEXT_COLOR_OVERRIDE
+											}}
+										>
+											Dashboard
+										</Link>
+									</EuiHeaderLink>
+								) : null
+							}
 							<EuiHeaderLink
 								onClick={attemptUserLogout}
 							>

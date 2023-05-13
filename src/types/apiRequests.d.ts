@@ -93,11 +93,11 @@ interface FundraiserWithdrawalRequestParams {
 	fundraiserId: string
 }
 
-interface FundraiserWithdrawalUpdateBody {
+interface AdminUpdateWithdrawalBody {
 	withdrawalStatus: WithdrawalStatus
 }
 
-interface FundraiserWithdrawalUpdateParams {
+interface AdminUpdateWithdrawalParams {
 	withdrawalId: string
 }
 
@@ -141,8 +141,8 @@ export {
 	FundraiserDonationParams,
 	FundraiserWithdrawalRequestParams,
 	FundraiserWithdrawalRequestBody,
-	FundraiserWithdrawalUpdateBody,
-	FundraiserWithdrawalUpdateParams,
+	AdminUpdateWithdrawalBody,
+	AdminUpdateWithdrawalParams,
 	AdminGetWithdrawalsParams,
 	AdminGetFundraisersParams,
 	AdminUpdateFundraiserParams,

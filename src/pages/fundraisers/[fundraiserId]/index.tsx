@@ -1,4 +1,4 @@
-import { GetServerSideProps } from "next";
+import {GetServerSideProps} from "next";
 import {
 	FundraiserDonationBody,
 	FundraiserDonationParams,
@@ -6,8 +6,8 @@ import {
 	FundraiserWithdrawalRequestParams,
 	GetFundraiserRequestParams,
 } from "@/types/apiRequests";
-import { APIResponse, GetFundraiserResponse } from "@/types/apiResponses";
-import { NON_ZERO_NON_NEGATIVE } from "@/utils/validatorUtils";
+import {APIResponse, FundraiserDonation, GetFundraiserResponse} from "@/types/apiResponses";
+import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
 import {
 	calculateServiceFeeWeiForAmount,
 	gasAmountMap,
@@ -16,8 +16,10 @@ import {
 	requireBasicObjectValidation,
 	useValueScale,
 } from "@/utils/common";
-import { makeAPIRequest } from "@/utils/apiHandler";
+import {makeAPIRequest} from "@/utils/apiHandler";
 import {
+	EuiBasicTable,
+	EuiBasicTableColumn,
 	EuiButton,
 	EuiCheckbox,
 	EuiFieldText,
@@ -37,9 +39,9 @@ import {
 } from "@elastic/eui";
 import Image from "next/image";
 
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { AuthContext } from "@/pages/_app";
-import { useToastList } from "@/utils/toastUtils";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import {AuthContext} from "@/pages/_app";
+import {useToastList} from "@/utils/toastUtils";
 import Link from "next/link";
 import Head from "next/head";
 
@@ -74,9 +76,9 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 		};
 	}
 
-	const { fundraiserId } = ctx.params;
+	const {fundraiserId} = ctx.params;
 
-	const { isSuccess, isError, code, data, error } = await makeAPIRequest<
+	const {isSuccess, isError, code, data, error} = await makeAPIRequest<
 		GetFundraiserResponse,
 		{},
 		GetFundraiserRequestParams
@@ -101,7 +103,7 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 	}
 
 	if (isSuccess) {
-		const { requestStatus } = data!;
+		const {requestStatus} = data!;
 		if (code === 500 && requestStatus === "ERR_INTERNAL_ERROR") {
 			return {
 				redirect: {
@@ -181,7 +183,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 	const [raisedAmount, setRaisedAmount] = useState<number>(fundraiserRaisedAmount);
 	const [contribCount, setContribCount] = useState<number>(fundraiserContributorCount);
 
-	const { toasts, addToast, dismissToast } = useToastList({
+	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
 			return `fundraiser-page-${toastCount}`;
 		},
@@ -245,7 +247,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 				params: [requestParams],
 			});
 
-			const { isSuccess, isError, code, data, error } = await makeAPIRequest<
+			const {isSuccess, isError, code, data, error} = await makeAPIRequest<
 				APIResponse,
 				FundraiserDonationBody,
 				FundraiserDonationParams
@@ -272,7 +274,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			}
 
 			if (isSuccess && data) {
-				const { requestStatus } = data;
+				const {requestStatus} = data;
 				if (requestStatus === "SUCCESS") {
 					setRaisedAmount((prevAmount) => {
 						return prevAmount + donationAmount;
@@ -337,7 +339,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 
 		setWithdrawalRequestActive(true);
-		const { isSuccess, isError, code, data, error } = await makeAPIRequest<
+		const {isSuccess, isError, code, data, error} = await makeAPIRequest<
 			APIResponse,
 			FundraiserWithdrawalRequestBody,
 			FundraiserWithdrawalRequestParams
@@ -359,7 +361,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 
 		if (isSuccess && data) {
-			const { requestStatus, invalidParams } = data;
+			const {requestStatus, invalidParams} = data;
 			if (requestStatus === "SUCCESS") {
 				addToast(
 					"Your request was successfully registered",
@@ -390,16 +392,53 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		prefix: "fundraiser-checkbox",
 	});
 
+	const columns: Array<EuiBasicTableColumn<FundraiserDonation>> = [
+		{
+			field: "donorAddress",
+			name: "Donor Address",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donorAddress}</span>,
+				header: false,
+				truncateText: false,
+			},
+		},
+		{
+			field: "donatedAmount",
+			name: "Donated Amount",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donatedAmount} {fundraiserToken}</span>,
+				truncateText: false
+			},
+		},
+		{
+			field: "transactionHash",
+			name: "Transaction Hash",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.transactionHash}</span>,
+				truncateText: false
+			},
+		},
+		{
+			field: "donationTimestamp",
+			name: "Donation Timestamp",
+			dataType: "date",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donationTimestamp}</span>,
+				truncateText: false
+			},
+		},
+	];
+
 	return (
 		<>
 			<Head>
 				<title>{fundraiserTitle}</title>
-				<meta name="description" content={fundraiserDescription} />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<link rel="icon" href="/favicon.ico" />
+				<meta name="description" content={fundraiserDescription}/>
+				<meta name="viewport" content="width=device-width, initial-scale=1"/>
+				<link rel="icon" href="/favicon.ico"/>
 			</Head>
 			<EuiFlexGroup direction={"column"} alignItems={"center"}>
-				<EuiSpacer />
+				<EuiSpacer/>
 				<EuiPanel
 					style={{
 						width: "90vw",
@@ -437,7 +476,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 											<Image
 												src={`https://gravatar.com/avatar/${fundraiserCreator.slice(
 													2
-												)}?d=retro&f=y&s=240`}
+												)}?d=retro&f=y&s=180`}
 												alt={fundraiserCreator}
 												width={180}
 												height={180}
@@ -464,7 +503,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 												</Link>
 											</EuiLink>
 										</EuiFlexItem>
-										<EuiHorizontalRule margin={"none"} />
+										<EuiHorizontalRule margin={"none"}/>
 										<EuiFlexItem>
 											<EuiFlexGroup>
 												<EuiFlexItem>
@@ -514,7 +553,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 									</EuiFlexGroup>
 								</EuiPanel>
 							</EuiFlexItem>
-							{fundraiserStatus === "OPEN" ? (
+							{fundraiserStatus !== "IN_QUEUE" ? (
 								<>
 									{authCtx.metamaskAddress === fundraiserCreator ? (
 										<EuiFlexItem>
@@ -567,7 +606,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 																	onClick={createWithdrawalRequest}
 																>
 																	{withdrawalRequestActive ? (
-																		<EuiLoadingSpinner />
+																		<EuiLoadingSpinner/>
 																	) : (
 																		`Create Request`
 																	)}
@@ -587,7 +626,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															<h1>Fund this Campaign</h1>
 														</EuiText>
 													</EuiFlexItem>
-													<EuiHorizontalRule margin={"none"} />
+													<EuiHorizontalRule margin={"none"}/>
 													<EuiFlexItem>
 														<EuiForm fullWidth>
 															<EuiFormRow
@@ -666,7 +705,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 																		}
 																	>
 																		{donationRequestActive ? (
-																			<EuiLoadingSpinner />
+																			<EuiLoadingSpinner/>
 																		) : (
 																			`Send ${fundraiserToken}`
 																		)}
@@ -693,8 +732,25 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 						</EuiFlexGroup>
 					</EuiFlexItem>
 				</EuiFlexGroup>
-				<EuiSpacer />
-				<EuiGlobalToastList dismissToast={dismissToast} toasts={toasts} toastLifeTimeMs={5000} />
+				{
+					fundraiserStatus !== "IN_QUEUE" ? (
+						<EuiFlexItem>
+							<EuiPanel style={{minWidth: "90vw"}}>
+								<EuiBasicTable
+									tableCaption={"Demo of EuiBasicTable"}
+									tableLayout={"auto"}
+									items={fundraiserDonations}
+									rowHeader="donorAddress"
+									columns={columns}
+								/>
+							</EuiPanel>
+						</EuiFlexItem>
+					) : (
+						null
+					)
+				}
+				<EuiSpacer/>
+				<EuiGlobalToastList dismissToast={dismissToast} toasts={toasts} toastLifeTimeMs={5000}/>
 			</EuiFlexGroup>
 		</>
 	);

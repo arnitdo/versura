@@ -43,27 +43,29 @@ export default async function getWithdrawals(req: CustomApiRequest<{}, AdminGetW
 
 		const {rows} = await dbClient.query<FundraiserWithdrawalRequests>(
 			`SELECT *
-             FROM "fundraiserWithdrawalRequests"
-             WHERE "requestStatus" = 'OPEN'
-             OFFSET $1 LIMIT 10`,
+			 FROM "fundraiserWithdrawalRequests"
+			 WHERE "requestStatus" = 'OPEN'
+			 OFFSET $1 LIMIT 10`,
 			[withdrawalOffset]
 		)
 
 		const mappedFeedRows = await Promise.all(
 			rows.map(async (withdrawalRow) => {
 				const {targetFundraiser} = withdrawalRow
-				const {rows} = await dbClient.query<Pick<FundRaisers, "fundraiserTitle">>(
-					`SELECT "fundraiserTitle"
-                     FROM "fundRaisers"
-                     WHERE "fundraiserId" = $1`,
+				const {rows} = await dbClient.query<Pick<FundRaisers, "fundraiserTitle" | "fundraiserRaisedAmount" | "fundraiserTarget">>(
+					`SELECT "fundraiserTitle", "fundraiserRaisedAmount", "fundraiserTarget"
+					 FROM "fundRaisers"
+					 WHERE "fundraiserId" = $1`,
 					[targetFundraiser]
 				)
-				const {fundraiserTitle} = rows[0]
+				const {fundraiserTitle, fundraiserTarget, fundraiserRaisedAmount} = rows[0]
 				return {
 					...withdrawalRow,
 					targetFundraiser: {
 						fundraiserId: targetFundraiser,
-						fundraiserTitle: fundraiserTitle
+						fundraiserTitle: fundraiserTitle,
+						fundraiserRaisedAmount: fundraiserRaisedAmount,
+						fundraiserTarget: fundraiserTarget
 					}
 				}
 			})

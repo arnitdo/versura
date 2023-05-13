@@ -11,7 +11,7 @@ import {
 	requireQueryParamValidators,
 	requireValidBody
 } from "@/utils/customMiddleware";
-import {FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams} from "@/types/apiRequests";
+import {AdminUpdateWithdrawalBody, AdminUpdateWithdrawalParams} from "@/types/apiRequests";
 import {IN_ARR} from "@/utils/validatorUtils";
 import {WithdrawalStatus} from "@/types/apiTypedefs";
 import {db} from "@/utils/db";
@@ -20,7 +20,7 @@ import {versuraAccount, versuraAddress, web3Client, web3Eth} from "@/utils/web3P
 import {calculateServiceFeeWeiForAmount, gasAmountMap} from "@/utils/common";
 
 
-export default async function updateWithdrawalStatus(req: CustomApiRequest<FundraiserWithdrawalUpdateBody, FundraiserWithdrawalUpdateParams>, res: CustomApiResponse) {
+export default async function updateWithdrawalStatus(req: CustomApiRequest<AdminUpdateWithdrawalBody, AdminUpdateWithdrawalParams>, res: CustomApiResponse) {
 	const dbClient = await db.connect()
 
 	const middlewareStatus = await requireMiddlewareChecks(
@@ -37,9 +37,9 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 				withdrawalId: async (withdrawalId) => {
 					const {rows} = await dbClient.query(
 						`SELECT 1
-                         FROM "fundraiserWithdrawalRequests"
-                         WHERE "requestId" = $1
-                           AND "requestStatus" = 'OPEN'`,
+						 FROM "fundraiserWithdrawalRequests"
+						 WHERE "requestId" = $1
+						   AND "requestStatus" = 'OPEN'`,
 						[withdrawalId]
 					)
 
@@ -71,8 +71,8 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 
 		const {rows: dbRows} = await dbClient.query<FundraiserWithdrawalRequests>(
 			`SELECT *
-             FROM "fundraiserWithdrawalRequests"
-             WHERE "requestId" = $1`,
+			 FROM "fundraiserWithdrawalRequests"
+			 WHERE "requestId" = $1`,
 			[withdrawalId]
 		)
 
@@ -127,16 +127,16 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 
 				await dbClient.query(
 					`UPDATE "fundraiserWithdrawalRequests"
-                     SET "requestStatus" = 'APPROVED'
-                     WHERE "requestId" = $1
-                       AND "targetFundraiser" = $2`,
+					 SET "requestStatus" = 'APPROVED'
+					 WHERE "requestId" = $1
+					   AND "targetFundraiser" = $2`,
 					[withdrawalId, fundraiserId]
 				)
 
 				await dbClient.query(
 					`UPDATE "fundRaisers"
-                     SET "fundraiserWithdrawnAmount" = "fundraiserWithdrawnAmount" + $1
-                     WHERE "fundraiserId" = $2`,
+					 SET "fundraiserWithdrawnAmount" = "fundraiserWithdrawnAmount" + $1
+					 WHERE "fundraiserId" = $2`,
 					[outgoingAmountEth, fundraiserId]
 				)
 
@@ -149,11 +149,16 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Fundr
 			case "REJECTED": {
 				await dbClient.query(
 					`UPDATE "fundraiserWithdrawalRequests"
-                     SET "requestStatus" = 'REJECTED'
-                     WHERE "requestId" = $1
-                       AND "targetFundraiser" = $2`,
+					 SET "requestStatus" = 'REJECTED'
+					 WHERE "requestId" = $1
+					   AND "targetFundraiser" = $2`,
 					[withdrawalId, fundraiserId]
 				)
+
+				res.status(200).json({
+					requestStatus: "SUCCESS"
+				})
+
 				dbClient.release()
 				return
 			}

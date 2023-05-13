@@ -114,7 +114,9 @@ interface AdminGetWithdrawalResponse extends APIResponse {
 		Omit<FundraiserWithdrawalRequests, "targetFundraiser"> & {
 		targetFundraiser: {
 			fundraiserId: number,
-			fundraiserTitle: string
+			fundraiserTitle: string,
+			fundraiserRaisedAmount: number,
+			fundraiserTarget: number
 		}
 	}
 		)[]

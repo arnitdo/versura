@@ -95,7 +95,7 @@ CREATE TABLE "fundraiserDonations"
     CONSTRAINT "fk_fundraiserDonations_donatedFundraiser_fundRaisers_fundId"
         FOREIGN KEY ("donatedFundraiser") REFERENCES "fundRaisers" ("fundraiserId"),
 
-    CONSTRAINT "fk_fundraiserDonations_donatorAddress_authUsers_walletAddress"
+    CONSTRAINT "fk_fundraiserDonations_donorAddress_authUsers_walletAddress"
         FOREIGN KEY ("donorAddress") REFERENCES "authUsers" ("walletAddress")
 
 );

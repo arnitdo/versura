@@ -115,8 +115,12 @@ export default function CreateFundraiser(): JSX.Element {
 			})
 		}
 
+		const fundraiserImages = fundraiserMedia.filter((mediaFile) => {
+			return mediaFile.type.startsWith("image/")
+		})
+
 		// Require media before creating fundraisers
-		if (fundraiserMedia.length === 0) {
+		if (fundraiserMedia.length === 0 || fundraiserImages.length === 0) {
 			addToast(
 				"Please attach media to your campaign",
 				"Images will attract more contributors to your fundraiser",
