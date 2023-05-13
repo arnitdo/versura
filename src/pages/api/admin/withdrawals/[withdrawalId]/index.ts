@@ -123,7 +123,7 @@ export default async function updateWithdrawalStatus(req: CustomApiRequest<Admin
 					gas: web3Client.utils.fromWei(gasFee.toString(), "gwei")
 				})
 
-				await web3Eth.sendSignedTransaction(signedTransaction.rawTransaction!)
+				web3Eth.sendSignedTransaction(signedTransaction.rawTransaction!)
 
 				await dbClient.query(
 					`UPDATE "fundraiserWithdrawalRequests"
