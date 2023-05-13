@@ -430,6 +430,13 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 											/>
 										)
 									}
+									{Array(20 - pendingFundraisers.length).fill(0).map((elem, index) => {
+										return (
+											<EuiFlexItem key={`spacer-${index}`}>
+												<EuiSpacer/>
+											</EuiFlexItem>
+										)
+									})}
 								</EuiFlexGroup>
 							</EuiFlexItem>
 							<EuiFlexItem>

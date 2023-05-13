@@ -54,16 +54,17 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 	try {
 		const {fundraiserId} = req.query
 
-		const adminUserAccess = req.user?.userRole === "ADMIN"
+		const adminAccess = req.user?.userRole === "ADMIN"
 
 		const {rows: dbRows} = await db.query<FundRaisers>(
 			`SELECT *
-             FROM "fundRaisers"
-             WHERE "fundraiserId" = $1
-               AND ("fundraiserStatus" = 'OPEN'
-                 ${adminUserAccess ? `OR "fundraiserStatus" = 'IN_QUEUE')` : `)`}`,
+			 FROM "fundRaisers"
+			 WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
+
+		const reqUser = req.user?.walletAddress
+
 		if (dbRows.length === 0) {
 			res.status(404).json({
 				requestStatus: "ERR_NOT_FOUND",
@@ -72,12 +73,21 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 		}
 
 		const selectedFundraiser = dbRows[0]
-		const {fundraiserMediaObjectKeys} = selectedFundraiser
+		const {fundraiserMediaObjectKeys, fundraiserCreator, fundraiserStatus} = selectedFundraiser
+
+		if (!adminAccess && reqUser !== fundraiserCreator) {
+			if (fundraiserStatus !== "OPEN") {
+				res.status(404).json({
+					requestStatus: "ERR_NOT_FOUND",
+				})
+				return
+			}
+		}
 
 		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 			`SELECT "objectKey", "objectContentType"
-             FROM "internalS3BucketObjects"
-             WHERE "objectKey" = ANY ($1)`,
+			 FROM "internalS3BucketObjects"
+			 WHERE "objectKey" = ANY ($1)`,
 			[fundraiserMediaObjectKeys]
 		)
 
@@ -104,8 +114,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 		const {rows: dbMilestoneRows} = await dbClient.query<FundraiserMilestones>(
 			`SELECT *
-             FROM "fundraiserMilestones"
-             WHERE "milestoneFundraiserId" = $1`,
+			 FROM "fundraiserMilestones"
+			 WHERE "milestoneFundraiserId" = $1`,
 			[fundraiserId]
 		)
 
@@ -115,8 +125,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 					`SELECT "objectKey", "objectContentType"
-                     FROM "internalS3BucketObjects"
-                     WHERE "objectKey" = ANY ($1)`,
+					 FROM "internalS3BucketObjects"
+					 WHERE "objectKey" = ANY ($1)`,
 					[milestoneMediaObjectKeys]
 				)
 
@@ -154,8 +164,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 		const {rows: fundraiserUpdateRows} = await dbClient.query<FundraiserUpdates>(
 			`SELECT *
-             FROM "fundraiserUpdates"
-             WHERE "updateFundraiserId" = $1`,
+			 FROM "fundraiserUpdates"
+			 WHERE "updateFundraiserId" = $1`,
 			[fundraiserId]
 		)
 
@@ -165,8 +175,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
 					`SELECT "objectKey", "objectContentType"
-                     FROM "internalS3BucketObjects"
-                     WHERE "objectKey" = ANY ($1)`,
+					 FROM "internalS3BucketObjects"
+					 WHERE "objectKey" = ANY ($1)`,
 					[updateMediaObjectKeys]
 				)
 
@@ -201,10 +211,10 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 		const {rows: fundraiserDonationRows} = await dbClient.query<FundraiserDonations>(
 			`SELECT "donorAddress", "donatedAmount", "donationTimestamp", "transactionHash"
-             FROM "fundraiserDonations"
-             WHERE "donatedFundraiser" = $1
-             ORDER BY "donatedAmount" DESC
-             LIMIT 10`,
+			 FROM "fundraiserDonations"
+			 WHERE "donatedFundraiser" = $1
+			 ORDER BY "donatedAmount" DESC
+			 LIMIT 10`,
 			[fundraiserId]
 		)
 
