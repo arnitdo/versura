@@ -155,7 +155,7 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 		let mediaCallbackStatuses = await Promise.all(
 			mediaFiles.map(async (mediaFile, fileIdx) => {
 				const objectKey = objectKeyGenFn(mediaFile, fileIdx)
-				const {type: objectContentType, size: objectSizeBytes} = mediaFile
+				const {type: objectContentType, size: objectSizeBytes, name} = mediaFile
 				const {
 					isSuccess,
 					isError,
@@ -169,7 +169,8 @@ async function manageMedia(args: MediaManagementArgs): Promise<boolean[]> {
 						objectKey: objectKey,
 						requestMethod: mediaMethod,
 						objectContentType: objectContentType,
-						objectSizeBytes: objectSizeBytes
+						objectSizeBytes: objectSizeBytes,
+						objectName: name
 					}
 				})
 				if (isSuccess && data) {

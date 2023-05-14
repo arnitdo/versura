@@ -43,9 +43,9 @@ export default async function getPendingFundraisers(req: CustomApiRequest<{}, Ad
 
 		const {rows} = await dbClient.query<FundRaisers>(
 			`SELECT *
-             FROM "fundRaisers"
-             WHERE "fundraiserStatus" = 'IN_QUEUE'
-             OFFSET $1 LIMIT 10`,
+			 FROM "fundRaisers"
+			 WHERE "fundraiserStatus" = 'IN_QUEUE'
+			 OFFSET $1 LIMIT 10`,
 			[fundraiserPageOffset]
 		)
 
@@ -54,15 +54,15 @@ export default async function getPendingFundraisers(req: CustomApiRequest<{}, Ad
 				const {fundraiserMediaObjectKeys} = fundraiserRow
 				const fundraiserMedia = await Promise.all(
 					fundraiserMediaObjectKeys.map(async (objectKey) => {
-						const {rows: mediaRows} = await dbClient.query<Pick<S3BucketObjects, "objectContentType">>(
-							`SELECT "objectContentType"
-                             FROM "internalS3BucketObjects"
-                             WHERE "objectKey" = $1`,
+						const {rows: mediaRows} = await dbClient.query<Pick<S3BucketObjects, "objectContentType" | "objectName">>(
+							`SELECT "objectContentType", "objectName"
+							 FROM "internalS3BucketObjects"
+							 WHERE "objectKey" = $1`,
 							[objectKey]
 						)
 
 						const selectedRow = mediaRows[0]
-						const {objectContentType: mediaContentType} = selectedRow
+						const {objectContentType: mediaContentType, objectName} = selectedRow
 						const mediaURL = await getObjectUrl({
 							objectKey: objectKey,
 							requestMethod: "GET"
@@ -70,7 +70,8 @@ export default async function getPendingFundraisers(req: CustomApiRequest<{}, Ad
 
 						return {
 							mediaURL,
-							mediaContentType
+							mediaContentType,
+							mediaName: objectName
 						}
 					})
 				)

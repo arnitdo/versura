@@ -37,6 +37,7 @@ interface PresignedURLBody {
 
 interface MediaCallbackBody {
 	requestMethod: S3ObjectMethods,
+	objectName: string,
 	objectKey: string,
 	objectSizeBytes: number,
 	objectContentType: string

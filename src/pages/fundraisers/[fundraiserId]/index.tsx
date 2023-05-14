@@ -29,6 +29,8 @@ import {
 	EuiFormRow,
 	EuiGlobalToastList,
 	EuiHorizontalRule,
+	EuiIcon,
+	EuiImage,
 	EuiLink,
 	EuiLoadingSpinner,
 	EuiMarkdownFormat,
@@ -319,7 +321,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 
 	const [withdrawalRequestActive, setWithdrawalRequestActive] = useState<boolean>(false);
 
-	const maxWithdrawableAmount = raisedAmount - fundraiserWithdrawnAmount;
+	const maxWithdrawableAmount = ((raisedAmount * 1e8) - (fundraiserWithdrawnAmount * 1e8)) / 1e8;
 
 	useEffect(() => {
 		setWithdrawalAmount(maxWithdrawableAmount);
@@ -736,19 +738,114 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 					fundraiserStatus !== "IN_QUEUE" ? (
 						<EuiFlexItem>
 							<EuiPanel style={{minWidth: "90vw"}}>
-								<EuiBasicTable
-									tableCaption={"Demo of EuiBasicTable"}
-									tableLayout={"auto"}
-									items={fundraiserDonations}
-									rowHeader="donorAddress"
-									columns={columns}
-								/>
+								<EuiFlexGroup
+									direction={"column"}
+									gutterSize={"s"}
+								>
+									<EuiFlexItem>
+										<EuiText>
+											<h2>Recent Donations</h2>
+										</EuiText>
+									</EuiFlexItem>
+									<EuiHorizontalRule margin={"xs"}/>
+									<EuiFlexItem>
+										<EuiBasicTable
+											tableCaption={"Donations Table"}
+											tableLayout={"auto"}
+											items={fundraiserDonations}
+											rowHeader="donorAddress"
+											columns={columns}
+										/>
+									</EuiFlexItem>
+								</EuiFlexGroup>
 							</EuiPanel>
 						</EuiFlexItem>
 					) : (
 						null
 					)
 				}
+				<EuiFlexItem>
+					<EuiPanel
+						style={{
+							width: "90vw"
+						}}
+					>
+						<EuiFlexGroup
+							direction={"column"}
+							gutterSize={"s"}
+						>
+							<EuiFlexItem>
+								<EuiText>
+									<h2>Fundraiser Media</h2>
+								</EuiText>
+							</EuiFlexItem>
+							<EuiHorizontalRule margin={"xs"}/>
+							<EuiFlexItem>
+								<EuiFlexGroup
+									direction={"row"}
+									style={{
+										overflowX: "scroll"
+									}}
+									gutterSize={"s"}
+								>
+									{
+										fundraiserMedia.map((mediaObject, mediaIndex) => {
+											const {mediaContentType, mediaURL, mediaName} = mediaObject
+											if (mediaContentType.startsWith("image/")) {
+												return (
+													<EuiFlexItem key={mediaURL} grow={0} style={{
+														flexShrink: 0
+													}}>
+														<EuiPanel color={"subdued"}>
+															<Link href={mediaURL} target={"_blank"}>
+																<EuiImage
+																	src={mediaURL}
+																	alt={`Fundraiser Media ${mediaIndex}`}
+																	height={128}
+																/>
+															</Link>
+														</EuiPanel>
+													</EuiFlexItem>
+												)
+											} else {
+												return (
+													<EuiFlexItem key={mediaURL} grow={0} style={{
+														flexShrink: 0
+													}}>
+														<EuiPanel
+															color={"subdued"}
+															style={{
+																display: "flex"
+															}}
+														>
+															<EuiFlexGroup
+																direction={"column"}
+																justifyContent={"center"}
+																alignItems={"center"}
+															>
+																<EuiFlexItem>
+																	<EuiIcon type={"filebeatApp"} size={"xxl"}/>
+																</EuiFlexItem>
+																<EuiFlexItem grow={0}>
+																	<Link href={mediaURL} target={"_blank"}>
+																		<EuiText>
+																			<h5>{mediaName}</h5>
+																		</EuiText>
+																	</Link>
+																</EuiFlexItem>
+															</EuiFlexGroup>
+														</EuiPanel>
+
+													</EuiFlexItem>
+												)
+											}
+										})
+									}
+								</EuiFlexGroup>
+							</EuiFlexItem>
+						</EuiFlexGroup>
+					</EuiPanel>
+				</EuiFlexItem>
 				<EuiSpacer/>
 				<EuiGlobalToastList dismissToast={dismissToast} toasts={toasts} toastLifeTimeMs={5000}/>
 			</EuiFlexGroup>

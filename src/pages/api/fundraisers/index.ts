@@ -83,9 +83,9 @@ async function createFundraiser(req: CustomApiRequest<CreateFundraiserRequestBod
 
 		const dbCreateResponse = await dbClient.query<Pick<FundRaisers, "fundraiserId">>(
 			`INSERT INTO "fundRaisers"
-             VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT,
-                     DEFAULT)
-             RETURNING "fundraiserId"`,
+			 VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, NOW(), DEFAULT, DEFAULT, DEFAULT,
+					 DEFAULT)
+			 RETURNING "fundraiserId"`,
 			[walletAddress, fundraiserTitle, fundraiserDescription, fundraiserTarget, fundraiserToken, fundraiserMinDonationAmount]
 		)
 
@@ -142,10 +142,10 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 
 		const {rows: feedRows} = await dbClient.query<FundRaisers>(
 			`SELECT *
-             FROM "fundRaisers"
-             WHERE "fundraiserStatus" = 'OPEN'
-             ORDER BY "fundraiserCreatedOn" DESC
-             OFFSET $1 LIMIT $2`,
+			 FROM "fundRaisers"
+			 WHERE "fundraiserStatus" = 'OPEN'
+			 ORDER BY "fundraiserCreatedOn" DESC
+			 OFFSET $1 LIMIT $2`,
 			[feedPageOffset, FEED_PAGE_SIZE]
 		)
 
@@ -154,17 +154,20 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 				const {fundraiserMediaObjectKeys} = feedRow
 				const fundraiserMedia: GenericMedia[] = []
 
-				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-					`SELECT "objectKey", "objectContentType"
-                     FROM "internalS3BucketObjects"
-                     WHERE "objectKey" = ANY ($1)`,
+				const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType" | "objectName">>(
+					`SELECT "objectKey", "objectContentType", "objectName"
+					 FROM "internalS3BucketObjects"
+					 WHERE "objectKey" = ANY ($1)`,
 					[fundraiserMediaObjectKeys]
 				)
 
 				const objectKeyContentMap: { [objKey: string]: string } = {}
+				const objectKeyNameMap: { [objKey: string]: string } = {}
+
 				for (const objectContentTypeRow of objectContentTypeRows) {
-					const {objectKey, objectContentType} = objectContentTypeRow
+					const {objectKey, objectContentType, objectName} = objectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
+					objectKeyNameMap[objectKey] = objectName
 				}
 
 				for (const objectKey of fundraiserMediaObjectKeys) {
@@ -173,9 +176,11 @@ async function getFundraiserFeed(req: CustomApiRequest<any, GetFundraiserFeedReq
 						objectKey: objectKey
 					})
 					const mappedContentType = objectKeyContentMap[objectKey]
+					const mappedName = objectKeyNameMap[objectKey]
 					fundraiserMedia.push({
 						mediaURL: presignedURL,
-						mediaContentType: mappedContentType
+						mediaContentType: mappedContentType,
+						mediaName: mappedName
 					})
 				}
 

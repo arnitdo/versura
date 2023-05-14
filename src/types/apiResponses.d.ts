@@ -56,6 +56,7 @@ interface CreateFundraiserResponse extends APIResponse {
 }
 
 interface GenericMedia {
+	mediaName: string,
 	mediaURL: string,
 	mediaContentType: string
 }

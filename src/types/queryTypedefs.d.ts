@@ -36,6 +36,7 @@ export type FundraiserDonations = {
 
 export type S3BucketObjects = {
 	bucketName: string,
+	objectName: string,
 	objectKey: string,
 	objectSizeBytes: number,
 	objectContentType: string

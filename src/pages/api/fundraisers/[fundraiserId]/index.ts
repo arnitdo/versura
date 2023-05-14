@@ -84,18 +84,20 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			}
 		}
 
-		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-			`SELECT "objectKey", "objectContentType"
+		const {rows: objectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType" | "objectName">>(
+			`SELECT "objectKey", "objectContentType", "objectName"
 			 FROM "internalS3BucketObjects"
 			 WHERE "objectKey" = ANY ($1)`,
 			[fundraiserMediaObjectKeys]
 		)
 
 		const objectKeyContentMap: { [objKey: string]: string } = {}
+		const objectKeyNameMap: { [objKey: string]: string } = {}
 
 		for (const objectContentTypeRow of objectContentTypeRows) {
-			const {objectKey, objectContentType} = objectContentTypeRow
+			const {objectKey, objectContentType, objectName} = objectContentTypeRow
 			objectKeyContentMap[objectKey] = objectContentType
+			objectKeyNameMap[objectKey] = objectName
 		}
 
 		const fundraiserMedia: GenericMedia[] = []
@@ -106,9 +108,11 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 				objectKey: objectKey
 			})
 			const mappedContentType = objectKeyContentMap[objectKey]
+			const mappedName = objectKeyNameMap[objectKey]
 			fundraiserMedia.push({
 				mediaURL: presignedURL,
-				mediaContentType: mappedContentType
+				mediaContentType: mappedContentType,
+				mediaName: mappedName
 			})
 		}
 
@@ -123,16 +127,17 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			dbMilestoneRows.map(async (milestoneRow) => {
 				const {milestoneMediaObjectKeys} = milestoneRow
 
-				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-					`SELECT "objectKey", "objectContentType"
+				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType" | "objectName">>(
+					`SELECT "objectKey", "objectContentType", "objectName"
 					 FROM "internalS3BucketObjects"
 					 WHERE "objectKey" = ANY ($1)`,
 					[milestoneMediaObjectKeys]
 				)
 
 				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
-					const {objectKey, objectContentType} = mediaObjectContentTypeRow
+					const {objectKey, objectContentType, objectName} = mediaObjectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
+					objectKeyNameMap[objectKey] = objectName
 				}
 
 				const milestoneMedia: GenericMedia[] = await Promise.all(
@@ -143,9 +148,11 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 						})
 
 						const mappedContentType = objectKeyContentMap[objectKey]
+						const mappedName = objectKeyNameMap[objectKey]
 						return {
 							mediaURL: presignedUrl,
-							mediaContentType: mappedContentType
+							mediaContentType: mappedContentType,
+							mediaName: mappedName
 						}
 					})
 				)
@@ -173,16 +180,17 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 			fundraiserUpdateRows.map(async (updateRow) => {
 				const {updateMediaObjectKeys} = updateRow
 
-				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType">>(
-					`SELECT "objectKey", "objectContentType"
+				const {rows: mediaObjectContentTypeRows} = await dbClient.query<Pick<S3BucketObjects, "objectKey" | "objectContentType" | "objectName">>(
+					`SELECT "objectKey", "objectContentType", "objectName"
 					 FROM "internalS3BucketObjects"
 					 WHERE "objectKey" = ANY ($1)`,
 					[updateMediaObjectKeys]
 				)
 
 				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
-					const {objectKey, objectContentType} = mediaObjectContentTypeRow
+					const {objectKey, objectContentType, objectName} = mediaObjectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
+					objectKeyNameMap[objectName] = objectName
 				}
 
 				const updateMedia: GenericMedia[] = await Promise.all(
@@ -194,7 +202,8 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 
 						return {
 							mediaURL: objectUrl,
-							mediaContentType: objectKeyContentMap[objectKey]
+							mediaContentType: objectKeyContentMap[objectKey],
+							mediaName: objectKeyNameMap[objectKey]
 						}
 					})
 				)
