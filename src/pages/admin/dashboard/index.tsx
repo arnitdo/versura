@@ -183,7 +183,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 				<meta name="viewport" content="width=device-width, initial-scale=1"/>
 				<link rel="icon" href="/favicon.ico"/>
 			</Head>
-			<EuiPageTemplate.Section>
+			<EuiPageTemplate.Section color={"subdued"}>
 				<EuiFlexGroup direction={"column"}>
 					<EuiFlexItem>
 						<EuiFlexGroup>
