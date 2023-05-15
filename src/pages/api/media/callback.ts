@@ -57,7 +57,7 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 	}
 
 	try {
-		const {requestMethod, objectKey, objectSizeBytes, objectContentType} = req.body
+		const {requestMethod, objectKey, objectSizeBytes, objectContentType, objectName} = req.body
 
 		switch (requestMethod) {
 			case "DELETE":
@@ -77,8 +77,8 @@ export default async function mediaCallback(req: CustomApiRequest<MediaCallbackB
 			case "PUT":
 				await dbClient.query(
 					`INSERT INTO "internalS3BucketObjects"
-					 VALUES ($1, $2, $3, $4)`,
-					[process.env.AWS_S3_BUCKET!, objectKey, objectSizeBytes, objectContentType]
+					 VALUES ($1, $2, $3, $4, $5)`,
+					[process.env.AWS_S3_BUCKET!, objectKey, objectSizeBytes, objectContentType, objectName]
 				)
 				await dbClient.query(
 					`UPDATE "internalS3Buckets"

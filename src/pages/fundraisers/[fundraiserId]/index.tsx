@@ -1,5 +1,7 @@
 import {GetServerSideProps} from "next";
 import {
+	AddFundraiserMediaBody,
+	AddFundraiserMediaParams,
 	FundraiserDonationBody,
 	FundraiserDonationParams,
 	FundraiserWithdrawalRequestBody,
@@ -13,6 +15,7 @@ import {
 	gasAmountMap,
 	gasTokenMap,
 	LINK_TEXT_COLOR_OVERRIDE,
+	manageMedia,
 	requireBasicObjectValidation,
 	useValueScale,
 } from "@/utils/common";
@@ -23,6 +26,7 @@ import {
 	EuiButton,
 	EuiCheckbox,
 	EuiFieldText,
+	EuiFilePicker,
 	EuiFlexGroup,
 	EuiFlexItem,
 	EuiForm,
@@ -41,11 +45,12 @@ import {
 } from "@elastic/eui";
 import Image from "next/image";
 
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import {AuthContext} from "@/pages/_app";
 import {useToastList} from "@/utils/toastUtils";
 import Link from "next/link";
 import Head from "next/head";
+import {useRouter} from "next/router";
 
 type FundraiserPageProps = GetFundraiserResponse["fundraiserData"];
 
@@ -148,6 +153,8 @@ export const getServerSideProps: GetServerSideProps<FundraiserPageProps, GetFund
 export default function FundraiserPage(props: FundraiserPageProps): JSX.Element {
 	const authCtx = useContext(AuthContext);
 
+	const navRouter = useRouter();
+
 	const {
 		fundraiserId,
 		fundraiserTarget,
@@ -202,12 +209,66 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		scaledValues: progressStatusColors,
 	});
 	const fundraiserPercentageInt = fundraiserCompletionPercentage.toFixed(0);
-
 	const calculatedServiceFeeWei = calculateServiceFeeWeiForAmount(donationAmount, fundraiserToken);
-
 	const calculatedServiceFeeEth = calculatedServiceFeeWei * 1e-18;
-
 	const finalAmountEth = donationAmount + calculatedServiceFeeEth;
+
+	const [withdrawalAmount, setWithdrawalAmount] = useState(raisedAmount);
+	const [withdrawalInvalid, setWithdrawalInvalid] = useState<boolean>(false);
+	const [withdrawalRequestActive, setWithdrawalRequestActive] = useState<boolean>(false);
+	const maxWithdrawableAmount = ((raisedAmount * 1e8) - (fundraiserWithdrawnAmount * 1e8)) / 1e8;
+
+
+	const [fileUploadInProgress, setFileUploadInProgress] = useState(false);
+	const filePickerRef = useRef();
+
+	useEffect(() => {
+		setWithdrawalAmount(maxWithdrawableAmount);
+		if (maxWithdrawableAmount == 0) {
+			setWithdrawalInvalid(true);
+		}
+	}, [raisedAmount]);
+
+	const columns: Array<EuiBasicTableColumn<FundraiserDonation>> = [
+		{
+			field: "donorAddress",
+			name: "Donor Address",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donorAddress}</span>,
+				header: false,
+				truncateText: false,
+			},
+		},
+		{
+			field: "donatedAmount",
+			name: "Donated Amount",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donatedAmount} {fundraiserToken}</span>,
+				truncateText: false
+			},
+		},
+		{
+			field: "transactionHash",
+			name: "Transaction Hash",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.transactionHash}</span>,
+				truncateText: false
+			},
+		},
+		{
+			field: "donationTimestamp",
+			name: "Donation Timestamp",
+			dataType: "date",
+			mobileOptions: {
+				render: (donations: FundraiserDonation) => <span>{donations.donationTimestamp}</span>,
+				truncateText: false
+			},
+		},
+	];
+
+	const checkboxId = useGeneratedHtmlId({
+		prefix: "fundraiser-checkbox",
+	});
 
 	const sendFundraiserDonation = useCallback(async () => {
 		if (!authCtx.isAuthenticated) {
@@ -316,20 +377,6 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 	}, [donationAmount, gasAmountWei, calculatedServiceFeeWei, finalAmountEth, authCtx, conditionsAccepted]);
 
-	const [withdrawalAmount, setWithdrawalAmount] = useState(raisedAmount);
-	const [withdrawalInvalid, setWithdrawalInvalid] = useState<boolean>(false);
-
-	const [withdrawalRequestActive, setWithdrawalRequestActive] = useState<boolean>(false);
-
-	const maxWithdrawableAmount = ((raisedAmount * 1e8) - (fundraiserWithdrawnAmount * 1e8)) / 1e8;
-
-	useEffect(() => {
-		setWithdrawalAmount(maxWithdrawableAmount);
-		if (maxWithdrawableAmount == 0) {
-			setWithdrawalInvalid(true);
-		}
-	}, [raisedAmount]);
-
 	const createWithdrawalRequest = useCallback(async () => {
 		if (withdrawalInvalid) {
 			addToast(
@@ -390,46 +437,83 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		}
 	}, [withdrawalAmount, withdrawalInvalid]);
 
-	const checkboxId = useGeneratedHtmlId({
-		prefix: "fundraiser-checkbox",
-	});
+	const uploadAddedMedia = useCallback(async (mediaFiles: FileList | null) => {
+		if (mediaFiles === null) {
+			return;
+		}
 
-	const columns: Array<EuiBasicTableColumn<FundraiserDonation>> = [
-		{
-			field: "donorAddress",
-			name: "Donor Address",
-			mobileOptions: {
-				render: (donations: FundraiserDonation) => <span>{donations.donorAddress}</span>,
-				header: false,
-				truncateText: false,
-			},
-		},
-		{
-			field: "donatedAmount",
-			name: "Donated Amount",
-			mobileOptions: {
-				render: (donations: FundraiserDonation) => <span>{donations.donatedAmount} {fundraiserToken}</span>,
-				truncateText: false
-			},
-		},
-		{
-			field: "transactionHash",
-			name: "Transaction Hash",
-			mobileOptions: {
-				render: (donations: FundraiserDonation) => <span>{donations.transactionHash}</span>,
-				truncateText: false
-			},
-		},
-		{
-			field: "donationTimestamp",
-			name: "Donation Timestamp",
-			dataType: "date",
-			mobileOptions: {
-				render: (donations: FundraiserDonation) => <span>{donations.donationTimestamp}</span>,
-				truncateText: false
-			},
-		},
-	];
+		const filesToUpload = Array.from(mediaFiles);
+		if (filesToUpload.length === 0) {
+			return;
+		}
+
+		const keygenFn = (mediaFile: File, fileIdx: number) => {
+			return `fundraisers/${fundraiserId}/media/${fundraiserMedia.length + fileIdx + 1}`;
+		};
+
+		const fileUploadStatuses = await manageMedia({
+			mediaFiles: filesToUpload,
+			mediaMethod: "PUT",
+			objectKeyGenFn: keygenFn
+		});
+
+		const accFileUploadStatus = fileUploadStatuses.reduce((prev, curr) => {
+			return prev && curr
+		}, true)
+
+		if (!accFileUploadStatus) {
+			addToast(
+				"An unexpected error occurred",
+				"We could not upload your file",
+				"danger"
+			);
+			return;
+		}
+
+		await Promise.all(
+			filesToUpload.map(async (fileObject, fileIdx) => {
+				const {
+					isSuccess,
+					isError,
+					error,
+					code,
+					data
+				} = await makeAPIRequest<APIResponse, AddFundraiserMediaBody, AddFundraiserMediaParams>({
+					endpointPath: "/api/fundraisers/:fundraiserId/media",
+					requestMethod: "POST",
+					queryParams: {
+						fundraiserId: fundraiserId.toString()
+					},
+					bodyParams: {
+						objectKey: keygenFn(fileObject, fileIdx)
+					}
+				});
+				if (isError && error) {
+					console.error(error);
+					addToast(
+						"An unexpected error occurred",
+						"We could not upload your file",
+						"danger"
+					);
+					return;
+				}
+				if (isSuccess && data) {
+					const {requestStatus} = data;
+					if (requestStatus === "SUCCESS") {
+						addToast(
+							"File(s) uploaded successfully",
+							"They are now publicly visible to all users",
+							"success"
+						);
+						setTimeout(() => {
+							navRouter.reload();
+						}, 5000);
+						return;
+					}
+				}
+			})
+		);
+	}, []);
 
 	return (
 		<>
@@ -786,11 +870,12 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 									style={{
 										overflowX: "scroll"
 									}}
+									className={"eui-scrollBar"}
 									gutterSize={"s"}
 								>
 									{
 										fundraiserMedia.map((mediaObject, mediaIndex) => {
-											const {mediaContentType, mediaURL, mediaName} = mediaObject
+											const {mediaContentType, mediaURL, mediaName} = mediaObject;
 											if (mediaContentType.startsWith("image/")) {
 												return (
 													<EuiFlexItem key={mediaURL} grow={0} style={{
@@ -806,7 +891,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 															</Link>
 														</EuiPanel>
 													</EuiFlexItem>
-												)
+												);
 											} else {
 												return (
 													<EuiFlexItem key={mediaURL} grow={0} style={{
@@ -820,10 +905,10 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 														>
 															<EuiFlexGroup
 																direction={"column"}
-																justifyContent={"center"}
+																justifyContent={"spaceEvenly"}
 																alignItems={"center"}
 															>
-																<EuiFlexItem>
+																<EuiFlexItem grow={0}>
 																	<EuiIcon type={"filebeatApp"} size={"xxl"}/>
 																</EuiFlexItem>
 																<EuiFlexItem grow={0}>
@@ -837,9 +922,38 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 														</EuiPanel>
 
 													</EuiFlexItem>
-												)
+												);
 											}
 										})
+									}
+									{
+										fundraiserCreator === authCtx.metamaskAddress ? (
+											<EuiFlexItem grow={0} style={{
+												flexShrink: 0
+											}}>
+												<EuiPanel
+													color={"subdued"}
+													style={{
+														display: "flex"
+													}}
+												>
+													<EuiFlexItem>
+														<EuiFilePicker
+															display={"large"}
+															onChange={(filesToUpload) => {
+																setFileUploadInProgress(true);
+																uploadAddedMedia(filesToUpload);
+															}}
+															// @ts-ignore
+															ref={filePickerRef}
+															disabled={fileUploadInProgress}
+														/>
+													</EuiFlexItem>
+												</EuiPanel>
+											</EuiFlexItem>
+										) : (
+											null
+										)
 									}
 								</EuiFlexGroup>
 							</EuiFlexItem>
