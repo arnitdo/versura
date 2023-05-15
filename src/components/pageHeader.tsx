@@ -90,7 +90,9 @@ export default function PageHeader(): JSX.Element {
 					userRole: undefined
 				})
 				setLogoutHandlerActive(false)
-				navRouter.reload()
+				setTimeout(() => {
+					navRouter.reload()
+				}, LOGOUT_REDIRECT_TIMER_S * 1000)
 				return
 			}
 		}
