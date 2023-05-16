@@ -3,7 +3,7 @@ import {Toast} from "@elastic/eui/src/components/toast/global_toast_list";
 
 type ToastType = "primary" | "success" | "warning" | "danger"
 
-type ToastUtils = {
+export type ToastUtils = {
 	toasts: Toast[]
 	addToast: (toastTitle: string, toastText: ReactChild, toastType?: ToastType) => void,
 	dismissToast: (dismissedToast: Toast) => void
