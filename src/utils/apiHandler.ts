@@ -45,6 +45,14 @@ async function makeAPIRequest<ResponseT extends APIResponse, RequestBodyT = {}, 
 					)
 					delete queryParams[queryParam]
 				}
+				if (endpointPath.includes(`[${queryParam}]`)) {
+					endpointPath = endpointPath.replace(
+						`[${queryParam}]`,
+						// @ts-ignore
+						queryParams[queryParam].toString()
+					)
+					delete queryParams[queryParam]
+				}
 			}
 			const queryParamsObj = new URLSearchParams()
 			for (const queryParamKey in queryParams) {

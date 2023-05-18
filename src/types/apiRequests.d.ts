@@ -59,6 +59,15 @@ interface DeleteFundraiserMediaParams {
 	fundraiserId: string
 }
 
+interface AddFundraiserMilestoneMediaBody {
+	objectKey: string
+}
+
+interface AddFundraiserMilestoneMediaParams {
+	fundraiserId: string,
+	milestoneId: string
+}
+
 interface AddFundraiserMilestoneBody {
 	milestoneTitle: string,
 	milestoneAmount: number
@@ -135,9 +144,10 @@ export {
 	DeleteFundraiserMediaParams,
 	AddFundraiserMilestoneBody,
 	AddFundraiserMilestoneParams,
+	AddFundraiserMilestoneMediaBody,
+	AddFundraiserMilestoneMediaParams,
 	AddFundraiserUpdateBody,
 	AddFundraiserUpdateParams,
-	AddMilestoneMediaContentBody,
 	FundraiserDonationBody,
 	FundraiserDonationParams,
 	FundraiserWithdrawalRequestParams,

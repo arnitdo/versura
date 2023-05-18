@@ -33,13 +33,13 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 				"milestoneTitle", "milestoneAmount"
 			),
 			[requireBodyValidators.name]: requireBodyValidators({
-				milestoneTitle: STRLEN_GT(16),
+				milestoneTitle: STRLEN_GT(12),
 				milestoneAmount: async (milestoneAmt: number) => {
 					const fundraiserId = req.query.fundraiserId
 					const {rows} = await dbClient.query<Pick<FundRaisers, "fundraiserTarget">>(
 						`SELECT "fundraiserTarget"
-                         FROM "fundRaisers"
-                         WHERE "fundraiserId" = $1`,
+						 FROM "fundRaisers"
+						 WHERE "fundraiserId" = $1`,
 						[fundraiserId]
 					)
 					const selectedFundraiser = rows[0]
@@ -47,6 +47,19 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 					if (fundraiserTarget < milestoneAmt) {
 						return false
 					}
+
+					const {rows: existingMilestoneRows} = await dbClient.query(
+						`SELECT 1
+						 FROM "fundraiserMilestones"
+						 WHERE "milestoneFundraiserId" = $1
+						   AND "milestoneAmount" = $2`,
+						[fundraiserId, milestoneAmt]
+					)
+
+					if (existingMilestoneRows.length) {
+						return false
+					}
+
 					return true
 				}
 			})
@@ -62,15 +75,15 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 
 		const {walletAddress, userRole} = req.user!
 
-		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
-			`SELECT "fundraiserCreator"
-             FROM "fundRaisers"
-             WHERE "fundraiserId" = $1`,
+		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator" | "fundraiserRaisedAmount">>(
+			`SELECT "fundraiserCreator", "fundraiserRaisedAmount"
+			 FROM "fundRaisers"
+			 WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
 
 		const currentFundraiser = currentFundraiserRows[0]
-		const {fundraiserCreator} = currentFundraiser
+		const {fundraiserCreator, fundraiserRaisedAmount} = currentFundraiser
 
 		if (userRole === "CLIENT" && walletAddress !== fundraiserCreator) {
 			res.status(403).json({
@@ -82,20 +95,32 @@ export default async function createMilestone(req: CustomApiRequest<AddFundraise
 
 		const {rows: createdMilestoneRows} = await dbClient.query<Pick<FundraiserMilestones, "milestoneId">>(
 			`INSERT INTO "fundraiserMilestones"
-             VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT, DEFAULT)
-             RETURNING "milestoneId"`,
+			 VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT, DEFAULT)
+			 RETURNING "milestoneId"`,
 			[fundraiserId, milestoneTitle, milestoneAmount]
-		)
-
-		await dbClient.query(
-			`UPDATE "fundRaisers"
-             SET "fundraiserMilestoneCount" = "fundraiserMilestoneCount" + 1
-             WHERE "fundraiserId" = $1`,
-			[fundraiserId]
 		)
 
 		const createdMilestoneRow = createdMilestoneRows[0]
 		const {milestoneId} = createdMilestoneRow
+
+		await dbClient.query(
+			`UPDATE "fundRaisers"
+			 SET "fundraiserMilestoneCount" = "fundraiserMilestoneCount" + 1
+			 WHERE "fundraiserId" = $1`,
+			[fundraiserId]
+		)
+
+		if (milestoneAmount <= fundraiserRaisedAmount) {
+			await dbClient.query(
+				`UPDATE "fundraiserMilestones"
+				 SET "milestoneStatus"    = TRUE,
+					 "milestoneReachedOn" = NOW()
+				 WHERE "milestoneId" = $1
+				   AND "milestoneFundraiserId" = $2`,
+				[milestoneId, fundraiserId]
+			)
+		}
+
 		res.status(200).json<CreateFundraiserMilestoneResponse>({
 			requestStatus: "SUCCESS",
 			milestoneId: milestoneId

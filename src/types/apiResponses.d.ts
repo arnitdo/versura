@@ -11,7 +11,7 @@ import {AdminDashboardData} from "@/pages/api/admin/dashboard";
 
 export type APIResponseCode =
 	0 | 200 | 400 | 403 | 404 | 405 | 500
-type APIResponseRequestStatus =
+export type APIResponseRequestStatus =
 // 2xx
 	"SUCCESS" |
 	// 3xx

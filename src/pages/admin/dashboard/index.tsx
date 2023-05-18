@@ -407,11 +407,9 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 																key={pendingFundraiser.fundraiserId}
 																grow={0}
 															>
-																<EuiPanel grow={false}>
-																	<FundraiserApprovalCard
-																		{...pendingFundraiser}
-																	/>
-																</EuiPanel>
+																<FundraiserApprovalCard
+																	{...pendingFundraiser}
+																/>
 															</EuiFlexItem>
 														)
 													})
@@ -457,11 +455,9 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 															<EuiFlexItem
 																key={pendingWithdrawal.requestId}
 															>
-																<EuiPanel grow={false}>
-																	<WithdrawalApprovalCard
-																		{...pendingWithdrawal}
-																	/>
-																</EuiPanel>
+																<WithdrawalApprovalCard
+																	{...pendingWithdrawal}
+																/>
 															</EuiFlexItem>
 														)
 													})

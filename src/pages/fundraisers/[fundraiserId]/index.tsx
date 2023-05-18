@@ -1,6 +1,6 @@
 import {GetServerSideProps} from "next";
 import {GetFundraiserRequestParams,} from "@/types/apiRequests";
-import {GetFundraiserResponse} from "@/types/apiResponses";
+import {GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {NON_ZERO_NON_NEGATIVE} from "@/utils/validatorUtils";
 import {LINK_TEXT_COLOR_OVERRIDE, requireBasicObjectValidation, useValueScale,} from "@/utils/common";
 import {makeAPIRequest} from "@/utils/apiHandler";
@@ -27,6 +27,7 @@ import {WithdrawalRequestCard} from "@/components/withdrawalRequestCard";
 import {FundraiserDonationTable} from "@/components/donationsTable";
 import {DonationCard} from "@/components/donationCard";
 import {FundraiserMedia} from "@/components/fundraiserMedia";
+import {FundraiserMilestones} from "@/components/fundraiserMilestones";
 
 export type FundraiserPageProps = GetFundraiserResponse["fundraiserData"];
 
@@ -174,6 +175,15 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 
 	const maxWithdrawableAmount = ((fundraiserRaisedAmount * 1e8) - (fundraiserWithdrawnAmount * 1e8)) / 1e8;
 
+	let selectedFundraiserMedia: GenericMedia | null = null
+	for (const mediaObject of fundraiserMedia) {
+		const {mediaContentType} = mediaObject
+		if (mediaContentType.startsWith("image/")) {
+			selectedFundraiserMedia = mediaObject
+			break
+		}
+	}
+
 	return (
 		<>
 			<Head>
@@ -184,146 +194,165 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 			</Head>
 			<EuiFlexGroup direction={"column"} alignItems={"center"}>
 				<EuiSpacer/>
-				<EuiPanel
-					style={{
-						width: "90vw",
-					}}
-				>
-					<EuiFlexGroup direction={"row"} alignItems={"center"}>
-						<EuiFlexItem>
-							<EuiText>
-								<h1>{fundraiserTitle}</h1>
-							</EuiText>
+				<EuiFlexItem>
+					<EuiPanel
+						style={{
+							width: "90vw",
+						}}
+					>
+						<EuiFlexGroup direction={"row"} alignItems={"center"}>
+							<EuiFlexItem>
+								<EuiText>
+									<h1>{fundraiserTitle}</h1>
+								</EuiText>
+							</EuiFlexItem>
+							<EuiFlexItem grow={0}>
+								<EuiText grow={false}>
+									<h4>{relativeFundraiserDate}</h4>
+								</EuiText>
+							</EuiFlexItem>
+						</EuiFlexGroup>
+					</EuiPanel>
+				</EuiFlexItem>
+				<EuiFlexItem>
+					<EuiFlexGroup
+						style={{
+							width: "90vw",
+						}}
+					>
+						<EuiFlexItem grow={7}>
+							<EuiPanel>
+								<EuiMarkdownFormat grow={true}>{fundraiserDescription}</EuiMarkdownFormat>
+							</EuiPanel>
 						</EuiFlexItem>
-						<EuiFlexItem grow={0}>
-							<EuiText grow={false}>
-								<h4>{relativeFundraiserDate}</h4>
-							</EuiText>
+						<EuiFlexItem grow={3}>
+							<EuiFlexGroup direction={"column"}>
+								<EuiFlexItem>
+									<EuiPanel>
+										<EuiFlexGroup direction={"column"} alignItems={"center"}>
+											<EuiFlexItem>
+												<Image
+													src={`https://gravatar.com/avatar/${fundraiserCreator.slice(
+														2
+													)}?d=retro&f=y&s=180`}
+													alt={fundraiserCreator}
+													width={180}
+													height={180}
+													style={{
+														borderRadius: 18,
+													}}
+												/>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiLink
+													style={{
+														textDecorationColor: LINK_TEXT_COLOR_OVERRIDE,
+													}}
+												>
+													<Link
+														href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
+														target={"_blank"}
+													>
+														<EuiText color={LINK_TEXT_COLOR_OVERRIDE}>
+															{fundraiserCreator.slice(0, 12) +
+																"..." +
+																fundraiserCreator.slice(-12)}
+														</EuiText>
+													</Link>
+												</EuiLink>
+											</EuiFlexItem>
+											<EuiHorizontalRule margin={"none"}/>
+											<EuiFlexItem>
+												<EuiFlexGroup>
+													<EuiFlexItem>
+														<EuiFlexGroup direction={"column"} gutterSize={"s"}>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"} color={selectedColor}>
+																	<h3>{fundraiserRaisedAmount}&nbsp;{fundraiserToken}</h3>
+																</EuiText>
+															</EuiFlexItem>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"}>
+																	<h5>Raised</h5>
+																</EuiText>
+															</EuiFlexItem>
+														</EuiFlexGroup>
+													</EuiFlexItem>
+													<EuiFlexItem>
+														<EuiFlexGroup direction={"column"} gutterSize={"s"}>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"}>
+																	<h3>{fundraiserTarget}&nbsp;{fundraiserToken}</h3>
+																</EuiText>
+															</EuiFlexItem>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"}>
+																	<h5>Target</h5>
+																</EuiText>
+															</EuiFlexItem>
+														</EuiFlexGroup>
+													</EuiFlexItem>
+													<EuiFlexItem>
+														<EuiFlexGroup direction={"column"} gutterSize={"s"}>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"}>
+																	<h3>{fundraiserContributorCount}</h3>
+																</EuiText>
+															</EuiFlexItem>
+															<EuiFlexItem>
+																<EuiText textAlign={"center"}>
+																	<h5>Contributors</h5>
+																</EuiText>
+															</EuiFlexItem>
+														</EuiFlexGroup>
+													</EuiFlexItem>
+												</EuiFlexGroup>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiPanel>
+								</EuiFlexItem>
+								{fundraiserStatus !== "IN_QUEUE" ? (
+									<>
+										{authCtx.metamaskAddress === fundraiserCreator ? (
+											<EuiFlexItem>
+												<WithdrawalRequestCard
+													fundraiserId={fundraiserId}
+													fundraiserToken={fundraiserToken}
+													maxWithdrawableAmount={maxWithdrawableAmount}
+													addToast={addToast}
+												/>
+											</EuiFlexItem>
+										) : (
+											<EuiFlexItem>
+												<DonationCard
+													fundraiserId={fundraiserId}
+													fundraiserToken={fundraiserToken}
+													fundraiserMinDonationAmount={fundraiserMinDonationAmount}
+													addToast={addToast}
+												/>
+											</EuiFlexItem>
+										)}
+									</>
+								) : null}
+							</EuiFlexGroup>
 						</EuiFlexItem>
 					</EuiFlexGroup>
-				</EuiPanel>
-				<EuiFlexGroup
-					style={{
-						width: "90vw",
-					}}
-				>
-					<EuiFlexItem grow={7}>
-						<EuiPanel>
-							<EuiMarkdownFormat grow={true}>{fundraiserDescription}</EuiMarkdownFormat>
-						</EuiPanel>
-					</EuiFlexItem>
-					<EuiFlexItem grow={3}>
-						<EuiFlexGroup direction={"column"}>
-							<EuiFlexItem>
-								<EuiPanel>
-									<EuiFlexGroup direction={"column"} alignItems={"center"}>
-										<EuiFlexItem>
-											<Image
-												src={`https://gravatar.com/avatar/${fundraiserCreator.slice(
-													2
-												)}?d=retro&f=y&s=180`}
-												alt={fundraiserCreator}
-												width={180}
-												height={180}
-												style={{
-													borderRadius: 18,
-												}}
-											/>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiLink
-												style={{
-													textDecorationColor: LINK_TEXT_COLOR_OVERRIDE,
-												}}
-											>
-												<Link
-													href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
-													target={"_blank"}
-												>
-													<EuiText color={LINK_TEXT_COLOR_OVERRIDE}>
-														{fundraiserCreator.slice(0, 12) +
-															"..." +
-															fundraiserCreator.slice(-12)}
-													</EuiText>
-												</Link>
-											</EuiLink>
-										</EuiFlexItem>
-										<EuiHorizontalRule margin={"none"}/>
-										<EuiFlexItem>
-											<EuiFlexGroup>
-												<EuiFlexItem>
-													<EuiFlexGroup direction={"column"} gutterSize={"s"}>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"} color={selectedColor}>
-																<h3>{fundraiserPercentageInt}%</h3>
-															</EuiText>
-														</EuiFlexItem>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"}>
-																<h5>Complete</h5>
-															</EuiText>
-														</EuiFlexItem>
-													</EuiFlexGroup>
-												</EuiFlexItem>
-												<EuiFlexItem>
-													<EuiFlexGroup direction={"column"} gutterSize={"s"}>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"}>
-																<h3>{`${fundraiserTarget} ${fundraiserToken}`}</h3>
-															</EuiText>
-														</EuiFlexItem>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"}>
-																<h5>Target</h5>
-															</EuiText>
-														</EuiFlexItem>
-													</EuiFlexGroup>
-												</EuiFlexItem>
-												<EuiFlexItem>
-													<EuiFlexGroup direction={"column"} gutterSize={"s"}>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"}>
-																<h3>{fundraiserContributorCount}</h3>
-															</EuiText>
-														</EuiFlexItem>
-														<EuiFlexItem>
-															<EuiText textAlign={"center"}>
-																<h5>Contributors</h5>
-															</EuiText>
-														</EuiFlexItem>
-													</EuiFlexGroup>
-												</EuiFlexItem>
-											</EuiFlexGroup>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiPanel>
-							</EuiFlexItem>
-							{fundraiserStatus !== "IN_QUEUE" ? (
-								<>
-									{authCtx.metamaskAddress === fundraiserCreator ? (
-										<EuiFlexItem>
-											<WithdrawalRequestCard
-												fundraiserId={fundraiserId}
-												fundraiserToken={fundraiserToken}
-												maxWithdrawableAmount={maxWithdrawableAmount}
-												addToast={addToast}
-											/>
-										</EuiFlexItem>
-									) : (
-										<EuiFlexItem>
-											<DonationCard
-												fundraiserId={fundraiserId}
-												fundraiserToken={fundraiserToken}
-												fundraiserMinDonationAmount={fundraiserMinDonationAmount}
-												addToast={addToast}
-											/>
-										</EuiFlexItem>
-									)}
-								</>
-							) : null}
-						</EuiFlexGroup>
-					</EuiFlexItem>
-				</EuiFlexGroup>
+				</EuiFlexItem>
+				<EuiFlexItem>
+					<FundraiserMedia
+						fundraiserId={fundraiserId}
+						fundraiserCreator={fundraiserCreator}
+						fundraiserMedia={fundraiserMedia}
+						addToast={addToast}
+					/>
+				</EuiFlexItem>
+				<EuiFlexItem>
+					<FundraiserMilestones
+						{...props}
+						fundraiserDefaultMedia={selectedFundraiserMedia ?? undefined}
+						addToast={addToast}
+					/>
+				</EuiFlexItem>
 				{
 					fundraiserStatus !== "IN_QUEUE" ? (
 						<EuiFlexItem>
@@ -336,14 +365,6 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 						null
 					)
 				}
-				<EuiFlexItem>
-					<FundraiserMedia
-						fundraiserId={fundraiserId}
-						fundraiserCreator={fundraiserCreator}
-						fundraiserMedia={fundraiserMedia}
-						addToast={addToast}
-					/>
-				</EuiFlexItem>
 				<EuiSpacer/>
 				<EuiGlobalToastList dismissToast={dismissToast} toasts={toasts} toastLifeTimeMs={5000}/>
 			</EuiFlexGroup>

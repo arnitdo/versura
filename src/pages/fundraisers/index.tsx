@@ -12,7 +12,6 @@ import {
 	EuiHorizontalRule,
 	EuiIcon,
 	EuiPageTemplate,
-	EuiPanel,
 	EuiSpacer,
 	EuiText
 } from "@elastic/eui";
@@ -103,16 +102,9 @@ export default function FundraiserFeed(props: FundraiserFeedData): JSX.Element {
 										<EuiFlexItem
 											key={fundraiserData.fundraiserId}
 										>
-											<EuiPanel
-												color={"plain"}
-												style={{
-													width: "90vw"
-												}}
-											>
-												<FundraiserCard
-													{...fundraiserData}
-												/>
-											</EuiPanel>
+											<FundraiserCard
+												{...fundraiserData}
+											/>
 										</EuiFlexItem>
 									)
 								})

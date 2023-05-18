@@ -133,16 +133,18 @@ function FundraiserMedia(props: FundraiserMediaProps) {
 						}
 						alignItems={"baseline"}
 					>
-						<EuiFlexItem>
+						<EuiFlexItem grow={0}>
 							<EuiText>
 								<h2>Fundraiser Media</h2>
 							</EuiText>
 						</EuiFlexItem>
 						{
 							fundraiserCreator === authCtx.metamaskAddress ? (
-								<EuiText>
-									Note: Media once added cannot be removed. Do not upload sensitive documents!
-								</EuiText>
+								<EuiFlexItem grow={0}>
+									<EuiText>
+										Note: Media once added cannot be removed. Do not upload sensitive documents!
+									</EuiText>
+								</EuiFlexItem>
 							) : (
 								null
 							)

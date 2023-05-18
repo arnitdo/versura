@@ -73,8 +73,8 @@ async function VALID_FUNDRAISER_ID_CHECK(fundraiserId: string) {
 	const dbClient = await db.connect()
 	const {rows} = await dbClient.query(
 		`SELECT 1
-         FROM "fundRaisers"
-         WHERE "fundraiserId" = $1`,
+		 FROM "fundRaisers"
+		 WHERE "fundraiserId" = $1`,
 		[fundraiserId]
 	)
 
@@ -85,6 +85,41 @@ async function VALID_FUNDRAISER_ID_CHECK(fundraiserId: string) {
 
 	return false
 }
+
+async function VALID_MILESTONE_ID_CHECK(milestoneId: string) {
+	const dbClient = await db.connect()
+	const {rows} = await dbClient.query(
+		`SELECT 1
+		 FROM "fundraiserMilestones"
+		 WHERE "milestoneId" = $1`,
+		[milestoneId]
+	)
+
+	dbClient.release()
+	if (rows.length) {
+		return true
+	}
+
+	return false
+}
+
+async function VALID_OBJECT_KEY_CHECK(objectKey: string) {
+	const dbClient = await db.connect()
+	const {rows} = await dbClient.query(
+		`SELECT 1
+		 FROM "internalS3BucketObjects"
+		 WHERE "objectKey" = $1`,
+		[objectKey]
+	)
+
+	dbClient.release()
+	if (rows.length) {
+		return true
+	}
+
+	return false
+}
+
 
 function IN_ARR<T>(elemArray: T[]) {
 	return function (value: T) {
@@ -137,5 +172,7 @@ export {
 	NOT_IN_ARR,
 
 	VALID_FUNDRAISER_ID_CHECK,
+	VALID_MILESTONE_ID_CHECK,
+	VALID_OBJECT_KEY_CHECK,
 	STRING_TO_NUM_FN
 }

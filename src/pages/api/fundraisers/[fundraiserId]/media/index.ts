@@ -13,7 +13,7 @@ import {
 import {AddFundraiserMediaBody, AddFundraiserMediaParams} from "@/types/apiRequests";
 import {FundRaisers} from "@/types/queryTypedefs"
 import {db} from "@/utils/db";
-import {VALID_FUNDRAISER_ID_CHECK} from "@/utils/validatorUtils";
+import {VALID_FUNDRAISER_ID_CHECK, VALID_OBJECT_KEY_CHECK} from "@/utils/validatorUtils";
 
 // type FundraiserMediaBodyMap = {
 // 	POST: AddFundraiserMediaBody,
@@ -42,17 +42,12 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 			[requireBodyParams.name]: requireBodyParams("objectKey"),
 			[requireBodyValidators.name]: requireBodyValidators({
 				objectKey: async (objectKey) => {
-					const {rows: objectRows} = await dbClient.query(
-						`SELECT 1
-                         FROM "internalS3BucketObjects"
-                         WHERE "objectKey" = $1`,
-						[objectKey]
-					)
-					if (objectRows.length == 1) {
+					const objectKeyExists = await VALID_OBJECT_KEY_CHECK(objectKey)
+					if (objectKeyExists === true) {
 						const {rows: fundraiserMediaRows} = await dbClient.query(
 							`SELECT 1
-                             FROM "fundRaisers"
-                             WHERE $1 = ANY ("fundraiserMediaObjectKeys")`,
+							 FROM "fundRaisers"
+							 WHERE $1 = ANY ("fundraiserMediaObjectKeys")`,
 							[objectKey]
 						)
 						if (fundraiserMediaRows.length > 0) {
@@ -76,8 +71,8 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 
 		const {rows: currentFundraiserRows} = await dbClient.query<Pick<FundRaisers, "fundraiserCreator">>(
 			`SELECT "fundraiserCreator"
-             FROM "fundRaisers"
-             WHERE "fundraiserId" = $1`,
+			 FROM "fundRaisers"
+			 WHERE "fundraiserId" = $1`,
 			[fundraiserId]
 		)
 
@@ -94,8 +89,8 @@ export default async function addFundraiserMedia(req: CustomApiRequest<AddFundra
 
 		await dbClient.query(
 			`UPDATE "fundRaisers"
-             SET "fundraiserMediaObjectKeys" = ARRAY_APPEND("fundraiserMediaObjectKeys", $1)
-             WHERE "fundraiserId" = $2`,
+			 SET "fundraiserMediaObjectKeys" = ARRAY_APPEND("fundraiserMediaObjectKeys", $1)
+			 WHERE "fundraiserId" = $2`,
 			[objectKey, fundraiserId]
 		)
 

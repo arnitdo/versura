@@ -141,192 +141,194 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 	};
 
 	return (
-		<EuiFlexGroup direction={"column"}>
-			<EuiFlexItem>
-				<EuiFlexGroup
-					direction={"row"}
-					alignItems={"center"}
-					justifyContent={"spaceAround"}
-					gutterSize={"xl"}
-				>
-					<EuiFlexItem
-						grow={0}
+		<EuiPanel grow={false}>
+			<EuiFlexGroup direction={"column"}>
+				<EuiFlexItem>
+					<EuiFlexGroup
+						direction={"row"}
+						alignItems={"center"}
+						justifyContent={"spaceAround"}
+						gutterSize={"xl"}
 					>
-						<Image
-							src={
-								selectedFundraiserImage ? selectedFundraiserImage.mediaURL : PlaceholderImage
-							}
-							alt={`${fundraiserTitle} Banner Image`}
-							width={240}
-							height={-1}
-							style={{
-								borderRadius: 12,
-								maxHeight: 150
-							}}
-						/>
-					</EuiFlexItem>
-					<EuiFlexItem>
-						<EuiFlexGroup
-							direction={"column"}
+						<EuiFlexItem
+							grow={0}
 						>
-							<EuiFlexItem>
-								<EuiLink
-									style={{
-										textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									<Link
-										href={`/fundraisers/${fundraiserId}`}
+							<Image
+								src={
+									selectedFundraiserImage ? selectedFundraiserImage.mediaURL : PlaceholderImage
+								}
+								alt={`${fundraiserTitle} Banner Image`}
+								width={240}
+								height={-1}
+								style={{
+									borderRadius: 12,
+									maxHeight: 150
+								}}
+							/>
+						</EuiFlexItem>
+						<EuiFlexItem>
+							<EuiFlexGroup
+								direction={"column"}
+							>
+								<EuiFlexItem>
+									<EuiLink
+										style={{
+											textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+										}}
 									>
-										<EuiText
-											color={LINK_TEXT_COLOR_OVERRIDE}
+										<Link
+											href={`/fundraisers/${fundraiserId}`}
 										>
-											<h3>{fundraiserTitle}</h3>
-										</EuiText>
-									</Link>
-								</EuiLink>
-							</EuiFlexItem>
-							<EuiFlexItem>
-								<EuiFlexGroup>
-									<EuiFlexItem
-										grow={0}
-									>
-										<EuiAvatar
-											name={fundraiserCreator}
-											color={"plain"}
-											type={"space"}
-											imageUrl={
-												`//gravatar.com/avatar/${fundraiserCreator.slice(2)}?d=retro&f=y`
-											}
-										/>
-									</EuiFlexItem>
-									<EuiFlexItem
-										grow={0}
-									>
-										<EuiLink
-											style={{
-												textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
-											}}
-										>
-											<Link
-												href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
-												target={"_blank"}
+											<EuiText
+												color={LINK_TEXT_COLOR_OVERRIDE}
 											>
-												<EuiText
-													color={LINK_TEXT_COLOR_OVERRIDE}
+												<h3>{fundraiserTitle}</h3>
+											</EuiText>
+										</Link>
+									</EuiLink>
+								</EuiFlexItem>
+								<EuiFlexItem>
+									<EuiFlexGroup>
+										<EuiFlexItem
+											grow={0}
+										>
+											<EuiAvatar
+												name={fundraiserCreator}
+												color={"plain"}
+												type={"space"}
+												imageUrl={
+													`//gravatar.com/avatar/${fundraiserCreator.slice(2)}?d=retro&f=y`
+												}
+											/>
+										</EuiFlexItem>
+										<EuiFlexItem
+											grow={0}
+										>
+											<EuiLink
+												style={{
+													textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+												}}
+											>
+												<Link
+													href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${fundraiserCreator}`}
+													target={"_blank"}
 												>
-													{fundraiserCreator}
-												</EuiText>
-											</Link>
-										</EuiLink>
-									</EuiFlexItem>
-								</EuiFlexGroup>
-							</EuiFlexItem>
-						</EuiFlexGroup>
-					</EuiFlexItem>
-				</EuiFlexGroup>
-			</EuiFlexItem>
-			<EuiFlexItem>
-				<EuiFlexGroup>
-					<EuiFlexItem grow={8}>
-						<EuiPanel color={"subdued"}>
-							<EuiFlexGroup justifyContent={"center"}>
-								<EuiFlexItem>
-									<EuiFlexGroup
-										direction={"column"}
-										justifyContent={"center"}
-									>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>
-													{fundraiserTarget} {fundraiserToken}
-												</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>
-													Target
-												</h4>
-											</EuiText>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiFlexGroup
-										direction={"column"}
-										justifyContent={"center"}
-									>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>
-													{fundraiserMinDonationAmount} {fundraiserToken}
-												</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>
-													Min. Amount
-												</h4>
-											</EuiText>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiFlexGroup
-										direction={"column"}
-										justifyContent={"center"}
-									>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>
-													{parsedFundraiserDate.toLocaleDateString()}
-												</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>
-													Created On
-												</h4>
-											</EuiText>
+													<EuiText
+														color={LINK_TEXT_COLOR_OVERRIDE}
+													>
+														{fundraiserCreator}
+													</EuiText>
+												</Link>
+											</EuiLink>
 										</EuiFlexItem>
 									</EuiFlexGroup>
 								</EuiFlexItem>
 							</EuiFlexGroup>
-						</EuiPanel>
-					</EuiFlexItem>
-					<EuiFlexItem grow={2}>
-						<EuiFlexGroup direction={"column"}>
-							<EuiFlexItem>
-								<EuiButton
-									color={"primary"}
-									fill
-									onClick={approveFundraiser}
-								>
-									<EuiIcon type={"check"}/> Approve
-								</EuiButton>
-							</EuiFlexItem>
-							<EuiFlexItem>
-								<EuiButton
-									color={"danger"}
-									fill
-									onClick={rejectFundraiser}
-								>
-									<EuiIcon type={"cross"}/> Reject
-								</EuiButton>
-							</EuiFlexItem>
-						</EuiFlexGroup>
-					</EuiFlexItem>
-				</EuiFlexGroup>
-			</EuiFlexItem>
-			<EuiGlobalToastList
-				dismissToast={dismissToast}
-				toasts={toasts}
-				toastLifeTimeMs={5000}
-			/>
-		</EuiFlexGroup>
+						</EuiFlexItem>
+					</EuiFlexGroup>
+				</EuiFlexItem>
+				<EuiFlexItem>
+					<EuiFlexGroup>
+						<EuiFlexItem grow={8}>
+							<EuiPanel color={"subdued"}>
+								<EuiFlexGroup justifyContent={"center"}>
+									<EuiFlexItem>
+										<EuiFlexGroup
+											direction={"column"}
+											justifyContent={"center"}
+										>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>
+														{fundraiserTarget} {fundraiserToken}
+													</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>
+														Target
+													</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiFlexGroup
+											direction={"column"}
+											justifyContent={"center"}
+										>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>
+														{fundraiserMinDonationAmount} {fundraiserToken}
+													</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>
+														Min. Amount
+													</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiFlexGroup
+											direction={"column"}
+											justifyContent={"center"}
+										>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>
+														{parsedFundraiserDate.toLocaleDateString()}
+													</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>
+														Created On
+													</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiPanel>
+						</EuiFlexItem>
+						<EuiFlexItem grow={2}>
+							<EuiFlexGroup direction={"column"}>
+								<EuiFlexItem>
+									<EuiButton
+										color={"primary"}
+										fill
+										onClick={approveFundraiser}
+									>
+										<EuiIcon type={"check"}/> Approve
+									</EuiButton>
+								</EuiFlexItem>
+								<EuiFlexItem>
+									<EuiButton
+										color={"danger"}
+										fill
+										onClick={rejectFundraiser}
+									>
+										<EuiIcon type={"cross"}/> Reject
+									</EuiButton>
+								</EuiFlexItem>
+							</EuiFlexGroup>
+						</EuiFlexItem>
+					</EuiFlexGroup>
+				</EuiFlexItem>
+				<EuiGlobalToastList
+					dismissToast={dismissToast}
+					toasts={toasts}
+					toastLifeTimeMs={5000}
+				/>
+			</EuiFlexGroup>
+		</EuiPanel>
 	);
 }
 

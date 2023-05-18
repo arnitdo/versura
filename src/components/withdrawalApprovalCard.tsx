@@ -104,149 +104,151 @@ export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): 
 	}
 
 	return (
-		<EuiFlexGroup direction={"column"}>
-			<EuiFlexItem>
-				<EuiFlexGroup alignItems={"center"}>
-					<EuiFlexItem grow={0}>
-						<Image
-							src={
-								`https://gravatar.com/avatar/${walletAddress.slice(2)}?d=retro&f=y&s=128`
-							}
-							alt={walletAddress}
-							height={128}
-							width={128}
-							style={{
-								borderRadius: 12
-							}}
-						/>
-					</EuiFlexItem>
-					<EuiFlexItem>
-						<EuiFlexGroup direction={"column"}>
-							<EuiFlexItem>
-								<EuiLink
-									style={{
-										textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									<Link
-										href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${walletAddress}`}
-									>
-										<EuiText
-											color={LINK_TEXT_COLOR_OVERRIDE}
-										>
-											<h3>
-												{
-													walletAddress.slice(0, 12) + "..." + walletAddress.slice(-12)
-												}
-											</h3>
-										</EuiText>
-									</Link>
-								</EuiLink>
-							</EuiFlexItem>
-							<EuiFlexItem>
-								<EuiLink
-									style={{
-										textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
-									}}
-								>
-									<Link
-										href={`/fundraisers/${fundraiserId}`}
-									>
-										<EuiText
-											color={LINK_TEXT_COLOR_OVERRIDE}
-										>
-											{fundraiserTitle}
-										</EuiText>
-									</Link>
-								</EuiLink>
-							</EuiFlexItem>
-						</EuiFlexGroup>
-					</EuiFlexItem>
-				</EuiFlexGroup>
-			</EuiFlexItem>
-			<EuiFlexItem>
-				<EuiFlexGroup>
-					<EuiFlexItem grow={8}>
-						<EuiPanel
-							color={"subdued"}
-						>
-							<EuiFlexGroup justifyContent={"center"}>
-								<EuiFlexItem>
-									<EuiFlexGroup direction={"column"}>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>{withdrawalAmount} {withdrawalToken}</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>Requested</h4>
-											</EuiText>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiFlexGroup direction={"column"}>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>{fundraiserRaisedAmount} {withdrawalToken}</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>Raised</h4>
-											</EuiText>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiFlexItem>
-								<EuiFlexItem>
-									<EuiFlexGroup direction={"column"}>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h2>{fundraiserTarget} {withdrawalToken}</h2>
-											</EuiText>
-										</EuiFlexItem>
-										<EuiFlexItem>
-											<EuiText textAlign={"center"}>
-												<h4>Target</h4>
-											</EuiText>
-										</EuiFlexItem>
-									</EuiFlexGroup>
-								</EuiFlexItem>
-							</EuiFlexGroup>
-						</EuiPanel>
-					</EuiFlexItem>
-					<EuiFlexItem grow={2}>
-						<EuiFlexGroup direction={"column"}>
+		<EuiPanel grow={false}>
+			<EuiFlexGroup direction={"column"}>
+				<EuiFlexItem>
+					<EuiFlexGroup alignItems={"center"}>
+						<EuiFlexItem grow={0}>
+							<Image
+								src={
+									`https://gravatar.com/avatar/${walletAddress.slice(2)}?d=retro&f=y&s=128`
+								}
+								alt={walletAddress}
+								height={128}
+								width={128}
+								style={{
+									borderRadius: 12
+								}}
+							/>
+						</EuiFlexItem>
+						<EuiFlexItem>
 							<EuiFlexGroup direction={"column"}>
 								<EuiFlexItem>
-									<EuiButton
-										color={"primary"}
-										fill
-										onClick={approveWithdrawal}
+									<EuiLink
+										style={{
+											textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+										}}
 									>
-										<EuiIcon type={"check"}/> Approve
-									</EuiButton>
+										<Link
+											href={`https://${process.env.NEXT_PUBLIC_EVM_CHAIN_NAME}.etherscan.io/address/${walletAddress}`}
+										>
+											<EuiText
+												color={LINK_TEXT_COLOR_OVERRIDE}
+											>
+												<h3>
+													{
+														walletAddress.slice(0, 12) + "..." + walletAddress.slice(-12)
+													}
+												</h3>
+											</EuiText>
+										</Link>
+									</EuiLink>
 								</EuiFlexItem>
 								<EuiFlexItem>
-									<EuiButton
-										color={"danger"}
-										fill
-										onClick={rejectWithdrawal}
+									<EuiLink
+										style={{
+											textDecorationColor: LINK_TEXT_COLOR_OVERRIDE
+										}}
 									>
-										<EuiIcon type={"cross"}/> Reject
-									</EuiButton>
+										<Link
+											href={`/fundraisers/${fundraiserId}`}
+										>
+											<EuiText
+												color={LINK_TEXT_COLOR_OVERRIDE}
+											>
+												{fundraiserTitle}
+											</EuiText>
+										</Link>
+									</EuiLink>
 								</EuiFlexItem>
 							</EuiFlexGroup>
-						</EuiFlexGroup>
-					</EuiFlexItem>
-				</EuiFlexGroup>
-			</EuiFlexItem>
-			<EuiGlobalToastList
-				toasts={toasts}
-				toastLifeTimeMs={5000}
-				dismissToast={dismissToast}
-			/>
-		</EuiFlexGroup>
+						</EuiFlexItem>
+					</EuiFlexGroup>
+				</EuiFlexItem>
+				<EuiFlexItem>
+					<EuiFlexGroup>
+						<EuiFlexItem grow={8}>
+							<EuiPanel
+								color={"subdued"}
+							>
+								<EuiFlexGroup justifyContent={"center"}>
+									<EuiFlexItem>
+										<EuiFlexGroup direction={"column"}>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>{withdrawalAmount} {withdrawalToken}</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>Requested</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiFlexGroup direction={"column"}>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>{fundraiserRaisedAmount} {withdrawalToken}</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>Raised</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiFlexGroup direction={"column"}>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h2>{fundraiserTarget} {withdrawalToken}</h2>
+												</EuiText>
+											</EuiFlexItem>
+											<EuiFlexItem>
+												<EuiText textAlign={"center"}>
+													<h4>Target</h4>
+												</EuiText>
+											</EuiFlexItem>
+										</EuiFlexGroup>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiPanel>
+						</EuiFlexItem>
+						<EuiFlexItem grow={2}>
+							<EuiFlexGroup direction={"column"}>
+								<EuiFlexGroup direction={"column"}>
+									<EuiFlexItem>
+										<EuiButton
+											color={"primary"}
+											fill
+											onClick={approveWithdrawal}
+										>
+											<EuiIcon type={"check"}/> Approve
+										</EuiButton>
+									</EuiFlexItem>
+									<EuiFlexItem>
+										<EuiButton
+											color={"danger"}
+											fill
+											onClick={rejectWithdrawal}
+										>
+											<EuiIcon type={"cross"}/> Reject
+										</EuiButton>
+									</EuiFlexItem>
+								</EuiFlexGroup>
+							</EuiFlexGroup>
+						</EuiFlexItem>
+					</EuiFlexGroup>
+				</EuiFlexItem>
+				<EuiGlobalToastList
+					toasts={toasts}
+					toastLifeTimeMs={5000}
+					dismissToast={dismissToast}
+				/>
+			</EuiFlexGroup>
+		</EuiPanel>
 	)
 }
