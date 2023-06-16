@@ -1,5 +1,5 @@
 import {AdminGetWithdrawalResponse, APIResponse} from "@/types/apiResponses";
-import {useCallback} from "react";
+import {useCallback, useState} from "react";
 import {AdminUpdateWithdrawalBody, AdminUpdateWithdrawalParams} from "@/types/apiRequests";
 import {makeAPIRequest} from "@/utils/apiHandler";
 import {useToastList} from "@/utils/toastUtils";
@@ -14,28 +14,36 @@ import {
 	EuiText
 } from "@elastic/eui";
 import {useRouter} from "next/router";
-import Image from "next/image"
+import Image from "next/image";
 import {LINK_TEXT_COLOR_OVERRIDE} from "@/utils/common";
 import Link from "next/link";
 
-type WithdrawalApprovalProps = AdminGetWithdrawalResponse["pendingWithdrawals"][0]
+type WithdrawalApprovalProps = AdminGetWithdrawalResponse["pendingWithdrawals"][0] & {
+	withdrawalProcessActive: boolean,
+	global_setWithdrawalProcessActive: (activeState: boolean) => void
+}
 
-export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): JSX.Element {
+export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps) {
 	const {
 		targetFundraiser: {
 			fundraiserId, fundraiserTitle, fundraiserTarget, fundraiserRaisedAmount
-		}, withdrawalAmount, withdrawalToken, withdrawalStatus, walletAddress, requestId
-	} = props
+		}, withdrawalAmount, withdrawalToken, withdrawalStatus, walletAddress, requestId,
+		global_setWithdrawalProcessActive,
+		withdrawalProcessActive
+	} = props;
+
+	const [withdrawalUpdateCompleted, setWithdrawalUpdateCompleted] = useState(false);
 
 	const {toasts, addToast, dismissToast} = useToastList({
 		toastIdFactoryFn: (toastCount, toastType) => {
-			return `admin-dashboard-withdrawals-${toastCount}`
+			return `admin-dashboard-withdrawals-${toastCount}`;
 		}
-	})
+	});
 
-	const navRouter = useRouter()
+	const navRouter = useRouter();
 
 	const updateWithdrawalStatus = useCallback(async (updatedStatus: AdminUpdateWithdrawalBody["withdrawalStatus"]) => {
+		global_setWithdrawalProcessActive(true);
 		const {
 			isSuccess,
 			isError,
@@ -51,20 +59,21 @@ export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): 
 			queryParams: {
 				withdrawalId: requestId.toString()
 			}
-		})
+		});
 
 		if (isError && error) {
-			console.error(error)
+			console.error(error);
 			addToast(
 				"An unexpected error occurred",
 				"We weren't able to update the withdrawal",
 				"danger"
-			)
-			return
+			);
+			global_setWithdrawalProcessActive(false);
+			return;
 		}
 
 		if (isSuccess && data) {
-			const {requestStatus} = data
+			const {requestStatus} = data;
 			if (updatedStatus === "APPROVED") {
 				addToast(
 					"Withdrawal approved successfully",
@@ -80,27 +89,31 @@ export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): 
 						</EuiText>
 					),
 					"success"
-				)
+				);
 			} else if (updatedStatus === "REJECTED") {
 				addToast(
 					"Withdrawal rejected successfully",
 					"No funds have been transferred and all assets have been retained",
 					"success"
-				)
+				);
 			}
-			setTimeout(() => {
-				navRouter.reload()
-			}, 5000)
-			return
+			global_setWithdrawalProcessActive(false);
+			return;
 		}
-	}, [addToast, navRouter, requestId])
+	}, [addToast, global_setWithdrawalProcessActive, navRouter, requestId]);
 
 	const approveWithdrawal = () => {
-		updateWithdrawalStatus("APPROVED")
-	}
+		updateWithdrawalStatus("APPROVED");
+	};
 
 	const rejectWithdrawal = () => {
-		updateWithdrawalStatus("REJECTED")
+		updateWithdrawalStatus("REJECTED");
+	};
+
+	if (withdrawalUpdateCompleted) {
+		return (
+			null
+		)
 	}
 
 	return (
@@ -250,5 +263,5 @@ export default function WithdrawalApprovalCard(props: WithdrawalApprovalProps): 
 				/>
 			</EuiFlexGroup>
 		</EuiPanel>
-	)
+	);
 }

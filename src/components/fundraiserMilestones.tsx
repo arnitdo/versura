@@ -44,12 +44,6 @@ function FundraiserMilestones(props: FundraiserMilestonesProps) {
 
 	const [showMilestoneForm, setShowMilestoneForm] = useState(false);
 
-	if (fundraiserStatus === "IN_QUEUE") {
-		return (
-			null
-		);
-	}
-
 	return (
 		<EuiPanel
 			style={{

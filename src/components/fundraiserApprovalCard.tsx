@@ -7,6 +7,7 @@ import {
 	EuiGlobalToastList,
 	EuiIcon,
 	EuiLink,
+	EuiLoadingSpinner,
 	EuiPanel,
 	EuiText
 } from "@elastic/eui";
@@ -24,7 +25,10 @@ import {useRouter} from "next/router";
 type FundraiserCardProps = Omit<
 	GetFundraiserResponse["fundraiserData"],
 	"fundraiserMilestones" | "fundraiserDonations" | "fundraiserUpdates"
->
+> & {
+	approvalOrRejectionProcessActive: boolean,
+	global_setApprovalOrRejectionProcessActive: (activeState: boolean) => void
+}
 
 function FundraiserApprovalCard(props: FundraiserCardProps) {
 	const {
@@ -33,7 +37,8 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 		fundraiserTarget, fundraiserToken,
 		fundraiserMinDonationAmount, fundraiserContributorCount,
 		fundraiserRaisedAmount, fundraiserCreatedOn,
-		fundraiserMedia, fundraiserMilestoneCount
+		fundraiserMedia, fundraiserMilestoneCount,
+		approvalOrRejectionProcessActive, global_setApprovalOrRejectionProcessActive
 	} = props;
 
 	const {toasts, addToast, dismissToast} = useToastList({
@@ -56,6 +61,8 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 	const parsedFundraiserDate = new Date(fundraiserCreatedOn);
 
 	const updateFundraiserStatus = useCallback(async (fundraiserStatus: AdminUpdateFundraiserBody["fundraiserStatus"]) => {
+		if (approvalOrRejectionProcessActive) return;
+		global_setApprovalOrRejectionProcessActive(true);
 		const {
 			isSuccess,
 			isError,
@@ -80,6 +87,7 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 				"The fundraiser could not be updated",
 				"danger"
 			);
+			global_setApprovalOrRejectionProcessActive(false);
 			return;
 		}
 
@@ -117,9 +125,11 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 						"The fundraiser has been rejected and cannot be accessed by the public",
 						"success"
 					);
-
 				}
-				navRouter.reload()
+				setTimeout(() => {
+					navRouter.reload()
+				}, 500)
+				global_setApprovalOrRejectionProcessActive(false);
 				return;
 			}
 
@@ -130,7 +140,7 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 			);
 			return;
 		}
-	}, [addToast, fundraiserId, navRouter]);
+	}, [addToast, approvalOrRejectionProcessActive, fundraiserId, global_setApprovalOrRejectionProcessActive]);
 
 	const approveFundraiser = () => {
 		updateFundraiserStatus("OPEN");
@@ -138,7 +148,7 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 
 	const rejectFundraiser = () => {
 		updateFundraiserStatus("CLOSED");
-	};
+	}
 
 	return (
 		<EuiPanel grow={false}>
@@ -305,8 +315,17 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 										color={"primary"}
 										fill
 										onClick={approveFundraiser}
+										disabled={approvalOrRejectionProcessActive}
 									>
-										<EuiIcon type={"check"}/> Approve
+										{
+											approvalOrRejectionProcessActive ? (
+												<EuiLoadingSpinner/>
+											) : (
+												<>
+													<EuiIcon type={"check"}/> Approve
+												</>
+											)
+										}
 									</EuiButton>
 								</EuiFlexItem>
 								<EuiFlexItem>
@@ -314,8 +333,17 @@ function FundraiserApprovalCard(props: FundraiserCardProps) {
 										color={"danger"}
 										fill
 										onClick={rejectFundraiser}
+										disabled={approvalOrRejectionProcessActive}
 									>
-										<EuiIcon type={"cross"}/> Reject
+										{
+											approvalOrRejectionProcessActive ? (
+												<EuiLoadingSpinner/>
+											) : (
+												<>
+													<EuiIcon type={"cross"}/> Reject
+												</>
+											)
+										}
 									</EuiButton>
 								</EuiFlexItem>
 							</EuiFlexGroup>

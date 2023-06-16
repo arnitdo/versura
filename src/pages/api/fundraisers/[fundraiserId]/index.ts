@@ -17,7 +17,7 @@ import {
 	FundraiserUpdates,
 	S3BucketObjects
 } from "@/types/queryTypedefs";
-import {FundraiserMilestone, GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
+import {FundraiserMilestone, FundraiserUpdate, GenericMedia, GetFundraiserResponse} from "@/types/apiResponses";
 import {getObjectUrl} from "@/utils/s3";
 
 /*type FundraiserBodyDispatch = {
@@ -172,11 +172,12 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 		const {rows: fundraiserUpdateRows} = await dbClient.query<FundraiserUpdates>(
 			`SELECT *
 			 FROM "fundraiserUpdates"
-			 WHERE "updateFundraiserId" = $1`,
+			 WHERE "updateFundraiserId" = $1
+			 ORDER BY "updatePostedOn" DESC`,
 			[fundraiserId]
 		)
 
-		const mappedUpdateRows = await Promise.all(
+		const mappedUpdateRows: FundraiserUpdate[] = await Promise.all(
 			fundraiserUpdateRows.map(async (updateRow) => {
 				const {updateMediaObjectKeys} = updateRow
 
@@ -190,7 +191,7 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 				for (const mediaObjectContentTypeRow of mediaObjectContentTypeRows) {
 					const {objectKey, objectContentType, objectName} = mediaObjectContentTypeRow
 					objectKeyContentMap[objectKey] = objectContentType
-					objectKeyNameMap[objectName] = objectName
+					objectKeyNameMap[objectKey] = objectName
 				}
 
 				const updateMedia: GenericMedia[] = await Promise.all(
@@ -211,10 +212,10 @@ export default async function getFundraiser(req: CustomApiRequest<any, GetFundra
 				// @ts-ignore
 				delete updateRow["updateMediaObjectKeys"]
 
-				// @ts-ignore
-				updateRow["updateMedia"] = updateMedia
-
-				return updateRow
+				return {
+					...updateRow,
+					updateMedia
+				}
 			})
 		)
 

@@ -24,10 +24,10 @@ import Link from "next/link";
 import Head from "next/head";
 import {useRouter} from "next/router";
 import {WithdrawalRequestCard} from "@/components/withdrawalRequestCard";
-import {FundraiserDonationTable} from "@/components/donationsTable";
 import {DonationCard} from "@/components/donationCard";
 import {FundraiserMedia} from "@/components/fundraiserMedia";
 import {FundraiserMilestones} from "@/components/fundraiserMilestones";
+import {FundraiserUpdates} from "@/components/fundraiserUpdates";
 
 export type FundraiserPageProps = GetFundraiserResponse["fundraiserData"];
 
@@ -149,6 +149,7 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 		fundraiserWithdrawnAmount,
 		fundraiserStatus,
 		fundraiserDonations,
+		fundraiserUpdates
 	} = props;
 
 	const parsedFundraiserCreationDate = new Date(fundraiserCreatedOn);
@@ -353,18 +354,26 @@ export default function FundraiserPage(props: FundraiserPageProps): JSX.Element 
 						addToast={addToast}
 					/>
 				</EuiFlexItem>
-				{
-					fundraiserStatus !== "IN_QUEUE" ? (
-						<EuiFlexItem>
-							<FundraiserDonationTable
-								fundraiserToken={fundraiserToken}
-								fundraiserDonations={fundraiserDonations}
-							/>
-						</EuiFlexItem>
-					) : (
-						null
-					)
-				}
+				{/*{*/}
+				{/*	fundraiserStatus !== "IN_QUEUE" ? (*/}
+				{/*		<EuiFlexItem>*/}
+				{/*			<FundraiserDonationTable*/}
+				{/*				fundraiserToken={fundraiserToken}*/}
+				{/*				fundraiserDonations={fundraiserDonations}*/}
+				{/*			/>*/}
+				{/*		</EuiFlexItem>*/}
+				{/*	) : (*/}
+				{/*		null*/}
+				{/*	)*/}
+				{/*}*/}
+				<EuiFlexItem>
+					<FundraiserUpdates
+						fundraiserCreator={fundraiserCreator}
+						fundraiserUpdates={fundraiserUpdates}
+						fundraiserId={fundraiserId}
+						addToast={addToast}
+					/>
+				</EuiFlexItem>
 				<EuiSpacer/>
 				<EuiGlobalToastList dismissToast={dismissToast} toasts={toasts} toastLifeTimeMs={5000}/>
 			</EuiFlexGroup>

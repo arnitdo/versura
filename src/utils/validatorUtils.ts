@@ -103,6 +103,23 @@ async function VALID_MILESTONE_ID_CHECK(milestoneId: string) {
 	return false
 }
 
+async function VALID_UPDATE_ID_CHECK(updateId: string) {
+	const dbClient = await db.connect()
+	const {rows} = await dbClient.query(
+		`SELECT 1
+		 FROM "fundraiserUpdates"
+		 WHERE "updateId" = $1`,
+		[updateId]
+	)
+
+	dbClient.release()
+	if (rows.length) {
+		return true
+	}
+
+	return false
+}
+
 async function VALID_OBJECT_KEY_CHECK(objectKey: string) {
 	const dbClient = await db.connect()
 	const {rows} = await dbClient.query(
@@ -173,6 +190,7 @@ export {
 
 	VALID_FUNDRAISER_ID_CHECK,
 	VALID_MILESTONE_ID_CHECK,
+	VALID_UPDATE_ID_CHECK,
 	VALID_OBJECT_KEY_CHECK,
 	STRING_TO_NUM_FN
 }

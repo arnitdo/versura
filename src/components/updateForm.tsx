@@ -8,29 +8,32 @@ import {
 	EuiFormRow,
 	EuiHorizontalRule,
 	EuiPanel,
-	EuiProgress
+	EuiTextArea
 } from "@elastic/eui";
 import {FundraiserPageProps} from "@/pages/fundraisers/[fundraiserId]";
 import {ToastUtils} from "@/utils/toastUtils";
 import {makeAPIRequest} from "@/utils/apiHandler";
-import {APIResponse, CreateFundraiserMilestoneResponse} from "@/types/apiResponses";
+import {APIResponse, CreateFundraiserUpdateResponse} from "@/types/apiResponses";
 import {
-	AddFundraiserMilestoneBody,
 	AddFundraiserMilestoneMediaBody,
 	AddFundraiserMilestoneMediaParams,
-	AddFundraiserMilestoneParams
+	AddFundraiserUpdateBody,
+	AddFundraiserUpdateParams
 } from "@/types/apiRequests";
-import {manageMedia, useValueScale} from "@/utils/common";
+import {manageMedia} from "@/utils/common";
 import {useCallback, useState} from "react";
 import {useRouter} from "next/router";
 
-type MilestoneFormProps = Pick<FundraiserPageProps, "fundraiserId" | "fundraiserTarget" | "fundraiserToken"> & {
+type UpdateFormProps = Pick<
+	FundraiserPageProps,
+	"fundraiserId"
+> & {
 	addToast: ToastUtils["addToast"],
 	hideForm: () => void
 }
 
-function MilestoneForm(props: MilestoneFormProps) {
-	const {hideForm, addToast, fundraiserId, fundraiserToken, fundraiserTarget} = props;
+function UpdateForm(props: UpdateFormProps) {
+	const {hideForm, addToast, fundraiserId} = props;
 
 	const navRouter = useRouter()
 	const {pathname, query} = navRouter
@@ -43,92 +46,74 @@ function MilestoneForm(props: MilestoneFormProps) {
 		)
 	}
 
-	const [milestoneTitle, setMilestoneTitle] = useState("");
-	const [milestoneTarget, setMilestoneTarget] = useState(0);
-	const [milestoneMedia, setMilestoneMedia] = useState<File[]>([]);
+	const [updateTitle, setUpdateTitle] = useState("");
+	const [updateDescription, setUpdateDescription] = useState("");
+	const [updateMedia, setUpdateMedia] = useState<File[]>([]);
 
 	const [{
-		milestoneTarget: targetInvalid,
-		milestoneTitle: titleInvalid
+		updateDescription: descriptionInvalid,
+		updateTitle: titleInvalid
 	}, setMilestoneDataInvalid] = useState({
-		milestoneTitle: false,
-		milestoneTarget: false
+		updateTitle: false,
+		updateDescription: false
 	});
 
-	const [milestoneCreateProcessActive, setMilestoneCreateProcessActive] = useState(false);
-	const [milestoneCreateStage, setMilestoneCreateStage] = useState(0);
+	const [updateCreateProcessActive, setUpdateCreateProcessActive] = useState(false);
+	const [updateCreateStage, setUpdateCreateStage] = useState(0);
 
 	const commonFileCallback = () => {
-		setMilestoneCreateStage((prevStage) => {
+		setUpdateCreateStage((prevStage) => {
 			return prevStage + 1;
 		});
 	};
 
-	const progressColor = useValueScale({
-		minValue: 0,
-		maxValue: 4 + (milestoneMedia.length * 4),
-		minScale: 0,
-		maxScale: 4,
-		scaledValues: ["danger", "orange", "yellow", "green", "success"],
-		currValue: milestoneCreateStage
-	});
-
-	const createMilestone = useCallback(async () => {
-		if (milestoneTarget > fundraiserTarget) {
-			addToast(
-				"Invalid target entered",
-				"Milestone amount cannot be greater than the fundraiser target",
-				"danger"
-			);
-			return;
-		}
-
-		setMilestoneCreateProcessActive(true);
-		const createMilestoneResponse = await makeAPIRequest<CreateFundraiserMilestoneResponse, AddFundraiserMilestoneBody, AddFundraiserMilestoneParams>({
-			endpointPath: "/api/fundraisers/:fundraiserId/milestones",
+	const createUpdate = useCallback(async () => {
+		setUpdateCreateProcessActive(true);
+		const createUpdateResponse = await makeAPIRequest<CreateFundraiserUpdateResponse, AddFundraiserUpdateBody, AddFundraiserUpdateParams>({
+			endpointPath: "/api/fundraisers/:fundraiserId/updates",
 			requestMethod: "POST",
 			queryParams: {
 				fundraiserId: fundraiserId.toString()
 			},
 			bodyParams: {
-				milestoneTitle: milestoneTitle,
-				milestoneAmount: milestoneTarget
+				updateTitle: updateTitle,
+				updateDescription: updateDescription
 			}
 		});
 
 		const {
-			isSuccess: isMilestoneSuccess,
-			isError: isMilestoneError,
-			code: milestoneCode,
-			error: milestoneError,
-			data: milestoneData
-		} = createMilestoneResponse;
+			isSuccess: isUpdateSuccess,
+			isError: isUpdateError,
+			code: updateCode,
+			error: updateError,
+			data: updateData
+		} = createUpdateResponse;
 
-		if (isMilestoneError && milestoneError) {
-			console.error(milestoneError);
+		if (isUpdateError && updateError) {
+			console.error(updateError);
 			addToast(
 				"An unexpected error occurred",
 				"We weren't able to process your request",
 				"danger"
 			);
-			setMilestoneCreateStage(0);
-			setMilestoneCreateProcessActive(false);
+			setUpdateCreateStage(0);
+			setUpdateCreateProcessActive(false);
 			return;
 		}
-		if (isMilestoneSuccess && milestoneData) {
-			const {requestStatus} = milestoneData;
+		if (isUpdateSuccess && updateData) {
+			const {requestStatus} = updateData;
 			if (requestStatus === "SUCCESS") {
-				setMilestoneCreateStage(4);
+				setUpdateCreateStage(4);
 
-				const {milestoneId} = milestoneData;
+				const {updateId} = updateData;
 
 				const objectKeyGenFn = (mediaFile: File, fileIdx: number) => {
-					return `fundraisers/${fundraiserId}/milestones/${milestoneId}/media/${fileIdx + 1}`;
+					return `fundraisers/${fundraiserId}/updates/${updateId}/media/${fileIdx + 1}`;
 				};
 
-				if (milestoneMedia.length > 0) {
+				if (updateMedia.length > 0) {
 					const fileUploadResult = await manageMedia({
-						mediaFiles: milestoneMedia,
+						mediaFiles: updateMedia,
 						mediaMethod: "PUT",
 						objectKeyGenFn: objectKeyGenFn,
 						stepCompletionCallbacks: {
@@ -146,20 +131,20 @@ function MilestoneForm(props: MilestoneFormProps) {
 							"We weren't able to upload your files",
 							"danger"
 						);
-						setMilestoneCreateStage(0);
-						setMilestoneCreateProcessActive(false);
+						setUpdateCreateStage(0);
+						setUpdateCreateProcessActive(false);
 						return;
 					}
 
 					const mediaStatuses = await Promise.all(
-						milestoneMedia.map(async (mediaFile, fileIdx) => {
+						updateMedia.map(async (mediaFile, fileIdx) => {
 							const objectKey = objectKeyGenFn(mediaFile, fileIdx);
 							const milestoneMediaResponse = await makeAPIRequest<APIResponse, AddFundraiserMilestoneMediaBody, AddFundraiserMilestoneMediaParams>({
-								endpointPath: "/api/fundraisers/:fundraiserId/milestones/:milestoneId/media",
+								endpointPath: "/api/fundraisers/:fundraiserId/updates/:milestoneId/media",
 								requestMethod: "POST",
 								queryParams: {
 									fundraiserId: fundraiserId.toString(),
-									milestoneId: milestoneId.toString(),
+									milestoneId: updateId.toString(),
 								},
 								bodyParams: {
 									objectKey: objectKey
@@ -179,14 +164,14 @@ function MilestoneForm(props: MilestoneFormProps) {
 									"We weren't able to upload your files",
 									"danger"
 								);
-								setMilestoneCreateStage(0);
-								setMilestoneCreateProcessActive(false);
+								setUpdateCreateStage(0);
+								setUpdateCreateProcessActive(false);
 								return false;
 							}
 							if (isMediaSuccess && mediaData) {
 								const {requestStatus} = mediaData;
 								if (requestStatus === "SUCCESS") {
-									setMilestoneCreateStage((prevStage) => {
+									setUpdateCreateStage((prevStage) => {
 										return prevStage + 1;
 									});
 									return true;
@@ -196,8 +181,8 @@ function MilestoneForm(props: MilestoneFormProps) {
 										"We weren't able to upload your files",
 										"danger"
 									);
-									setMilestoneCreateStage(0);
-									setMilestoneCreateProcessActive(false);
+									setUpdateCreateStage(0);
+									setUpdateCreateProcessActive(false);
 									return false;
 								}
 							}
@@ -208,8 +193,6 @@ function MilestoneForm(props: MilestoneFormProps) {
 						return prev && curr;
 					}, true);
 
-					console.log(mediaStatusAcc)
-
 					if (mediaStatusAcc === true) {
 						addToast(
 							"Milestone created successfully",
@@ -217,10 +200,10 @@ function MilestoneForm(props: MilestoneFormProps) {
 							"success"
 						);
 						setMilestoneDataInvalid({
-							milestoneTarget: false,
-							milestoneTitle: false
+							updateDescription: false,
+							updateTitle: false
 						})
-						setMilestoneCreateProcessActive(false)
+						setUpdateCreateProcessActive(false)
 						navRouter.prefetch(thisPagePath)
 						setTimeout(() => {
 							navRouter.reload()
@@ -233,10 +216,10 @@ function MilestoneForm(props: MilestoneFormProps) {
 						"success"
 					);
 					setMilestoneDataInvalid({
-						milestoneTarget: false,
-						milestoneTitle: false
+						updateTitle: false,
+						updateDescription: false
 					})
-					setMilestoneCreateProcessActive(false)
+					setUpdateCreateProcessActive(false)
 					navRouter.prefetch(thisPagePath)
 					setTimeout(() => {
 						navRouter.reload()
@@ -249,13 +232,13 @@ function MilestoneForm(props: MilestoneFormProps) {
 					"We weren't able to process your request",
 					"danger"
 				);
-				setMilestoneCreateStage(0);
-				setMilestoneCreateProcessActive(false);
+				setUpdateCreateStage(0);
+				setUpdateCreateProcessActive(false);
 				return;
 			} else if (requestStatus === "ERR_INVALID_BODY_PARAMS") {
-				const {invalidParams} = milestoneData;
+				const {invalidParams} = updateData;
 				if (invalidParams) {
-					if (invalidParams.includes("milestoneTitle")) {
+					if (invalidParams.includes("updateTitle")) {
 						setMilestoneDataInvalid((prevData) => {
 							return {
 								...prevData,
@@ -263,7 +246,7 @@ function MilestoneForm(props: MilestoneFormProps) {
 							}
 						})
 					}
-					if (invalidParams.includes("milestoneTarget")) {
+					if (invalidParams.includes("updateDescription")) {
 						setMilestoneDataInvalid((prevData) => {
 							return {
 								...prevData,
@@ -275,7 +258,7 @@ function MilestoneForm(props: MilestoneFormProps) {
 			}
 		}
 
-	}, [milestoneTarget, fundraiserTarget, fundraiserId, milestoneTitle, addToast, milestoneMedia, milestoneCreateStage]);
+	}, [updateDescription, fundraiserId, updateTitle, addToast, updateMedia, updateCreateStage]);
 
 	return (
 		<EuiPanel color={"subdued"}>
@@ -284,43 +267,26 @@ function MilestoneForm(props: MilestoneFormProps) {
 			>
 				<EuiFlexItem>
 					<EuiForm>
-						<EuiFormRow label={"Milestone Title"} fullWidth>
+						<EuiFormRow label={"Update Title"} fullWidth>
 							<EuiFieldText
 								fullWidth
-								placeholder={"Enter a short title of your milestone"}
+								placeholder={"Enter a short title of your update"}
 								required
 								onChange={(e) => {
-									setMilestoneTitle(e.target.value);
+									setUpdateTitle(e.target.value);
 								}}
 								isInvalid={titleInvalid}
 							/>
 						</EuiFormRow>
-						<EuiFormRow fullWidth label={"Milestone amount"}>
-							<EuiFieldText
+						<EuiFormRow fullWidth label={"Update Description"}>
+							<EuiTextArea
 								fullWidth
-								placeholder={"Enter the amount for your milestone"}
-								append={fundraiserToken}
+								placeholder={"Enter a short description of your update"}
 								required
 								onChange={(e) => {
-									const parsedValue = Number.parseFloat(e.target.value);
-									if (Number.isNaN(parsedValue) || !Number.isFinite(parsedValue)) {
-										setMilestoneDataInvalid((prevValue) => {
-											return {
-												...prevValue,
-												milestoneTarget: true
-											}
-										})
-										return;
-									}
-									setMilestoneDataInvalid((prevValue) => {
-										return {
-											...prevValue,
-											milestoneTarget: false
-										}
-									})
-									setMilestoneTarget(parsedValue);
+									setUpdateDescription(e.target.value);
 								}}
-								isInvalid={targetInvalid}
+								isInvalid={descriptionInvalid}
 							/>
 						</EuiFormRow>
 						<EuiFormRow fullWidth label={"Upload Optional Media"}>
@@ -329,38 +295,25 @@ function MilestoneForm(props: MilestoneFormProps) {
 								display={"large"}
 								onChange={(fileList) => {
 									if (fileList === null) {
-										setMilestoneMedia([]);
+										setUpdateMedia([]);
 									} else {
 										const mediaFiles = Array.from(fileList);
-										setMilestoneMedia(mediaFiles);
+										setUpdateMedia(mediaFiles);
 									}
 								}}
 							/>
 						</EuiFormRow>
 						<EuiHorizontalRule/>
-						{
-							milestoneCreateProcessActive ? (
-								<>
-									<EuiProgress
-										color={progressColor}
-										max={4 + milestoneMedia.length * 2}
-										value={milestoneCreateStage}
-									/>
-									<EuiHorizontalRule/>
-								</>
-							) : (
-								null
-							)
-						}
 						<EuiFormRow label={""} fullWidth>
 							<EuiFlexGroup>
 								<EuiFlexItem>
 									<EuiButton
 										fill
 										color={"primary"}
-										onClick={createMilestone}
+										onClick={createUpdate}
+										disabled={updateCreateProcessActive}
 									>
-										Add Milestone
+										Add Update
 									</EuiButton>
 								</EuiFlexItem>
 								<EuiFlexItem>
@@ -382,5 +335,5 @@ function MilestoneForm(props: MilestoneFormProps) {
 }
 
 export {
-	MilestoneForm
+	UpdateForm
 };

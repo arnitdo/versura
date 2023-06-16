@@ -86,6 +86,15 @@ interface AddFundraiserUpdateBody {
 	updateDescription: string,
 }
 
+interface AddFundraiserUpdateMediaBody {
+	objectKey: string
+}
+
+interface AddFundraiserUpdateMediaParams {
+	fundraiserId: string,
+	updateId: string
+}
+
 interface FundraiserDonationBody {
 	donatedAmount: number,
 	transactionHash: string,
@@ -148,6 +157,8 @@ export {
 	AddFundraiserMilestoneMediaParams,
 	AddFundraiserUpdateBody,
 	AddFundraiserUpdateParams,
+	AddFundraiserUpdateMediaBody,
+	AddFundraiserUpdateMediaParams,
 	FundraiserDonationBody,
 	FundraiserDonationParams,
 	FundraiserWithdrawalRequestParams,

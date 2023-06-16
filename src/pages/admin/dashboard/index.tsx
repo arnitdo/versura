@@ -141,12 +141,34 @@ export const getServerSideProps: GetServerSideProps<
 
 	const requestDataAcc = [dashboardResponseData!, fundraiserResponseData!, withdrawalResponseData!];
 
+	const dataRequestsAuth = requestDataAcc.map((responseData) => {
+		const {requestStatus} = responseData;
+		return requestStatus === "ERR_AUTH_REQUIRED" || requestStatus === "ERR_ADMIN_REQUIRED";
+	});
+
+	const authAcc = dataRequestsAuth.reduce((prev, curr) => {
+		return prev && curr
+	}, true)
+
+	if (authAcc) {
+		return {
+			redirect: {
+				destination: "/404",
+				permanent: false
+			}
+		}
+	}
+
 	const dataRequestsSuccess = requestDataAcc.map((responseData) => {
 		const {requestStatus} = responseData;
 		return requestStatus === "SUCCESS";
 	});
 
-	if (!dataRequestsSuccess) {
+	const successAcc = dataRequestsSuccess.reduce((prev, curr) => {
+		return prev && curr
+	}, true)
+
+	if (!successAcc) {
 		return {
 			redirect: {
 				destination: "/500",
@@ -172,7 +194,9 @@ export const getServerSideProps: GetServerSideProps<
 
 export default function AdminDashboard(props: AdminDashboardProps) {
 	const {dashboardData, fundraiserPage, withdrawalPage, pendingWithdrawals, pendingFundraisers} = props;
-	const [selectedTabId, setSelectedTabId] = useState<number>(1);
+
+	const [approvalOrRejectionProcessActive, setApprovalOrRejectionProcessActive] = useState(false);
+
 	// Add UI Code Here
 
 	return (
@@ -408,10 +432,12 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 																grow={0}
 															>
 																<FundraiserApprovalCard
+																	approvalOrRejectionProcessActive={approvalOrRejectionProcessActive}
+																	global_setApprovalOrRejectionProcessActive={setApprovalOrRejectionProcessActive}
 																	{...pendingFundraiser}
 																/>
 															</EuiFlexItem>
-														)
+														);
 													})
 												}
 											</>
@@ -433,7 +459,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 											<EuiFlexItem key={`spacer-${index}`}>
 												<EuiSpacer/>
 											</EuiFlexItem>
-										)
+										);
 									})}
 								</EuiFlexGroup>
 							</EuiFlexItem>
@@ -459,7 +485,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 																	{...pendingWithdrawal}
 																/>
 															</EuiFlexItem>
-														)
+														);
 													})
 												}
 											</>
@@ -481,7 +507,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 											<EuiFlexItem key={`spacer-${index}`}>
 												<EuiSpacer/>
 											</EuiFlexItem>
-										)
+										);
 									})}
 								</EuiFlexGroup>
 							</EuiFlexItem>

@@ -72,8 +72,10 @@ type FundraiserDonation = Pick<
 
 type FundraiserUpdate = Pick<
 	FundraiserUpdates,
-	"updateTitle" | "updateDescription" | "updatePostedOn"
->
+	"updateId" | "updateTitle" | "updateDescription" | "updatePostedOn"
+> & {
+	updateMedia: GenericMedia[]
+}
 
 interface GetFundraiserResponse extends APIResponse {
 	fundraiserData: Omit<

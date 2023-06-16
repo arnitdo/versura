@@ -42,16 +42,16 @@ export default async function getDashboardData(req: CustomApiRequest, res: Custo
 
 		const {rows: totalPendingFundraiserRows} = await dbClient.query<Pick<AdminDashboardData, "totalPendingFundraiserCount">>(
 			`SELECT COUNT(*) AS "totalPendingFundraiserCount"
-             FROM "fundRaisers"
-             WHERE "fundraiserStatus" = 'IN_QUEUE'`
+			 FROM "fundRaisers"
+			 WHERE "fundraiserStatus" = 'IN_QUEUE'`
 		)
 
 		const {totalPendingFundraiserCount} = totalPendingFundraiserRows[0]
 
 		const {rows: totalPendingWithdrawalRows} = await dbClient.query<Pick<AdminDashboardData, "totalPendingWithdrawalCount">>(
 			`SELECT COUNT(*) AS "totalPendingWithdrawalCount"
-             FROM "fundraiserWithdrawalRequests"
-             WHERE "requestStatus" = 'OPEN'`
+			 FROM "fundraiserWithdrawalRequests"
+			 WHERE "requestStatus" = 'OPEN'`
 		)
 
 		const {totalPendingWithdrawalCount} = totalPendingWithdrawalRows[0]
@@ -59,67 +59,67 @@ export default async function getDashboardData(req: CustomApiRequest, res: Custo
 
 		const {rows: fundraiserRows} = await dbClient.query<Pick<AdminDashboardData, "totalFundraiserCount">>(
 			`SELECT COUNT(*) AS "totalFundraiserCount"
-             FROM "fundRaisers"`
+			 FROM "fundRaisers"`
 		)
 
 		const {totalFundraiserCount} = fundraiserRows[0]
 
 		const {rows: totalWithdrawalRows} = await dbClient.query<Pick<AdminDashboardData, "totalWithdrawalAmount">>(
 			`SELECT SUM("withdrawalAmount") AS "totalWithdrawalAmount"
-             FROM "fundraiserWithdrawalRequests"
-             WHERE "requestStatus" = 'APPROVED'`
+			 FROM "fundraiserWithdrawalRequests"
+			 WHERE "requestStatus" = 'APPROVED'`
 		)
 
 		const {totalWithdrawalAmount} = totalWithdrawalRows[0]
 
 		const {rows: totalDonationRows} = await dbClient.query<Pick<AdminDashboardData, "totalDonatedAmount">>(
 			`SELECT SUM("donatedAmount") AS "totalDonatedAmount"
-             FROM "fundraiserDonations"`
+			 FROM "fundraiserDonations"`
 		)
 
 		const {totalDonatedAmount} = totalDonationRows[0]
 
 		const {rows: totalDonorsRows} = await dbClient.query<Pick<AdminDashboardData, "totalUniqueDonors">>(
 			`SELECT COUNT(DISTINCT "donorAddress") AS "totalUniqueDonors"
-             FROM "fundraiserDonations"`
+			 FROM "fundraiserDonations"`
 		)
 
 		const {totalUniqueDonors} = totalDonorsRows[0]
 
 		const {rows: successfulCampaignRows} = await dbClient.query<Pick<AdminDashboardData, "totalSuccessfulCampaigns">>(
 			`SELECT COUNT(*) AS "totalSuccessfulCampaigns"
-             FROM "fundRaisers"
-             WHERE "fundraiserRaisedAmount" > "fundraiserTarget"`
+			 FROM "fundRaisers"
+			 WHERE "fundraiserRaisedAmount" >= "fundraiserTarget"`
 		)
 
 		const {totalSuccessfulCampaigns} = successfulCampaignRows[0]
 
 		const {rows: userRows} = await dbClient.query<Pick<AdminDashboardData, "totalUserCount">>(
 			`SELECT COUNT(*) AS "totalUserCount"
-             FROM "authUsers"
-             WHERE "userRole" = 'CLIENT'`
+			 FROM "authUsers"
+			 WHERE "userRole" = 'CLIENT'`
 		)
 
 		const {totalUserCount} = userRows[0]
 
 		const {rows: totalMilestoneRows} = await dbClient.query<Pick<AdminDashboardData, "totalMilestoneCount">>(
 			`SELECT COUNT(*) AS "totalMilestoneCount"
-             FROM "fundraiserMilestones"`
+			 FROM "fundraiserMilestones"`
 		)
 
 		const {totalMilestoneCount} = totalMilestoneRows[0]
 
 		const {rows: completedMilestoneRows} = await dbClient.query<Pick<AdminDashboardData, "reachedMilestoneCount">>(
 			`SELECT COUNT(*) AS "reachedMilestoneCount"
-             FROM "fundraiserMilestones"
-             WHERE "milestoneStatus" = TRUE`
+			 FROM "fundraiserMilestones"
+			 WHERE "milestoneStatus" = TRUE`
 		)
 
 		const {reachedMilestoneCount} = completedMilestoneRows[0]
 
 		const {rows: totalUpdateRows} = await dbClient.query<Pick<AdminDashboardData, "totalUpdateCount">>(
 			`SELECT COUNT(*) AS "totalUpdateCount"
-             FROM "fundraiserUpdates"`
+			 FROM "fundraiserUpdates"`
 		)
 
 		const {totalUpdateCount} = totalUpdateRows[0]
