@@ -196,6 +196,7 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 	const {dashboardData, fundraiserPage, withdrawalPage, pendingWithdrawals, pendingFundraisers} = props;
 
 	const [approvalOrRejectionProcessActive, setApprovalOrRejectionProcessActive] = useState(false);
+	const [withdrawalProcessActive, setWithdrawalProcessActive] = useState<boolean>(false);
 
 	// Add UI Code Here
 
@@ -483,6 +484,8 @@ export default function AdminDashboard(props: AdminDashboardProps) {
 															>
 																<WithdrawalApprovalCard
 																	{...pendingWithdrawal}
+																	withdrawalProcessActive={withdrawalProcessActive}
+																	global_setWithdrawalProcessActive={setWithdrawalProcessActive}
 																/>
 															</EuiFlexItem>
 														);
